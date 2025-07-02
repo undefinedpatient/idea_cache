@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ICCacheView extends StatefulWidget {
+  const ICCacheView({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _ICCacheView();

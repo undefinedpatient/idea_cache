@@ -1,9 +1,6 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:idea_cache/cache.dart';
-import './overview.dart';
-import 'cacheview.dart';
+import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/page/overview.dart';
 
 class ICApp extends StatelessWidget {
   const ICApp({super.key});
@@ -32,7 +29,42 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-  final List<Cache> _userCaches = [];
+  List<Cache> _userCaches = [];
+  OverlayEntry? addCacheOverlayEntry;
+
+  void _createAddCacheOverlay() {
+    // Ensure current we do not have any entry
+    assert(addCacheOverlayEntry == null);
+    // Create a new entry and assign it to our class property
+    addCacheOverlayEntry = OverlayEntry(
+      builder: (BuildContext buildContext) {
+        return GestureDetector(
+          onTap: _removeAddCacheOverlay,
+          child: Material(
+            color: Colors.black38,
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: EdgeInsets.all(120),
+                padding: EdgeInsets.all(32),
+                color: Colors.white,
+                child: Text("Text"),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    //Add the entry to our overlayEntry
+    Overlay.of(context).insert(addCacheOverlayEntry!);
+  }
+
+  void _removeAddCacheOverlay() {
+    addCacheOverlayEntry?.remove();
+    addCacheOverlayEntry?.dispose();
+    addCacheOverlayEntry = null;
+  }
+
   @override
   Widget build(BuildContext buildContext) {
     double width = MediaQuery.of(buildContext).size.width;
@@ -40,12 +72,13 @@ class _ICMainView extends State<ICMainView> {
     Widget currentPageWidget = Placeholder();
 
     if (_selectedIndex == 0) {
-      currentPageWidget = Text("Overview");
+      currentPageWidget = ICOverview();
     } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length) {
       currentPageWidget = Placeholder();
     } else {
       currentPageWidget = Text("Setting");
     }
+
     if (width > height) {
       return Scaffold(
         appBar: AppBar(title: Text("IdeaCache")),
@@ -102,7 +135,7 @@ class _ICMainView extends State<ICMainView> {
                     leading: Icon(Icons.add),
                     title: Text('Add Cache'),
                     selected: false,
-                    onTap: () {},
+                    onTap: _createAddCacheOverlay,
                   ),
                   ListTile(
                     leading: Icon(
