@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:idea_cache/component/createCacheForm.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/page/overview.dart';
+import 'dart:io';
 
 class ICApp extends StatelessWidget {
   const ICApp({super.key});
@@ -29,15 +31,17 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-  List<Cache> _userCaches = [];
+  final List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
 
-  void _createAddCacheOverlay() {
+  void _addCreateCacheOverlay() {
     // Ensure current we do not have any entry
     assert(addCacheOverlayEntry == null);
     // Create a new entry and assign it to our class property
     addCacheOverlayEntry = OverlayEntry(
       builder: (BuildContext buildContext) {
+        double width = MediaQuery.of(buildContext).size.width;
+        double height = MediaQuery.of(buildContext).size.height;
         return GestureDetector(
           onTap: _removeAddCacheOverlay,
           child: Material(
@@ -45,10 +49,12 @@ class _ICMainView extends State<ICMainView> {
             child: GestureDetector(
               onTap: () {},
               child: Container(
-                margin: EdgeInsets.all(120),
-                padding: EdgeInsets.all(32),
                 color: Colors.white,
-                child: Text("Text"),
+                margin: (width > 1280 && height > 600)
+                    ? EdgeInsets.fromLTRB(360, 128, 360, 128)
+                    : EdgeInsets.fromLTRB(0, 128, 0, 128),
+
+                child: ICCreateCacheForm(onCancel: _removeAddCacheOverlay),
               ),
             ),
           ),
@@ -79,7 +85,7 @@ class _ICMainView extends State<ICMainView> {
       currentPageWidget = Text("Setting");
     }
 
-    if (width > height) {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
         appBar: AppBar(title: Text("IdeaCache")),
         body: Row(
@@ -135,7 +141,7 @@ class _ICMainView extends State<ICMainView> {
                     leading: Icon(Icons.add),
                     title: Text('Add Cache'),
                     selected: false,
-                    onTap: _createAddCacheOverlay,
+                    onTap: _addCreateCacheOverlay,
                   ),
                   ListTile(
                     leading: Icon(

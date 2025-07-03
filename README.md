@@ -1,3 +1,3 @@
 # idea_cache
 
-A new Flutter project.
+A Flutter cross-platiform Project except web

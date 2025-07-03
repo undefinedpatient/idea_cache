@@ -1,3 +1,5 @@
+import 'package:path_provider/path_provider.dart';
+
 class Cache {
   Cache({required int id, required this.name}) : _id = id;
   final int _id;
