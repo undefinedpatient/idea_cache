@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:idea_cache/model/cache.dart';
 
 class ICCreateCacheForm extends StatefulWidget {
   const ICCreateCacheForm({super.key, required Function() onCancel})
@@ -19,12 +20,14 @@ class _ICCreateCacheForm extends State<ICCreateCacheForm> {
   String _name = "";
   String _description = "";
 
-  void _submitForm() {
-    log("_submitForm() called", name: "Class:_ICCreateCacheForm");
+  void _submitForm() async {
+    log("called", name: "_ICCreateCacheForm._submitForm()");
     if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
       _onCancel();
     }
+    await Cache.writeCounter(1);
+    await Cache.readCounter().toString();
   }
 
   @override
