@@ -32,7 +32,7 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-  List<Cache> _userCaches = [];
+  final List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
   void _addCreateCacheOverlay() {
     // Ensure current we do not have any entry
@@ -40,6 +40,8 @@ class _ICMainView extends State<ICMainView> {
     // Create a new entry and assign it to our class property
     addCacheOverlayEntry = OverlayEntry(
       builder: (BuildContext buildContext) {
+        double width = MediaQuery.of(buildContext).size.width;
+        double height = MediaQuery.of(buildContext).size.height;
         double width = MediaQuery.of(buildContext).size.width;
         double height = MediaQuery.of(buildContext).size.height;
         return GestureDetector(
