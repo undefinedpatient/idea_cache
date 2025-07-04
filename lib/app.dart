@@ -54,7 +54,7 @@ class _ICMainView extends State<ICMainView> {
                     ? EdgeInsets.fromLTRB(360, 128, 360, 128)
                     : EdgeInsets.fromLTRB(0, 128, 0, 128),
 
-                child: ICCreateCacheForm(onCancel: _removeAddCacheOverlay),
+                child: ICCreateCacheForm(onExitForm: _removeAddCacheOverlay),
               ),
             ),
           ),
@@ -115,9 +115,9 @@ class _ICMainView extends State<ICMainView> {
                       children: _userCaches.asMap().entries.map((entry) {
                         final int index = entry.key;
                         final String title = entry.value.name;
-                        final int id = entry.value.id;
+                        // final int id = entry.value.id;
                         return ListTile(
-                          key: ValueKey(id), // Required for ReorderableListView
+                          // key: ValueKey(id), // Required for ReorderableListView
                           leading: Icon(
                             _selectedIndex == index + 1
                                 ? Icons.pages

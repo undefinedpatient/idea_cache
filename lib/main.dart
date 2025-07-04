@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
-import 'package:idea_cache/model/cache.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {

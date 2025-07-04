@@ -2,32 +2,37 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/fileHandler.dart';
 
 class ICCreateCacheForm extends StatefulWidget {
-  const ICCreateCacheForm({super.key, required Function() onCancel})
-    : _onCancel = onCancel;
-  final Function() _onCancel;
+  const ICCreateCacheForm({super.key, required Function() onExitForm})
+    : _onExitForm = onExitForm;
+  final Function() _onExitForm;
   @override
   State<StatefulWidget> createState() {
-    return _ICCreateCacheForm(onCancel: _onCancel);
+    return _ICCreateCacheForm(onExitForm: _onExitForm);
   }
 }
 
 class _ICCreateCacheForm extends State<ICCreateCacheForm> {
-  _ICCreateCacheForm({required Function() onCancel}) : _onCancel = onCancel;
+  _ICCreateCacheForm({required Function() onExitForm})
+    : _onExitForm = onExitForm;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final Function() _onCancel;
-  String _name = "";
-  String _description = "";
+  final Function() _onExitForm;
+  String _nameInForm = "";
 
   void _submitForm() async {
-    log("called", name: "_ICCreateCacheForm._submitForm()");
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState?.save();
-      _onCancel();
-    }
-    await Cache.writeCounter(1);
-    await Cache.readCounter().toString();
+    log(name: toString(), "_submitForm()");
+    Cache newCache = Cache(name: "Untitled");
+    FileHandler.writeCache(newCache);
+
+    // if (_formKey.currentState!.validate()) {
+    //   Cache newCache = new Cache(name: _nameInForm);
+    //   log("Called");
+    //   newCache.toJson().forEach((String key, dynamic value) {
+    //     log("$key:$value");
+    //   });
+    // }
   }
 
   @override
@@ -53,29 +58,15 @@ class _ICCreateCacheForm extends State<ICCreateCacheForm> {
                 }
                 return null;
               },
-              onSaved: (newValue) {
-                log("New name $newValue has been saved");
-                _name = (newValue != null) ? newValue : "";
-              },
-            ),
-            TextFormField(
-              decoration: InputDecoration(
-                labelText: "Description",
-                border: OutlineInputBorder(borderSide: BorderSide(width: 4)),
-              ),
-              validator: (value) {
-                return null;
-              },
-              onSaved: (newValue) {
-                log("New id $newValue has been saved");
-                _description = (newValue != null) ? newValue : "";
+              onChanged: (newValue) {
+                _nameInForm = newValue;
               },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 16.0,
               children: [
-                FilledButton(onPressed: _onCancel, child: Text("Cancel")),
+                FilledButton(onPressed: _onExitForm, child: Text("Cancel")),
                 FilledButton(onPressed: _submitForm, child: Text("Submit")),
               ],
             ),
