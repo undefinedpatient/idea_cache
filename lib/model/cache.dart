@@ -2,18 +2,16 @@ import 'package:uuid/uuid.dart';
 
 class Cache {
   final String _id;
-  late List<int> _blockIds;
+  final List<int> _blockIds = List.empty(growable: true);
   String name;
   // Construct a new Cache with name
-  Cache({required this.name}) : _id = Uuid().v4() {
-    _blockIds = List.empty(growable: true);
-  }
+  Cache({required this.name}) : _id = Uuid().v4();
   // Construct a Cache from Json
   Cache.fromJson(Map<String, dynamic> json)
     : _id = json['id'],
       name = json['name'] {
-    for (int i = 0; i < json['blockId'].length; i++) {
-      addBlockId(json['blockId'][i]);
+    for (int i = 0; i < json['blockIds'].length; i++) {
+      addBlockId(json['blockIds'][i]);
     }
   }
   // Convert Cache object to Json String, the String can be encode with dart:convert jsonEncode()

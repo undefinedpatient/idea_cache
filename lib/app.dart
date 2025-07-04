@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/createCacheForm.dart';
 import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 
@@ -31,9 +32,8 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-  final List<Cache> _userCaches = [];
+  List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
-
   void _addCreateCacheOverlay() {
     // Ensure current we do not have any entry
     assert(addCacheOverlayEntry == null);
@@ -71,10 +71,21 @@ class _ICMainView extends State<ICMainView> {
     addCacheOverlayEntry = null;
   }
 
+  Future<void> _loadCaches() async {
+    final caches = await FileHandler.readCaches();
+    setState(() {
+      _userCaches = caches;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCaches();
+  }
+
   @override
   Widget build(BuildContext buildContext) {
-    double width = MediaQuery.of(buildContext).size.width;
-    double height = MediaQuery.of(buildContext).size.height;
     Widget currentPageWidget = Placeholder();
 
     if (_selectedIndex == 0) {
@@ -112,36 +123,48 @@ class _ICMainView extends State<ICMainView> {
                   ),
                   Expanded(
                     child: ReorderableListView(
+                      buildDefaultDragHandles: false,
+                      onReorder: (int oldIndex, int newIndex) {
+                        setState(() {
+                          if (oldIndex < newIndex) {
+                            newIndex -= 1;
+                          }
+                          final Cache item = _userCaches.removeAt(oldIndex);
+                          _userCaches.insert(newIndex, item);
+                        });
+                      },
                       children: _userCaches.asMap().entries.map((entry) {
                         final int index = entry.key;
                         final String title = entry.value.name;
-                        // final int id = entry.value.id;
-                        return ListTile(
-                          // key: ValueKey(id), // Required for ReorderableListView
-                          leading: Icon(
-                            _selectedIndex == index + 1
-                                ? Icons.pages
-                                : Icons.pages_outlined,
+                        final String id = entry.value.id;
+
+                        return ReorderableDragStartListener(
+                          key: ValueKey(id),
+                          index: index,
+                          child: ListTile(
+                            leading: Icon(
+                              _selectedIndex == index + 1
+                                  ? Icons.pages
+                                  : Icons.pages_outlined,
+                            ),
+                            title: Text(title),
+                            // trailing: const Icon(Icons.drafts),
+                            selected: _selectedIndex == index + 1,
+                            onTap: () async {},
                           ),
-                          title: Text(title),
-                          trailing: const Icon(Icons.drag_handle),
-                          selected: _selectedIndex == index + 1,
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = index + 1;
-                            });
-                          },
                         );
                       }).toList(),
-
-                      onReorder: (int v, int a) {},
                     ),
                   ),
                   ListTile(
                     leading: Icon(Icons.add),
                     title: Text('Add Cache'),
                     selected: false,
-                    onTap: _addCreateCacheOverlay,
+                    onTap: () async {
+                      Cache newCache = Cache(name: "Untitled");
+                      await FileHandler.writeCache(newCache);
+                      await _loadCaches();
+                    },
                   ),
                   ListTile(
                     leading: Icon(

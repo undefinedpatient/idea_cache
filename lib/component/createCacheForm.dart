@@ -19,7 +19,6 @@ class _ICCreateCacheForm extends State<ICCreateCacheForm> {
     : _onExitForm = onExitForm;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final Function() _onExitForm;
-  String _nameInForm = "";
 
   void _submitForm() async {
     log(name: toString(), "_submitForm()");
@@ -59,7 +58,7 @@ class _ICCreateCacheForm extends State<ICCreateCacheForm> {
                 return null;
               },
               onChanged: (newValue) {
-                _nameInForm = newValue;
+                // _nameInForm = newValue;
               },
             ),
             Row(

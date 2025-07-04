@@ -18,53 +18,63 @@ class FileHandler {
   // Return the file to be read/written by file name and its DestinationType
   static Future<File> _localFile({
     required FileDestinationType fileDestinationType,
-    required String filename,
   }) async {
     final String path = await _localPath();
     switch (fileDestinationType) {
       case FileDestinationType.cache:
-        return File("$path/$filename.txt");
+        return File("$path/IdeaCache/caches.json").create(recursive: true);
       case FileDestinationType.block:
-        return File("$path/$filename.txt");
+        return File("$path/IdeaCache/blocks.json").create(recursive: true);
     }
   }
 
+  // Append a new Cache data in form of json
   static Future<File> writeCache(Cache cache) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.cache,
-      filename: cache.name,
     );
-    return file.writeAsString(jsonEncode(cache.toJson()));
-  }
+    int occurrence = 1;
+    while (await findCacheByName(cache.name) != null) {
+      String oldName = cache.name;
+      cache.name =
+          "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
 
-  static Future<File> writeCounter({
-    required FileDestinationType fileDestinationType,
-    required String filename,
-  }) async {
-    final file = await _localFile(
-      fileDestinationType: fileDestinationType,
-      filename: filename,
-    );
-    return file.writeAsString('987');
-  }
-
-  static Future<int> readCounter({
-    required FileDestinationType fileDestinationType,
-    required String filename,
-  }) async {
-    try {
-      final File file = await _localFile(
-        fileDestinationType: fileDestinationType,
-        filename: filename,
-      );
-
-      // Read the file
-      final String contents = await file.readAsString();
-      log(contents, name: "Cache.readCounter()");
-      return int.parse(contents);
-    } catch (e) {
-      // If encountering an error, return 0
-      return 0;
+      occurrence++;
     }
+    List<Cache> existingCaches = await readCaches();
+    existingCaches.add(cache);
+    return await file.writeAsString(
+      jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
+    );
+  }
+
+  static Future<Cache?> findCacheByName(String cachename) async {
+    List<Cache>? caches = await readCaches();
+    for (int i = 0; i < caches.length; i++) {
+      if (caches[i].name == cachename) {
+        return caches[i];
+      }
+    }
+    return null;
+  }
+
+  static Future<List<Cache>> readCaches() async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.cache,
+    );
+    try {
+      if (await file.exists()) {
+        final String content = await file.readAsString();
+        if (content.isNotEmpty) {
+          final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
+          return jsonList
+              .map((json) => Cache.fromJson(json as Map<String, dynamic>))
+              .toList();
+        }
+      }
+    } catch (e) {
+      log('Error reading caches: $e');
+    }
+    return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
   }
 }
