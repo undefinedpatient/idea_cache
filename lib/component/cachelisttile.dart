@@ -80,7 +80,16 @@ class _ICCacheListTileState extends State<ICCacheListTile> {
                   widget._cacheid,
                 );
                 oldCache?.name = _inputText;
-                FileHandler.updateCache(oldCache!);
+                await FileHandler.updateCache(oldCache!);
+                // After update the name might be name.001 so need to fetch again
+                Cache? newCache = await FileHandler.findCacheById(
+                  widget._cacheid,
+                );
+                setState(() {
+                  _inputText = newCache!.name;
+                  _controller.text = _inputText;
+                });
+
                 FocusScope.of(context).unfocus();
               },
             )
