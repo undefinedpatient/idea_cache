@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:idea_cache/component/createCacheForm.dart';
+import 'package:idea_cache/component/cachelisttile.dart';
+import 'package:idea_cache/component/createcacheform.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
+import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 
@@ -32,6 +36,7 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
+  String _currentCacheId = "";
   List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
   void _addCreateCacheOverlay() {
@@ -86,14 +91,14 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    Widget currentPageWidget = Placeholder();
-
+    log("reloaded");
+    Widget pageWidget = Placeholder();
     if (_selectedIndex == 0) {
-      currentPageWidget = ICOverview();
-    } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length) {
-      currentPageWidget = Placeholder();
+      pageWidget = ICOverview();
+    } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
+      pageWidget = ICCacheView(cacheId: _currentCacheId);
     } else {
-      currentPageWidget = Text("Setting");
+      pageWidget = Placeholder();
     }
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
@@ -141,17 +146,45 @@ class _ICMainView extends State<ICMainView> {
                         return ReorderableDragStartListener(
                           key: ValueKey(id),
                           index: index,
-                          child: ListTile(
-                            leading: Icon(
-                              _selectedIndex == index + 1
-                                  ? Icons.pages
-                                  : Icons.pages_outlined,
-                            ),
-                            title: Text(title),
-                            // trailing: const Icon(Icons.drafts),
+                          child: ICCacheListTile(
+                            title: title,
+                            onTap: () {
+                              setState(() {
+                                _selectedIndex = index + 1;
+                                _currentCacheId =
+                                    _userCaches[_selectedIndex - 1].id;
+                              });
+                              log(_currentCacheId);
+                            },
                             selected: _selectedIndex == index + 1,
-                            onTap: () async {},
                           ),
+                          // ListTile(
+                          //   // isThreeLine: false,
+                          //   // subtitle: Text(""),
+
+                          //   // dense: true,
+                          //   leading: Icon(
+                          //     _selectedIndex == index + 1
+                          //         ? Icons.pages
+                          //         : Icons.pages_outlined,
+                          //   ),
+                          //   // trailing: IconButton(
+                          //   //   iconSize: 16,
+                          //   //   onPressed: () {},
+                          //   //   icon: Icon(Icons.edit),
+                          //   // ),
+                          //   title: Text(title),
+                          //   // trailing: const Icon(Icons.drafts),
+                          //   selected: _selectedIndex == index + 1,
+                          //   onTap: () {
+                          //     setState(() {
+                          //       _selectedIndex = index + 1;
+                          //       _currentCacheId =
+                          //           _userCaches[_selectedIndex - 1].id;
+                          //     });
+                          //     log(_currentCacheId);
+                          //   },
+                          // ),
                         );
                       }).toList(),
                     ),
@@ -184,7 +217,7 @@ class _ICMainView extends State<ICMainView> {
               ),
             ),
             VerticalDivider(thickness: 2, width: 2),
-            Expanded(child: currentPageWidget),
+            Expanded(child: pageWidget),
           ],
         ),
       );

@@ -58,6 +58,16 @@ class FileHandler {
     return null;
   }
 
+  static Future<Cache?> findCacheById(String cacheId) async {
+    List<Cache>? caches = await readCaches();
+    for (int i = 0; i < caches.length; i++) {
+      if (caches[i].id == cacheId) {
+        return caches[i];
+      }
+    }
+    return null;
+  }
+
   static Future<List<Cache>> readCaches() async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.cache,
