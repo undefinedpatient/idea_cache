@@ -91,7 +91,6 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    log("reloaded");
     Widget pageWidget = Placeholder();
     if (_selectedIndex == 0) {
       pageWidget = ICOverview();
@@ -138,53 +137,39 @@ class _ICMainView extends State<ICMainView> {
                           _userCaches.insert(newIndex, item);
                         });
                       },
+
                       children: _userCaches.asMap().entries.map((entry) {
                         final int index = entry.key;
                         final String title = entry.value.name;
                         final String id = entry.value.id;
-
-                        return ReorderableDragStartListener(
+                        // return ICCacheListTile(
+                        //   key: ValueKey(id),
+                        //   index: index,
+                        //   title: title,
+                        //   onTap: () {
+                        //     setState(() {
+                        //       _selectedIndex = index + 1;
+                        //       _currentCacheId =
+                        //           _userCaches[_selectedIndex - 1].id;
+                        //     });
+                        //   },
+                        //   selected: _selectedIndex == index + 1,
+                        // );
+                        return ReorderableDelayedDragStartListener(
                           key: ValueKey(id),
                           index: index,
                           child: ICCacheListTile(
                             title: title,
+                            cacheid: id,
                             onTap: () {
                               setState(() {
                                 _selectedIndex = index + 1;
                                 _currentCacheId =
                                     _userCaches[_selectedIndex - 1].id;
                               });
-                              log(_currentCacheId);
                             },
                             selected: _selectedIndex == index + 1,
                           ),
-                          // ListTile(
-                          //   // isThreeLine: false,
-                          //   // subtitle: Text(""),
-
-                          //   // dense: true,
-                          //   leading: Icon(
-                          //     _selectedIndex == index + 1
-                          //         ? Icons.pages
-                          //         : Icons.pages_outlined,
-                          //   ),
-                          //   // trailing: IconButton(
-                          //   //   iconSize: 16,
-                          //   //   onPressed: () {},
-                          //   //   icon: Icon(Icons.edit),
-                          //   // ),
-                          //   title: Text(title),
-                          //   // trailing: const Icon(Icons.drafts),
-                          //   selected: _selectedIndex == index + 1,
-                          //   onTap: () {
-                          //     setState(() {
-                          //       _selectedIndex = index + 1;
-                          //       _currentCacheId =
-                          //           _userCaches[_selectedIndex - 1].id;
-                          //     });
-                          //     log(_currentCacheId);
-                          //   },
-                          // ),
                         );
                       }).toList(),
                     ),
@@ -195,7 +180,7 @@ class _ICMainView extends State<ICMainView> {
                     selected: false,
                     onTap: () async {
                       Cache newCache = Cache(name: "Untitled");
-                      await FileHandler.writeCache(newCache);
+                      await FileHandler.appendCache(newCache);
                       await _loadCaches();
                     },
                   ),

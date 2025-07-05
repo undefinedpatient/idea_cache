@@ -23,7 +23,7 @@ class _ICCreateCacheForm extends State<ICCreateCacheForm> {
   void _submitForm() async {
     log(name: toString(), "_submitForm()");
     Cache newCache = Cache(name: "Untitled");
-    FileHandler.writeCache(newCache);
+    FileHandler.appendCache(newCache);
 
     // if (_formKey.currentState!.validate()) {
     //   Cache newCache = new Cache(name: _nameInForm);

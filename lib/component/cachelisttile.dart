@@ -1,29 +1,95 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
 
-class ICCacheListTile extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/filehandler.dart';
+
+class ICCacheListTile extends StatefulWidget {
   final String _title;
+  final String _cacheid;
   final Function() _onTap;
   final bool _selected;
   const ICCacheListTile({
     super.key,
     required String title,
+    required String cacheid,
     required Function() onTap,
     required bool selected,
   }) : _title = title,
+       _cacheid = cacheid,
        _onTap = onTap,
        _selected = selected;
+
   @override
-  Widget build(BuildContext context) {
+  State<ICCacheListTile> createState() => _ICCacheListTileState();
+}
+
+class _ICCacheListTileState extends State<ICCacheListTile> {
+  bool _isEditing = false;
+  String _inputText = "";
+  final TextEditingController _controller = TextEditingController();
+  void _toggleEditMode() {
+    setState(() {
+      _isEditing = !_isEditing;
+      if (!_isEditing) {
+        // Save the edited text when exiting edit mode
+        _inputText = _controller.text;
+      }
+    });
+  }
+
+  // When saving is not prefered
+  void _interruptEditMode() {
+    setState(() {
+      _isEditing = false;
+      _controller.text = _inputText;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _inputText = widget._title;
+      _controller.text = _inputText;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext buildContext) {
     return ListTile(
-      leading: Icon(_selected ? Icons.pages : Icons.pages_outlined),
-      // trailing: IconButton(
-      //   iconSize: 16,
-      //   onPressed: () {},
-      //   icon: Icon(Icons.edit),
-      // ),
-      title: Text(_title),
-      selected: _selected,
-      onTap: _onTap,
+      leading: Icon(widget._selected ? Icons.pages : Icons.pages_outlined),
+      title: _isEditing
+          ? TextField(
+              autofocus: true,
+              autocorrect: false,
+              controller: _controller,
+              onTapOutside: (_) {
+                _interruptEditMode();
+                FocusScope.of(context).unfocus();
+              },
+              onSubmitted: (_) async {
+                _toggleEditMode();
+                Cache? oldCache = await FileHandler.findCacheById(
+                  widget._cacheid,
+                );
+                oldCache?.name = _inputText;
+                FileHandler.updateCache(oldCache!);
+                FocusScope.of(context).unfocus();
+              },
+            )
+          : GestureDetector(
+              onSecondaryTap: _toggleEditMode,
+              child: Text(_inputText),
+            ),
+      selected: widget._selected,
+      onTap: widget._onTap,
     );
   }
 }

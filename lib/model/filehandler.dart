@@ -29,7 +29,7 @@ class FileHandler {
   }
 
   // Append a new Cache data in form of json
-  static Future<File> writeCache(Cache cache) async {
+  static Future<File> appendCache(Cache cache) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.cache,
     );
@@ -48,6 +48,65 @@ class FileHandler {
     );
   }
 
+  /* 
+  Update the current existing Cache in the DB
+  If no cache is found, call appendCache(Cache cache) instead
+  */
+  static Future<File> updateCache(Cache cache) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.cache,
+    );
+    final Cache? oldCache = await findCacheById(cache.id);
+    if (oldCache == null) {
+      return appendCache(cache);
+    }
+
+    int occurrence = 1;
+    while (await findCacheByName(cache.name) != null) {
+      String oldName = cache.name;
+      cache.name =
+          "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+      occurrence++;
+    }
+    List<Cache> existingCaches = await readCaches();
+    for (int i = 0; i < existingCaches.length; i++) {
+      if (existingCaches[i].id == cache.id) {
+        existingCaches[i] = cache;
+        break;
+      }
+    }
+    return await file.writeAsString(
+      jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
+    );
+  }
+
+  /*
+  Delete a cache with the given cacheId
+  */
+  static Future<File> deleteCacheById(String cacheId) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.cache,
+    );
+    final Cache? cache = await findCacheById(cacheId);
+    List<Cache> existingCaches = await readCaches();
+    if (cache == null) {
+      return file;
+    }
+
+    for (int i = 0; i < existingCaches.length; i++) {
+      if (existingCaches[i].id == cacheId) {
+        existingCaches.removeAt(i);
+        break;
+      }
+    }
+    return file.writeAsString(
+      jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
+    );
+  }
+
+  /*
+  Find the Cache by cachename
+  */
   static Future<Cache?> findCacheByName(String cachename) async {
     List<Cache>? caches = await readCaches();
     for (int i = 0; i < caches.length; i++) {

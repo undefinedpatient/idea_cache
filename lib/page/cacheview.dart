@@ -13,7 +13,6 @@ class ICCacheView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log("_VIEW:$_cacheId");
     return Column(children: [Text(_cacheId)]);
   }
 }
