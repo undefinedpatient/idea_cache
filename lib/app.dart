@@ -164,9 +164,6 @@ class _ICMainView extends State<ICMainView> {
                             },
                             onEditName: () async {
                               await _loadCaches();
-                              _userCaches.forEach((Cache cache) {
-                                log(cache.name);
-                              });
                             },
                             selected: _selectedIndex == index + 1,
                           ),

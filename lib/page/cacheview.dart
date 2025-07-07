@@ -23,7 +23,7 @@ class _ICCacheView extends State<ICCacheView> {
   Cache userCache = Cache(name: "loading");
   List<Block> _userBlock = [];
   Future<void> _loadBlocks() async {
-    List<Block> blocks = await FileHandler.readBlocks();
+    List<Block> blocks = await FileHandler.findBlocksByCacheId(widget.cacheid);
     setState(() {
       _userBlock = blocks;
     });
@@ -61,7 +61,8 @@ class _ICCacheView extends State<ICCacheView> {
       body: Column(
         children: [
           const Divider(thickness: 2, height: 2),
-          SizedBox(
+          Container(
+            color: Theme.of(context).colorScheme.surfaceDim,
             height: widget.tabHeight, // Fixed height for tab bar
             width: MediaQuery.of(context).size.width,
             // Use SizedBox to container listtile to avoid overflow

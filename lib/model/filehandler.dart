@@ -148,6 +148,17 @@ class FileHandler {
     return null;
   }
 
+  static Future<List<Block>> findBlocksByCacheId(String cacheid) async {
+    List<Block>? blocks = List.empty(growable: true);
+    List<Block>? readblocks = await readBlocks();
+    for (int i = 0; i < readblocks.length; i++) {
+      if (readblocks[i].cacheid == cacheid) {
+        blocks.add(readblocks[i]);
+      }
+    }
+    return blocks;
+  }
+
   static Future<Cache?> findCacheById(String cacheId) async {
     List<Cache>? caches = await readCaches();
     for (int i = 0; i < caches.length; i++) {
@@ -185,7 +196,6 @@ class FileHandler {
     try {
       if (await file.exists()) {
         final String content = await file.readAsString();
-        log(content);
         if (content.isNotEmpty) {
           final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
           return jsonList
