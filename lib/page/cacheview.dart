@@ -1,26 +1,45 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/blockview.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
-  final String cacheId;
+  final Cache cache;
   final double tabHeight;
-  const ICCacheView({super.key, required this.cacheId, double? tabHeight})
+  const ICCacheView({super.key, required this.cache, double? tabHeight})
     : tabHeight = (tabHeight != null) ? tabHeight : 42;
 
   @override
-  State<ICCacheView> createState() => _ICCacheView();
+  State<ICCacheView> createState() {
+    return _ICCacheView();
+  }
 }
 
 class _ICCacheView extends State<ICCacheView> {
   List<Block> _userBlock = [];
+  Future<void> _loadBlocks() async {
+    List<Block> blocks = await FileHandler.readBlocks();
+    setState(() {
+      _userBlock = blocks;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBlocks();
+    // _loadCache();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // _loadCache();
+    // _loadBlocks();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.cacheId.isEmpty ? 'Cache View' : widget.cacheId),
-      ),
+      appBar: AppBar(title: Text(widget.cache.name)),
       body: Column(
         children: [
           const Divider(thickness: 2, height: 2),
@@ -40,7 +59,12 @@ class _ICCacheView extends State<ICCacheView> {
                       return ReorderableDelayedDragStartListener(
                         index: entry.key,
                         key: ValueKey(entry.value.id),
-                        child: Text("dd"),
+                        child: MenuItemButton(
+                          requestFocusOnHover: false,
+                          onPressed: () {},
+                          leadingIcon: Icon(Icons.square),
+                          child: Text(entry.value.name),
+                        ),
                       );
                     }).toList(),
                     onReorder: (int oldIndex, int newIndex) {
@@ -56,7 +80,14 @@ class _ICCacheView extends State<ICCacheView> {
                 ),
                 MenuItemButton(
                   requestFocusOnHover: false,
-                  onPressed: () {},
+                  onPressed: () async {
+                    Block block = Block(
+                      cacheid: widget.cache.id,
+                      name: "Untitled",
+                    );
+                    await FileHandler.appendBlock(block);
+                    await _loadBlocks();
+                  },
                   leadingIcon: Icon(Icons.add),
                   child: Text("Add Block"),
                 ),

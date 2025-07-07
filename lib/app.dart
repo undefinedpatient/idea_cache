@@ -94,14 +94,13 @@ class _ICMainView extends State<ICMainView> {
     super.initState();
     _loadCaches();
   }
-
   @override
   Widget build(BuildContext buildContext) {
     Widget pageWidget = Placeholder();
     if (_selectedIndex == 0) {
       pageWidget = ICOverview();
     } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
-      pageWidget = ICCacheView(cacheId: _currentCacheId);
+      pageWidget = ICCacheView(cache: _userCaches[_selectedIndex-1]);
     } else {
       pageWidget = Placeholder();
     }
