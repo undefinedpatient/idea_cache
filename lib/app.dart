@@ -97,11 +97,12 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
+    log("build", name: runtimeType.toString());
     Widget pageWidget = Placeholder();
     if (_selectedIndex == 0) {
       pageWidget = ICOverview();
     } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
-      pageWidget = ICCacheView(cache: _userCaches[_selectedIndex - 1]);
+      pageWidget = ICCacheView(cacheid: _userCaches[_selectedIndex - 1].id);
     } else {
       pageWidget = Placeholder();
     }

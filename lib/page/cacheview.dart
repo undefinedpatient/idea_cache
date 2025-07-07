@@ -7,18 +7,20 @@ import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/blockview.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
-  final Cache cache;
+  final String cacheid;
   final double tabHeight;
-  const ICCacheView({super.key, required this.cache, double? tabHeight})
+  const ICCacheView({super.key, required this.cacheid, double? tabHeight})
     : tabHeight = (tabHeight != null) ? tabHeight : 42;
 
   @override
   State<ICCacheView> createState() {
+    log("build", name: runtimeType.toString());
     return _ICCacheView();
   }
 }
 
 class _ICCacheView extends State<ICCacheView> {
+  Cache userCache = Cache(name: "loading");
   List<Block> _userBlock = [];
   Future<void> _loadBlocks() async {
     List<Block> blocks = await FileHandler.readBlocks();
@@ -27,19 +29,35 @@ class _ICCacheView extends State<ICCacheView> {
     });
   }
 
+  Future<void> _loadCache() async {
+    Cache? cache = await FileHandler.findCacheById(widget.cacheid);
+    setState(() {
+      userCache = cache!;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _loadBlocks();
-    // _loadCache();
+    _loadCache();
+  }
+
+  @override
+  void didUpdateWidget(covariant ICCacheView oldWidget) {
+    log("rebuild", name: runtimeType.toString());
+    super.didUpdateWidget(oldWidget);
+    _loadCache();
+    _loadBlocks();
   }
 
   @override
   Widget build(BuildContext context) {
+    log("build", name: runtimeType.toString());
     // _loadCache();
     // _loadBlocks();
     return Scaffold(
-      appBar: AppBar(title: Text(widget.cache.name)),
+      appBar: AppBar(title: Text(userCache.name)),
       body: Column(
         children: [
           const Divider(thickness: 2, height: 2),
@@ -82,7 +100,7 @@ class _ICCacheView extends State<ICCacheView> {
                   requestFocusOnHover: false,
                   onPressed: () async {
                     Block block = Block(
-                      cacheid: widget.cache.id,
+                      cacheid: widget.cacheid,
                       name: "Untitled",
                     );
                     await FileHandler.appendBlock(block);
