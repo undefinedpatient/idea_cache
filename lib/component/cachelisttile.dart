@@ -8,16 +8,19 @@ class ICCacheListTile extends StatefulWidget {
   final String _title;
   final String _cacheid;
   final Function() _onTap;
+  final Function() _onEditName;
   final bool _selected;
   const ICCacheListTile({
     super.key,
     required String title,
     required String cacheid,
     required Function() onTap,
+    required Function() onEditName,
     required bool selected,
   }) : _title = title,
        _cacheid = cacheid,
        _onTap = onTap,
+       _onEditName = onEditName,
        _selected = selected;
 
   @override
@@ -89,7 +92,7 @@ class _ICCacheListTileState extends State<ICCacheListTile> {
                   _inputText = newCache!.name;
                   _controller.text = _inputText;
                 });
-
+                await widget._onEditName();
                 FocusScope.of(context).unfocus();
               },
             )

@@ -94,13 +94,14 @@ class _ICMainView extends State<ICMainView> {
     super.initState();
     _loadCaches();
   }
+
   @override
   Widget build(BuildContext buildContext) {
     Widget pageWidget = Placeholder();
     if (_selectedIndex == 0) {
       pageWidget = ICOverview();
     } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
-      pageWidget = ICCacheView(cache: _userCaches[_selectedIndex-1]);
+      pageWidget = ICCacheView(cache: _userCaches[_selectedIndex - 1]);
     } else {
       pageWidget = Placeholder();
     }
@@ -158,6 +159,12 @@ class _ICMainView extends State<ICMainView> {
                                 _selectedIndex = index + 1;
                                 _currentCacheId =
                                     _userCaches[_selectedIndex - 1].id;
+                              });
+                            },
+                            onEditName: () async {
+                              await _loadCaches();
+                              _userCaches.forEach((Cache cache) {
+                                log(cache.name);
                               });
                             },
                             selected: _selectedIndex == index + 1,
