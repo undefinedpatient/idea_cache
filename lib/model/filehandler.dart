@@ -54,14 +54,20 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
-    int occurrence = 1;
-    while (await findBlockByName(block.name) != null) {
-      String oldName = block.name;
-      block.name =
-          "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
 
-      occurrence++;
+    List<Block>? blocks = await findBlocksByCacheId(block.cacheid);
+    if (blocks.isNotEmpty) {
+      int occurrence = 0;
+      for (int i = 0; i < blocks.length; i++) {
+        String oldName = block.name;
+        if (blocks[i].name == block.name) {
+          occurrence++;
+          block.name =
+              "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+        }
+      }
     }
+
     List<Block> existingBlocks = await readBlocks();
     existingBlocks.add(block);
     return await file.writeAsString(
