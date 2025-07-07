@@ -11,7 +11,7 @@ class FileHandler {
   // File I/O
   static Future<String> _localPath() async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    log(directory.toString());
+    log(directory.toString(), name: "FileHandler");
     return directory.path;
   }
 

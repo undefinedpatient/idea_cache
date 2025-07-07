@@ -16,12 +16,18 @@ class ICApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: ICMainView(),
-      theme: ThemeData.from(
+      theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.greenAccent,
           brightness: Brightness.light,
         ),
       ),
+      // darkTheme: ThemeData(
+      //   colorScheme: ColorScheme.fromSeed(
+      //     seedColor: Colors.greenAccent,
+      //     brightness: Brightness.dark,
+      //   ),
+      // ),
     );
   }
 }
@@ -142,19 +148,6 @@ class _ICMainView extends State<ICMainView> {
                         final int index = entry.key;
                         final String title = entry.value.name;
                         final String id = entry.value.id;
-                        // return ICCacheListTile(
-                        //   key: ValueKey(id),
-                        //   index: index,
-                        //   title: title,
-                        //   onTap: () {
-                        //     setState(() {
-                        //       _selectedIndex = index + 1;
-                        //       _currentCacheId =
-                        //           _userCaches[_selectedIndex - 1].id;
-                        //     });
-                        //   },
-                        //   selected: _selectedIndex == index + 1,
-                        // );
                         return ReorderableDelayedDragStartListener(
                           key: ValueKey(id),
                           index: index,
@@ -201,7 +194,7 @@ class _ICMainView extends State<ICMainView> {
                 ],
               ),
             ),
-            VerticalDivider(thickness: 2, width: 2),
+            const VerticalDivider(thickness: 2, width: 2),
             Expanded(child: pageWidget),
           ],
         ),
