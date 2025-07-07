@@ -2,7 +2,7 @@ import 'package:uuid/uuid.dart';
 
 class Cache {
   final String _id;
-  final List<int> _blockIds = List.empty(growable: true);
+  final List<String> _blockIds = List.empty(growable: true);
   String name;
   // Construct a new Cache with name
   Cache({required this.name}) : _id = Uuid().v4();
@@ -23,15 +23,23 @@ class Cache {
     return _id;
   }
 
-  List<int> get blockIds {
+  List<String> get blockIds {
     return List.unmodifiable(_blockIds);
   }
 
-  List<int> addBlockId(int blockId) {
+  List<String> removeBlockIds(String blockId) {
     if (_blockIds.contains(blockId)) {
-      return _blockIds;
+      _blockIds.remove(blockId);
+      return List.unmodifiable(_blockIds);
+    }
+    return List.unmodifiable(_blockIds);
+  }
+
+  List<String> addBlockId(String blockId) {
+    if (_blockIds.contains(blockId)) {
+      return List.unmodifiable(_blockIds);
     }
     _blockIds.add(blockId);
-    return _blockIds;
+    return List.unmodifiable(_blockIds);
   }
 }
