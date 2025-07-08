@@ -1,5 +1,5 @@
 name: idea_cache
-description: "A new Flutter project."
+description: "A Flutter Project for cache random idea."
 publish_to: 'none'
 version: 0.1.0
 
@@ -13,12 +13,17 @@ dependencies:
   path_provider: ^2.1.5
   convert: ^3.1.2
   uuid: ^4.5.1
+  flutter_quill: ^11.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-
+dependency_overrides: 
+  flutter_quill:
+    git:
+      url: https://github.com/theniceboy/flutter-quill.git
+      ref: fix-flutter-3-32-macos-crash
 flutter:
   uses-material-design: true
   assets:

@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/cachelisttile.dart';
 import 'package:idea_cache/component/createcacheform.dart';
 import 'package:idea_cache/model/cache.dart';
@@ -18,10 +20,17 @@ class ICApp extends StatelessWidget {
       home: ICMainView(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.greenAccent,
+          seedColor: const Color.fromARGB(255, 240, 231, 105),
           brightness: Brightness.light,
         ),
       ),
+      themeMode: ThemeMode.system,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
       // darkTheme: ThemeData(
       //   colorScheme: ColorScheme.fromSeed(
       //     seedColor: Colors.greenAccent,

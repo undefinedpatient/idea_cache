@@ -15,7 +15,7 @@ class ICCacheView extends StatefulWidget {
 
   @override
   State<ICCacheView> createState() {
-    log("build", name: runtimeType.toString());
+    log("createState", name: runtimeType.toString());
     return _ICCacheView();
   }
 }
@@ -48,7 +48,7 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   void didUpdateWidget(covariant ICCacheView oldWidget) {
-    log("rebuild", name: runtimeType.toString());
+    log("didUpdateWidget", name: runtimeType.toString());
     super.didUpdateWidget(oldWidget);
     _loadCache();
     _loadBlocks();
@@ -57,7 +57,7 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   Widget build(BuildContext context) {
     log("build", name: runtimeType.toString());
-    Widget pageWidget = Placeholder();
+    Widget pageWidget = ICBlockView();
     // _loadCache();
     // _loadBlocks();
     return Scaffold(
