@@ -107,6 +107,41 @@ class FileHandler {
     );
   }
 
+  static Future<File> updateBlock(Block block) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.block,
+    );
+    final Block? oldBlock = await findBlockById(block.id);
+    if (oldBlock == null) {
+      return appendBlock(block);
+    }
+
+    List<Block>? blocks = await findBlocksByCacheId(block.cacheid);
+    if (blocks.isNotEmpty) {
+      int occurrence = 0;
+      for (int i = 0; i < blocks.length; i++) {
+        String oldName = block.name;
+        if (blocks[i].name == block.name) {
+          occurrence++;
+          block.name =
+              "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+        }
+      }
+    }
+
+    List<Block> exisitingBlock = await readBlocks();
+    //Replacing Block
+    for (int i = 0; i < exisitingBlock.length; i++) {
+      if (exisitingBlock[i].id == block.id) {
+        exisitingBlock[i] = block;
+        break;
+      }
+    }
+    return await file.writeAsString(
+      jsonEncode(exisitingBlock.map((value) => value.toJson()).toList()),
+    );
+  }
+
   /*
   Delete a cache with the given cacheId
   */
@@ -170,6 +205,16 @@ class FileHandler {
     for (int i = 0; i < caches.length; i++) {
       if (caches[i].id == cacheId) {
         return caches[i];
+      }
+    }
+    return null;
+  }
+
+  static Future<Block?> findBlockById(String blockId) async {
+    List<Block>? blocks = await readBlocks();
+    for (int i = 0; i < blocks.length; i++) {
+      if (blocks[i].id == blockId) {
+        return blocks[i];
       }
     }
     return null;

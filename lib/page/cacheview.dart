@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
@@ -22,6 +23,8 @@ class ICCacheView extends StatefulWidget {
 class _ICCacheView extends State<ICCacheView> {
   Cache userCache = Cache(name: "loading");
   List<Block> _userBlock = [];
+  int _selectedIndex = 0;
+
   Future<void> _loadBlocks() async {
     List<Block> blocks = await FileHandler.findBlocksByCacheId(widget.cacheid);
     setState(() {
@@ -54,6 +57,7 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   Widget build(BuildContext context) {
     log("build", name: runtimeType.toString());
+    Widget pageWidget = Placeholder();
     // _loadCache();
     // _loadBlocks();
     return Scaffold(
@@ -62,7 +66,7 @@ class _ICCacheView extends State<ICCacheView> {
         children: [
           const Divider(thickness: 2, height: 2),
           Container(
-            color: Theme.of(context).colorScheme.surfaceDim,
+            color: Theme.of(context).colorScheme.surface,
             height: widget.tabHeight, // Fixed height for tab bar
             width: MediaQuery.of(context).size.width,
             // Use SizedBox to container listtile to avoid overflow
@@ -78,11 +82,18 @@ class _ICCacheView extends State<ICCacheView> {
                       return ReorderableDelayedDragStartListener(
                         index: entry.key,
                         key: ValueKey(entry.value.id),
-                        child: MenuItemButton(
-                          requestFocusOnHover: false,
-                          onPressed: () {},
-                          leadingIcon: Icon(Icons.square),
-                          child: Text(entry.value.name),
+                        child: ICBlockListTile(
+                          name: entry.value.name,
+                          blockid: entry.value.id,
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = entry.key;
+                            });
+                          },
+                          onEditName: () async {
+                            await _loadBlocks();
+                          },
+                          isSelected: _selectedIndex == entry.key,
                         ),
                       );
                     }).toList(),
@@ -116,7 +127,7 @@ class _ICCacheView extends State<ICCacheView> {
 
           const Divider(thickness: 2, height: 2),
           Expanded(
-            child: ICBlockView(), // Pass cacheId if needed
+            child: pageWidget, // Pass cacheId if needed
           ),
         ],
       ),
