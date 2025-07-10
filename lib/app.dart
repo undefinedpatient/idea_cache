@@ -8,6 +8,7 @@ import 'package:idea_cache/component/createcacheform.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/cacheview.dart';
+import 'package:idea_cache/page/emptypage.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 
@@ -107,7 +108,7 @@ class _ICMainView extends State<ICMainView> {
   @override
   Widget build(BuildContext buildContext) {
     log("build", name: runtimeType.toString());
-    Widget pageWidget = Placeholder();
+    Widget pageWidget = ICEmptyPage();
     if (_selectedIndex == 0) {
       pageWidget = ICOverview();
     } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
@@ -116,7 +117,7 @@ class _ICMainView extends State<ICMainView> {
         reloadCaches: _loadCaches,
       );
     } else {
-      pageWidget = Placeholder();
+      pageWidget = ICEmptyPage();
     }
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
@@ -216,7 +217,7 @@ class _ICMainView extends State<ICMainView> {
         ),
       );
     } else {
-      return Placeholder();
+      return ICEmptyPage();
     }
   }
 }

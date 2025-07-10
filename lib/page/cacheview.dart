@@ -5,7 +5,8 @@ import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
-import 'package:idea_cache/page/blockview.dart'; // Removed unused imports
+import 'package:idea_cache/page/blockview.dart';
+import 'package:idea_cache/page/emptypage.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
   final String cacheid;
@@ -29,13 +30,13 @@ class ICCacheView extends StatefulWidget {
 
 class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
-  List<Block> _userBlock = [];
+  List<Block> _userBlocks = [];
   int _selectedIndex = 0;
 
   Future<void> _loadBlocks() async {
     List<Block> blocks = await FileHandler.findBlocksByCacheId(widget.cacheid);
     setState(() {
-      _userBlock = blocks;
+      _userBlocks = blocks;
     });
   }
 
@@ -57,6 +58,7 @@ class _ICCacheView extends State<ICCacheView> {
   void didUpdateWidget(covariant ICCacheView oldWidget) {
     log("didUpdateWidget", name: runtimeType.toString());
     super.didUpdateWidget(oldWidget);
+    _selectedIndex = 0;
     _loadCache();
     _loadBlocks();
   }
@@ -64,10 +66,13 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   Widget build(BuildContext context) {
     if (userCache == null) {
-      return Placeholder();
+      return ICEmptyPage();
     }
     log("build", name: runtimeType.toString());
-    Widget pageWidget = ICBlockView();
+    Widget pageWidget = ICEmptyPage();
+    if (_userBlocks.isNotEmpty) {
+      pageWidget = ICBlockView(blockid: _userBlocks[_selectedIndex].id);
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(userCache!.name),
@@ -140,7 +145,7 @@ class _ICCacheView extends State<ICCacheView> {
                   child: ReorderableListView(
                     buildDefaultDragHandles: false,
                     scrollDirection: Axis.horizontal,
-                    children: _userBlock.asMap().entries.map((
+                    children: _userBlocks.asMap().entries.map((
                       MapEntry<int, Block> entry,
                     ) {
                       return ReorderableDelayedDragStartListener(
@@ -166,8 +171,8 @@ class _ICCacheView extends State<ICCacheView> {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
                         }
-                        final Block item = _userBlock.removeAt(oldIndex);
-                        _userBlock.insert(newIndex, item);
+                        final Block item = _userBlocks.removeAt(oldIndex);
+                        _userBlocks.insert(newIndex, item);
                       });
                     },
                   ),
@@ -184,6 +189,23 @@ class _ICCacheView extends State<ICCacheView> {
                   },
                   leadingIcon: Icon(Icons.add),
                   child: Text("Add Block"),
+                ),
+                MenuItemButton(
+                  requestFocusOnHover: false,
+                  onPressed: () async {
+                    Block oldBlock = _userBlocks[_selectedIndex];
+                    await FileHandler.deleteBlocksById(oldBlock.id);
+
+                    await _loadBlocks();
+                    if (_selectedIndex >= _userBlocks.length) {
+                      _selectedIndex = _userBlocks.length - 1;
+                      // Hard Limiting tghe _selectedIndex
+                      if (_selectedIndex == -1) {
+                        _selectedIndex = 0;
+                      }
+                    }
+                  },
+                  leadingIcon: Icon(Icons.delete_outlined),
                 ),
               ],
             ),

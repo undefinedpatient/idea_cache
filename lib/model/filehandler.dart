@@ -184,18 +184,23 @@ class FileHandler {
     );
   }
 
-  static Future<File> deleteBlocksById(List<String> blockIds) async {
+  static Future<File> deleteBlocksById(blockId) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
-    final List<Block> existingBlocks = await readBlocks();
-    for (int i = 0; i < blockIds.length; i++) {
-      for (int j = 0; j < existingBlocks.length; i++) {
-        if (blockIds.contains(existingBlocks[j].id)) {
-          existingBlocks.removeAt(j);
-        }
+    final Block? block = await findBlockById(blockId);
+    List<Block> existingBlocks = await readBlocks();
+    if (block == null) {
+      return file;
+    }
+
+    for (int i = 0; i < existingBlocks.length; i++) {
+      if (existingBlocks[i].id == blockId) {
+        existingBlocks.removeAt(i);
+        break;
       }
     }
+
     return file.writeAsString(
       jsonEncode(existingBlocks.map((value) => value.toJson()).toList()),
     );

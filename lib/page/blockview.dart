@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 class ICBlockView extends StatefulWidget {
-  const ICBlockView({super.key});
+  final String blockid;
+  const ICBlockView({super.key, required String blockid}) : blockid = blockid;
 
   @override
   State<StatefulWidget> createState() {
@@ -42,7 +43,10 @@ class _ICBlockView extends State<ICBlockView> {
           Expanded(
             child: QuillEditor.basic(
               controller: _controller,
-              config: const QuillEditorConfig(placeholder: "Write Something"),
+              config: const QuillEditorConfig(
+                padding: EdgeInsetsGeometry.all(16),
+                placeholder: "Write Something",
+              ),
               focusNode: _focusNode,
               scrollController: _scrollController,
             ),
