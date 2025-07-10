@@ -13,7 +13,6 @@ import 'dart:io';
 
 class ICApp extends StatelessWidget {
   const ICApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,12 +30,12 @@ class ICApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         FlutterQuillLocalizations.delegate,
       ],
-      // darkTheme: ThemeData(
-      //   colorScheme: ColorScheme.fromSeed(
-      //     seedColor: Colors.greenAccent,
-      //     brightness: Brightness.dark,
-      //   ),
-      // ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.greenAccent,
+          brightness: Brightness.dark,
+        ),
+      ),
     );
   }
 }
@@ -92,6 +91,7 @@ class _ICMainView extends State<ICMainView> {
   }
 
   Future<void> _loadCaches() async {
+    _userCaches = List.empty();
     final caches = await FileHandler.readCaches();
     setState(() {
       _userCaches = caches;
@@ -111,7 +111,10 @@ class _ICMainView extends State<ICMainView> {
     if (_selectedIndex == 0) {
       pageWidget = ICOverview();
     } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
-      pageWidget = ICCacheView(cacheid: _userCaches[_selectedIndex - 1].id);
+      pageWidget = ICCacheView(
+        cacheid: _userCaches[_selectedIndex - 1].id,
+        reloadCaches: _loadCaches,
+      );
     } else {
       pageWidget = Placeholder();
     }

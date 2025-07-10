@@ -9,9 +9,16 @@ import 'package:idea_cache/page/blockview.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
   final String cacheid;
+  final Function() reloadCaches;
   final double tabHeight;
-  const ICCacheView({super.key, required this.cacheid, double? tabHeight})
-    : tabHeight = (tabHeight != null) ? tabHeight : 42;
+
+  const ICCacheView({
+    super.key,
+    required this.cacheid,
+    required Function() reloadCaches,
+    double? tabHeight,
+  }) : reloadCaches = reloadCaches,
+       tabHeight = (tabHeight != null) ? tabHeight : 42;
 
   @override
   State<ICCacheView> createState() {
@@ -21,7 +28,7 @@ class ICCacheView extends StatefulWidget {
 }
 
 class _ICCacheView extends State<ICCacheView> {
-  Cache userCache = Cache(name: "loading");
+  Cache? userCache = Cache(name: "loading");
   List<Block> _userBlock = [];
   int _selectedIndex = 0;
 
@@ -35,7 +42,7 @@ class _ICCacheView extends State<ICCacheView> {
   Future<void> _loadCache() async {
     Cache? cache = await FileHandler.findCacheById(widget.cacheid);
     setState(() {
-      userCache = cache!;
+      userCache = cache;
     });
   }
 
@@ -56,12 +63,69 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   Widget build(BuildContext context) {
+    if (userCache == null) {
+      return Placeholder();
+    }
     log("build", name: runtimeType.toString());
     Widget pageWidget = ICBlockView();
-    // _loadCache();
-    // _loadBlocks();
     return Scaffold(
-      appBar: AppBar(title: Text(userCache.name)),
+      appBar: AppBar(
+        title: Text(userCache!.name),
+        actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => Dialog(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      spacing: 8,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Text("Confirm Cache Deletion?"),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton(
+                              onPressed: () async {
+                                log(
+                                  "deleted Cache ${userCache!.id}",
+                                  name: runtimeType.toString(),
+                                );
+                                Navigator.pop(context);
+                                await FileHandler.deleteCacheById(
+                                  userCache!.id,
+                                );
+                                await widget.reloadCaches();
+                              },
+                              child: const Text(
+                                "Delete",
+                                style: TextStyle(color: Colors.redAccent),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text("Close"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+
+            icon: Icon(Icons.delete),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           const Divider(thickness: 2, height: 2),

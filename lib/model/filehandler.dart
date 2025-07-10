@@ -161,8 +161,43 @@ class FileHandler {
         break;
       }
     }
+    //Delete all the cacheBlock related
+    deleteBlocksByCacheId(cacheId);
     return file.writeAsString(
       jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
+    );
+  }
+
+  static Future<File> deleteBlocksByCacheId(String cacheId) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.block,
+    );
+    final List<Block> existingBlocks = await readBlocks();
+    List<Block> newBlocks = List.empty(growable: true);
+    for (int i = 0; i < existingBlocks.length; i++) {
+      if (existingBlocks[i].cacheid != cacheId) {
+        newBlocks.add(existingBlocks[i]);
+      }
+    }
+    return file.writeAsString(
+      jsonEncode(newBlocks.map((value) => value.toJson()).toList()),
+    );
+  }
+
+  static Future<File> deleteBlocksById(List<String> blockIds) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.block,
+    );
+    final List<Block> existingBlocks = await readBlocks();
+    for (int i = 0; i < blockIds.length; i++) {
+      for (int j = 0; j < existingBlocks.length; i++) {
+        if (blockIds.contains(existingBlocks[j].id)) {
+          existingBlocks.removeAt(j);
+        }
+      }
+    }
+    return file.writeAsString(
+      jsonEncode(existingBlocks.map((value) => value.toJson()).toList()),
     );
   }
 
