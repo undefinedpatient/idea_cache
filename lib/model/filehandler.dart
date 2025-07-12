@@ -50,12 +50,12 @@ class FileHandler {
   }
 
   // Append a new Block data in form of json
-  static Future<File> appendBlock(Block block) async {
+  static Future<File> appendBlock(ICBlock block) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
 
-    List<Block>? blocks = await findBlocksByCacheId(block.cacheid);
+    List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheid);
     if (blocks.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < blocks.length; i++) {
@@ -68,7 +68,7 @@ class FileHandler {
       }
     }
 
-    List<Block> existingBlocks = await readBlocks();
+    List<ICBlock> existingBlocks = await readBlocks();
     existingBlocks.add(block);
     return await file.writeAsString(
       jsonEncode(existingBlocks.map((value) => value.toJson()).toList()),
@@ -107,16 +107,16 @@ class FileHandler {
     );
   }
 
-  static Future<File> updateBlock(Block block) async {
+  static Future<File> updateBlock(ICBlock block) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
-    final Block? oldBlock = await findBlockById(block.id);
+    final ICBlock? oldBlock = await findBlockById(block.id);
     if (oldBlock == null) {
       return appendBlock(block);
     }
 
-    List<Block>? blocks = await findBlocksByCacheId(block.cacheid);
+    List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheid);
     if (blocks.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < blocks.length; i++) {
@@ -129,7 +129,7 @@ class FileHandler {
       }
     }
 
-    List<Block> exisitingBlock = await readBlocks();
+    List<ICBlock> exisitingBlock = await readBlocks();
     //Replacing Block
     for (int i = 0; i < exisitingBlock.length; i++) {
       if (exisitingBlock[i].id == block.id) {
@@ -172,8 +172,8 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
-    final List<Block> existingBlocks = await readBlocks();
-    List<Block> newBlocks = List.empty(growable: true);
+    final List<ICBlock> existingBlocks = await readBlocks();
+    List<ICBlock> newBlocks = List.empty(growable: true);
     for (int i = 0; i < existingBlocks.length; i++) {
       if (existingBlocks[i].cacheid != cacheId) {
         newBlocks.add(existingBlocks[i]);
@@ -188,8 +188,8 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
-    final Block? block = await findBlockById(blockId);
-    List<Block> existingBlocks = await readBlocks();
+    final ICBlock? block = await findBlockById(blockId);
+    List<ICBlock> existingBlocks = await readBlocks();
     if (block == null) {
       return file;
     }
@@ -219,8 +219,8 @@ class FileHandler {
     return null;
   }
 
-  static Future<Block?> findBlockByName(String blockname) async {
-    List<Block>? blocks = await readBlocks();
+  static Future<ICBlock?> findBlockByName(String blockname) async {
+    List<ICBlock>? blocks = await readBlocks();
     for (int i = 0; i < blocks.length; i++) {
       if (blocks[i].name == blockname) {
         return blocks[i];
@@ -229,9 +229,9 @@ class FileHandler {
     return null;
   }
 
-  static Future<List<Block>> findBlocksByCacheId(String cacheid) async {
-    List<Block>? blocks = List.empty(growable: true);
-    List<Block>? readblocks = await readBlocks();
+  static Future<List<ICBlock>> findBlocksByCacheId(String cacheid) async {
+    List<ICBlock>? blocks = List.empty(growable: true);
+    List<ICBlock>? readblocks = await readBlocks();
     for (int i = 0; i < readblocks.length; i++) {
       if (readblocks[i].cacheid == cacheid) {
         blocks.add(readblocks[i]);
@@ -250,8 +250,8 @@ class FileHandler {
     return null;
   }
 
-  static Future<Block?> findBlockById(String blockId) async {
-    List<Block>? blocks = await readBlocks();
+  static Future<ICBlock?> findBlockById(String blockId) async {
+    List<ICBlock>? blocks = await readBlocks();
     for (int i = 0; i < blocks.length; i++) {
       if (blocks[i].id == blockId) {
         return blocks[i];
@@ -280,7 +280,7 @@ class FileHandler {
     return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
   }
 
-  static Future<List<Block>> readBlocks() async {
+  static Future<List<ICBlock>> readBlocks() async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
@@ -289,8 +289,9 @@ class FileHandler {
         final String content = await file.readAsString();
         if (content.isNotEmpty) {
           final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
+
           return jsonList
-              .map((json) => Block.fromJson(json as Map<String, dynamic>))
+              .map((json) => ICBlock.fromJson(json as Map<String, dynamic>))
               .toList();
         }
       }

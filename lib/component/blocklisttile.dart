@@ -90,14 +90,14 @@ class _ICBlockListTile extends State<ICBlockListTile> {
                   },
                   onSubmitted: (value) async {
                     _toggleEditMode();
-                    Block? oldBlock = await FileHandler.findBlockById(
+                    ICBlock? oldBlock = await FileHandler.findBlockById(
                       widget._blockid,
                     );
                     oldBlock?.name = _inputText;
                     await FileHandler.updateBlock(oldBlock!);
 
                     // After update the name might be name.001 so need to fetch again
-                    Block? updatedBlock = await FileHandler.findBlockById(
+                    ICBlock? updatedBlock = await FileHandler.findBlockById(
                       widget._blockid,
                     );
                     setState(() {

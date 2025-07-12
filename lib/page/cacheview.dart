@@ -30,11 +30,13 @@ class ICCacheView extends StatefulWidget {
 
 class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
-  List<Block> _userBlocks = [];
+  List<ICBlock> _userBlocks = [];
   int _selectedIndex = 0;
 
   Future<void> _loadBlocks() async {
-    List<Block> blocks = await FileHandler.findBlocksByCacheId(widget.cacheid);
+    List<ICBlock> blocks = await FileHandler.findBlocksByCacheId(
+      widget.cacheid,
+    );
     setState(() {
       _userBlocks = blocks;
     });
@@ -146,7 +148,7 @@ class _ICCacheView extends State<ICCacheView> {
                     buildDefaultDragHandles: false,
                     scrollDirection: Axis.horizontal,
                     children: _userBlocks.asMap().entries.map((
-                      MapEntry<int, Block> entry,
+                      MapEntry<int, ICBlock> entry,
                     ) {
                       return ReorderableDelayedDragStartListener(
                         index: entry.key,
@@ -171,7 +173,7 @@ class _ICCacheView extends State<ICCacheView> {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
                         }
-                        final Block item = _userBlocks.removeAt(oldIndex);
+                        final ICBlock item = _userBlocks.removeAt(oldIndex);
                         _userBlocks.insert(newIndex, item);
                       });
                     },
@@ -180,7 +182,7 @@ class _ICCacheView extends State<ICCacheView> {
                 MenuItemButton(
                   requestFocusOnHover: false,
                   onPressed: () async {
-                    Block block = Block(
+                    ICBlock block = ICBlock(
                       cacheid: widget.cacheid,
                       name: "Untitled",
                     );
@@ -193,7 +195,7 @@ class _ICCacheView extends State<ICCacheView> {
                 MenuItemButton(
                   requestFocusOnHover: false,
                   onPressed: () async {
-                    Block oldBlock = _userBlocks[_selectedIndex];
+                    ICBlock oldBlock = _userBlocks[_selectedIndex];
                     await FileHandler.deleteBlocksById(oldBlock.id);
 
                     await _loadBlocks();
