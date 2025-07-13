@@ -64,7 +64,10 @@ class _ICBlockView extends State<ICBlockView> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [MenuItemButton(onPressed: _onSave, child: Text("Save"))],
+            children: [
+              Text(widget.blockid),
+              MenuItemButton(onPressed: _onSave, child: Text("Save")),
+            ],
           ),
           QuillSimpleToolbar(
             controller: _controller,

@@ -88,7 +88,7 @@ class FileHandler {
       return appendCache(cache);
     }
 
-    int occurrence = 1;
+    int occurrence = 0;
     while (await findCacheByName(cache.name) != null) {
       String oldName = cache.name;
       cache.name =
@@ -102,6 +102,7 @@ class FileHandler {
         break;
       }
     }
+    log("Cache Updated", name: "updateCache");
     return await file.writeAsString(
       jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
     );
@@ -142,6 +143,17 @@ class FileHandler {
     );
   }
 
+  // static Future<File> reorderCache(int from, int to) async {
+  //   final File file = await _localFile(
+  //     fileDestinationType: FileDestinationType.cache,
+  //   );
+  //   List<Cache> existingCache = await readCaches();
+  //   if(to>=existingCache.length){
+  //     throw Exception("");
+  //   }
+  //   Cache targetDestination = existingCache[to];
+  //   existingCache[to] = targetDestination
+  // }
   /*
   Delete a cache with the given cacheId
   */
@@ -230,14 +242,37 @@ class FileHandler {
   }
 
   static Future<List<ICBlock>> findBlocksByCacheId(String cacheid) async {
-    List<ICBlock>? blocks = List.empty(growable: true);
+    List<ICBlock>? unorderedBlocks = List.empty(growable: true);
+    //
+    List<ICBlock>? orderedblocks = List.empty(growable: true);
     List<ICBlock>? readblocks = await readBlocks();
+    Cache? cache = await findCacheById(cacheid);
+    if (cache == null) {
+      throw Exception("findBlocksByCacheId: cache is null!");
+    }
     for (int i = 0; i < readblocks.length; i++) {
       if (readblocks[i].cacheid == cacheid) {
-        blocks.add(readblocks[i]);
+        unorderedBlocks.add(readblocks[i]);
       }
     }
-    return blocks;
+    // log(
+    //   name: "readblocks",
+    //   readblocks.map((block) => block.id).toList().toString(),
+    // );
+    // log(
+    //   name: "unorderedBlocks",
+    //   unorderedBlocks.map((block) => block.id).toList().toString(),
+    // );
+    log(name: "cache.blockIds", cache.blockIds.toString());
+
+    for (int i = 0; i < cache.blockIds.length; i++) {
+      int indexOfTargetBlock = unorderedBlocks
+          .map((block) => block.id)
+          .toList()
+          .indexOf(cache.blockIds[i]);
+      orderedblocks.add(unorderedBlocks[indexOfTargetBlock]);
+    }
+    return orderedblocks;
   }
 
   static Future<Cache?> findCacheById(String cacheId) async {

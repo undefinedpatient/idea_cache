@@ -40,6 +40,7 @@ class _ICCacheView extends State<ICCacheView> {
     setState(() {
       _userBlocks = blocks;
     });
+    log(name: "_loadBlocks", "${blocks.map((block) => block.id)}");
   }
 
   Future<void> _loadCache() async {
@@ -47,6 +48,14 @@ class _ICCacheView extends State<ICCacheView> {
     setState(() {
       userCache = cache;
     });
+  }
+
+  Future<void> reorderBlock(int from, int to) async {
+    if (userCache == null) {
+      return;
+    }
+    userCache!.reorderBlockId(from, to);
+    FileHandler.updateCache(userCache!);
   }
 
   @override
@@ -172,7 +181,7 @@ class _ICCacheView extends State<ICCacheView> {
                         ),
                       );
                     }).toList(),
-                    onReorder: (int oldIndex, int newIndex) {
+                    onReorder: (int oldIndex, int newIndex) async {
                       setState(() {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
@@ -180,6 +189,7 @@ class _ICCacheView extends State<ICCacheView> {
                         final ICBlock item = _userBlocks.removeAt(oldIndex);
                         _userBlocks.insert(newIndex, item);
                       });
+                      await reorderBlock(oldIndex, newIndex);
                     },
                   ),
                 ),
@@ -191,6 +201,8 @@ class _ICCacheView extends State<ICCacheView> {
                       name: "Untitled",
                     );
                     await FileHandler.appendBlock(block);
+                    userCache!.addBlockId(block.id);
+                    await FileHandler.updateCache(userCache!);
                     await _loadBlocks();
                   },
                   leadingIcon: Icon(Icons.add),
@@ -200,7 +212,10 @@ class _ICCacheView extends State<ICCacheView> {
                   requestFocusOnHover: false,
                   onPressed: () async {
                     ICBlock oldBlock = _userBlocks[_selectedIndex];
+                    userCache!.removeBlockIds(oldBlock.id);
+                    await FileHandler.updateCache(userCache!);
                     await FileHandler.deleteBlocksById(oldBlock.id);
+
                     final SnackBar snackBar = SnackBar(
                       content: Text("Block ${oldBlock.name} Deleted!"),
                     );
@@ -208,7 +223,7 @@ class _ICCacheView extends State<ICCacheView> {
                     await _loadBlocks();
                     if (_selectedIndex >= _userBlocks.length) {
                       _selectedIndex = _userBlocks.length - 1;
-                      // Hard Limiting tghe _selectedIndex
+                      // Hard Limiting the _selectedIndex
                       if (_selectedIndex == -1) {
                         _selectedIndex = 0;
                       }

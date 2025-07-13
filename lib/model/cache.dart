@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 class Cache {
@@ -28,8 +30,11 @@ class Cache {
   }
 
   List<String> removeBlockIds(String blockId) {
+    log(name: "removeBlockIds", "${_blockIds.contains(blockId)}");
+    log(name: "removeBlockIds", "Finding $blockId in ${_blockIds.toList()}");
     if (_blockIds.contains(blockId)) {
       _blockIds.remove(blockId);
+      log(name: "removeBlockIds", "current Block id ${_blockIds.toList()}");
       return List.unmodifiable(_blockIds);
     }
     return List.unmodifiable(_blockIds);
@@ -40,6 +45,16 @@ class Cache {
       return List.unmodifiable(_blockIds);
     }
     _blockIds.add(blockId);
+    return List.unmodifiable(_blockIds);
+  }
+
+  List<String> reorderBlockId(int from, int to) {
+    if (to > _blockIds.length - 1) {
+      throw Exception("Index Error: Trying to access out of range");
+    }
+    String temp = _blockIds[to];
+    _blockIds[to] = _blockIds[from];
+    _blockIds[from] = temp;
     return List.unmodifiable(_blockIds);
   }
 }
