@@ -148,14 +148,10 @@ class _ICMainView extends State<ICMainView> {
                   Expanded(
                     child: ReorderableListView(
                       buildDefaultDragHandles: false,
-                      onReorder: (int oldIndex, int newIndex) {
-                        setState(() {
-                          if (oldIndex < newIndex) {
-                            newIndex -= 1;
-                          }
-                          final Cache item = _userCaches.removeAt(oldIndex);
-                          _userCaches.insert(newIndex, item);
-                        });
+                      onReorder: (int oldIndex, int newIndex) async {
+                        log("$oldIndex $newIndex");
+                        await FileHandler.reorderCaches(oldIndex, newIndex);
+                        await _loadCaches();
                       },
 
                       children: _userCaches.asMap().entries.map((entry) {

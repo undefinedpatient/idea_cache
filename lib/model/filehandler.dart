@@ -143,6 +143,21 @@ class FileHandler {
     );
   }
 
+  static Future<File> reorderCaches(int from, int to) async {
+    File file = await _localFile(
+      fileDestinationType: FileDestinationType.cache,
+    );
+    List<Cache> caches = await readCaches();
+    if (from < to) {
+      to -= 1;
+    }
+    final Cache item = caches.removeAt(from);
+    caches.insert(to, item);
+    return file.writeAsString(
+      jsonEncode(caches.map((cache) => cache.toJson()).toList()),
+    );
+  }
+
   /*
   Delete a cache with the given cacheId
   */
