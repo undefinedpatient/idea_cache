@@ -99,14 +99,18 @@ class _ICCacheView extends State<ICCacheView> {
                           children: [
                             TextButton(
                               onPressed: () async {
-                                log(
-                                  "deleted Cache ${userCache!.id}",
-                                  name: runtimeType.toString(),
-                                );
                                 Navigator.pop(context);
                                 await FileHandler.deleteCacheById(
                                   userCache!.id,
                                 );
+                                final SnackBar snackBar = SnackBar(
+                                  content: Text(
+                                    "Cache ${userCache!.name} Deleted!",
+                                  ),
+                                );
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(snackBar);
                                 await widget.reloadCaches();
                               },
                               child: const Text(
@@ -197,7 +201,10 @@ class _ICCacheView extends State<ICCacheView> {
                   onPressed: () async {
                     ICBlock oldBlock = _userBlocks[_selectedIndex];
                     await FileHandler.deleteBlocksById(oldBlock.id);
-
+                    final SnackBar snackBar = SnackBar(
+                      content: Text("Block ${oldBlock.name} Deleted!"),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     await _loadBlocks();
                     if (_selectedIndex >= _userBlocks.length) {
                       _selectedIndex = _userBlocks.length - 1;
