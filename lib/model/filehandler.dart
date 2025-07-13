@@ -141,7 +141,17 @@ class FileHandler {
       jsonEncode(exisitingBlock.map((value) => value.toJson()).toList()),
     );
   }
-
+  static Future<File> reorderCache(int from, int to) async {
+    // final File file = await _localFile(
+    //   fileDestinationType: FileDestinationType.cache,
+    // );
+    // List<Cache> existingCache = await readCaches();
+    // if(to>=existingCache.length){
+    //   throw Exception("");
+    // }
+    // Cache targetDestination = existingCache[to];
+    // existingCache[to] = targetDestination
+  }
   /*
   Delete a cache with the given cacheId
   */
