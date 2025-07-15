@@ -6,6 +6,7 @@ import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/blockview.dart';
+import 'package:idea_cache/page/cacheoverview.dart';
 import 'package:idea_cache/page/emptypage.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
@@ -69,7 +70,10 @@ class _ICCacheView extends State<ICCacheView> {
   void didUpdateWidget(covariant ICCacheView oldWidget) {
     // log("didUpdateWidget", name: runtimeType.toString());
     super.didUpdateWidget(oldWidget);
-    _selectedIndex = 0;
+    setState(() {
+      _selectedIndex = -1;
+    });
+
     _loadCache();
     _loadBlocks();
   }
@@ -81,7 +85,10 @@ class _ICCacheView extends State<ICCacheView> {
     }
     // log("build", name: runtimeType.toString());
     Widget pageWidget = ICEmptyPage();
-    if (_userBlocks.isNotEmpty) {
+    // -1 means that user is in Overview Page
+    if (_selectedIndex == -1) {
+      pageWidget = ICCacheOverview();
+    } else if (_userBlocks.isNotEmpty) {
       pageWidget = ICBlockView(blockid: _userBlocks[_selectedIndex].id);
     }
     return Scaffold(
@@ -109,9 +116,6 @@ class _ICCacheView extends State<ICCacheView> {
                             TextButton(
                               onPressed: () async {
                                 Navigator.pop(context);
-                                await FileHandler.deleteCacheById(
-                                  userCache!.id,
-                                );
                                 final SnackBar snackBar = SnackBar(
                                   content: Text(
                                     "Cache ${userCache!.name} Deleted!",
@@ -120,6 +124,11 @@ class _ICCacheView extends State<ICCacheView> {
                                 ScaffoldMessenger.of(
                                   context,
                                 ).showSnackBar(snackBar);
+
+                                await FileHandler.deleteCacheById(
+                                  userCache!.id,
+                                );
+
                                 await widget.reloadCaches();
                               },
                               child: const Text(
@@ -157,10 +166,24 @@ class _ICCacheView extends State<ICCacheView> {
             child: Row(
               children: <Widget>[
                 MenuItemButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = -1;
+                    });
+                  },
+                  style: MenuItemButton.styleFrom(
+                    backgroundColor: (_selectedIndex == -1)
+                        ? Theme.of(context).focusColor
+                        : Theme.of(context).cardColor,
+                  ),
+                  clipBehavior: Clip.hardEdge,
                   requestFocusOnHover: false,
-                  onPressed: () {},
-                  leadingIcon: Icon(Icons.space_dashboard),
-                  child: Text("Overview"),
+                  leadingIcon: Icon(
+                    (_selectedIndex == -1)
+                        ? Icons.square
+                        : Icons.square_outlined,
+                  ),
+                  child: SizedBox(width: 120, child: Text("Overview")),
                 ),
                 Expanded(
                   child: ReorderableListView(
