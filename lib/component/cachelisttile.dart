@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
@@ -76,7 +75,7 @@ class _ICCacheListTileState extends State<ICCacheListTile> {
                 _interruptEditMode();
                 FocusScope.of(context).unfocus();
               },
-              onSubmitted: (_) async {
+              onSubmitted: (value) async {
                 _toggleEditMode();
                 Cache? oldCache = await FileHandler.findCacheById(
                   widget._cacheid,
@@ -84,11 +83,11 @@ class _ICCacheListTileState extends State<ICCacheListTile> {
                 oldCache?.name = _inputText;
                 await FileHandler.updateCache(oldCache!);
                 // After update the name might be name.001 so need to fetch again
-                Cache? newCache = await FileHandler.findCacheById(
+                Cache? updatedCache = await FileHandler.findCacheById(
                   widget._cacheid,
                 );
                 setState(() {
-                  _inputText = newCache!.name;
+                  _inputText = updatedCache!.name;
                   _controller.text = _inputText;
                 });
                 await widget._onEditName();

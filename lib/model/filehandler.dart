@@ -87,15 +87,38 @@ class FileHandler {
     if (oldCache == null) {
       return appendCache(cache);
     }
-
-    int occurrence = 0;
-    while (await findCacheByName(cache.name) != null) {
-      String oldName = cache.name;
-      cache.name =
-          "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
-      occurrence++;
+    List<Cache>? caches = await readCaches();
+    caches.removeWhere((item) => item.id == cache.id);
+    if (caches.isNotEmpty) {
+      int occurrence = 0;
+      for (int i = 0; i < caches.length; i++) {
+        String oldName = cache.name;
+        if (caches[i].name == cache.name) {
+          occurrence++;
+          cache.name =
+              "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+        }
+      }
     }
+    // int occurrence = 1;
+    // // Case 0: If no duplicate name is found, then continues
+    // if (await findCacheByName(cache.name) != null) {
+    //   if ((await findCacheById(cache.id))!.name == cache.name) {
+    //     // Case 1: If the duplicated name cache is equal to the original one, pass
+    //     // E.g.: Renaming "abc" to "abc" should not change the name to "abc.001"
+    //   } else {
+    //     // Case 2: The duplicated name is due to other cache name
+    //     while (await findCacheByName(cache.name) != null) {
+    //       String oldName = cache.name;
+    //       cache.name =
+    //           "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+    //       occurrence++;
+    //     }
+    //   }
+    // }
+
     List<Cache> existingCaches = await readCaches();
+    // Replacing Cache
     for (int i = 0; i < existingCaches.length; i++) {
       if (existingCaches[i].id == cache.id) {
         existingCaches[i] = cache;
@@ -118,6 +141,7 @@ class FileHandler {
     }
 
     List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheid);
+    blocks.removeWhere((item) => item.id == block.id);
     if (blocks.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < blocks.length; i++) {

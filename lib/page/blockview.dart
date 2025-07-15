@@ -33,7 +33,7 @@ class _ICBlockView extends State<ICBlockView> {
   void _loadBlockContent() async {
     ICBlock? block = await FileHandler.findBlockById(widget.blockid);
     if (block == null) {
-      throw Exception("Block is Null");
+      // throw Exception("Block is Null");
       return;
     }
     if (block.content == "") {
