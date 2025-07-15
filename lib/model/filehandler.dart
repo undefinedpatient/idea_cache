@@ -12,7 +12,7 @@ class FileHandler {
   // File I/O
   static Future<String> _localPath() async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    log(directory.toString(), name: "FileHandler");
+    // log(directory.toString(), name: "FileHandler");
     return directory.path;
   }
 
@@ -102,7 +102,7 @@ class FileHandler {
         break;
       }
     }
-    log("Cache Updated", name: "updateCache");
+    // log("Cache Updated", name: "updateCache");
     return await file.writeAsString(
       jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
     );
@@ -267,7 +267,7 @@ class FileHandler {
     //   name: "unorderedBlocks",
     //   unorderedBlocks.map((block) => block.id).toList().toString(),
     // );
-    log(name: "cache.blockIds", cache.blockIds.toString());
+    // log(name: "cache.blockIds", cache.blockIds.toString());
 
     for (int i = 0; i < cache.blockIds.length; i++) {
       int indexOfTargetBlock = unorderedBlocks

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/fileHandler.dart';
@@ -58,6 +60,11 @@ class _ICBlockListTile extends State<ICBlockListTile> {
   }
 
   @override
+  void didUpdateWidget(covariant ICBlockListTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -76,7 +83,9 @@ class _ICBlockListTile extends State<ICBlockListTile> {
         ),
         clipBehavior: Clip.hardEdge,
         requestFocusOnHover: false,
-        leadingIcon: Icon(Icons.square),
+        leadingIcon: Icon(
+          (widget._isSelected) ? Icons.square : Icons.square_outlined,
+        ),
         child: SizedBox(
           width: 120,
           child: _isEditing

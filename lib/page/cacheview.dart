@@ -23,7 +23,7 @@ class ICCacheView extends StatefulWidget {
 
   @override
   State<ICCacheView> createState() {
-    log("createState", name: runtimeType.toString());
+    // log("createState", name: runtimeType.toString());
     return _ICCacheView();
   }
 }
@@ -40,7 +40,7 @@ class _ICCacheView extends State<ICCacheView> {
     setState(() {
       _userBlocks = blocks;
     });
-    log(name: "_loadBlocks", "${blocks.map((block) => block.id)}");
+    // log(name: "_loadBlocks()", "${blocks.map((block) => block.id)}");
   }
 
   Future<void> _loadCache() async {
@@ -67,7 +67,7 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   void didUpdateWidget(covariant ICCacheView oldWidget) {
-    log("didUpdateWidget", name: runtimeType.toString());
+    // log("didUpdateWidget", name: runtimeType.toString());
     super.didUpdateWidget(oldWidget);
     _selectedIndex = 0;
     _loadCache();
@@ -79,7 +79,7 @@ class _ICCacheView extends State<ICCacheView> {
     if (userCache == null) {
       return ICEmptyPage();
     }
-    log("build", name: runtimeType.toString());
+    // log("build", name: runtimeType.toString());
     Widget pageWidget = ICEmptyPage();
     if (_userBlocks.isNotEmpty) {
       pageWidget = ICBlockView(blockid: _userBlocks[_selectedIndex].id);
@@ -156,6 +156,12 @@ class _ICCacheView extends State<ICCacheView> {
             // Use SizedBox to container listtile to avoid overflow
             child: Row(
               children: <Widget>[
+                MenuItemButton(
+                  requestFocusOnHover: false,
+                  onPressed: () {},
+                  leadingIcon: Icon(Icons.space_dashboard),
+                  child: Text("Overview"),
+                ),
                 Expanded(
                   child: ReorderableListView(
                     buildDefaultDragHandles: false,

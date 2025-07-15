@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
 
@@ -33,8 +34,10 @@ class _ICBlockView extends State<ICBlockView> {
     ICBlock? block = await FileHandler.findBlockById(widget.blockid);
     if (block == null) {
       throw Exception("Block is Null");
+      return;
     }
     if (block.content == "") {
+      _controller.document = Document();
       return;
     }
     _controller.document = Document.fromJson(jsonDecode(block.content));
@@ -47,6 +50,14 @@ class _ICBlockView extends State<ICBlockView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {}); // Triggers rebuild after first frame
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ICBlockView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadBlockContent();
+
+    log(name: runtimeType.toString(), "${widget.blockid}");
   }
 
   @override
@@ -63,10 +74,14 @@ class _ICBlockView extends State<ICBlockView> {
       body: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              MenuItemButton(
+                onPressed: _onSave,
+                child: Text("Save"),
+                requestFocusOnHover: false,
+              ),
               Text(widget.blockid),
-              MenuItemButton(onPressed: _onSave, child: Text("Save")),
             ],
           ),
           QuillSimpleToolbar(
