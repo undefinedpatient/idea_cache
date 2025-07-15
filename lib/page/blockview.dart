@@ -25,7 +25,7 @@ class _ICBlockView extends State<ICBlockView> {
     if (oldBlock == null) {
       throw Exception("Block is Null");
     }
-    oldBlock?.setContent(jsonEncode(_controller.document.toDelta().toJson()));
+    oldBlock.setContent(jsonEncode(_controller.document.toDelta().toJson()));
     FileHandler.updateBlock(oldBlock);
   }
 
