@@ -54,7 +54,6 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-  String _currentCacheId = "";
   List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
 
@@ -77,7 +76,13 @@ class _ICMainView extends State<ICMainView> {
     log("build", name: runtimeType.toString());
     Widget pageWidget = ICEmptyPage();
     if (_selectedIndex == 0) {
-      pageWidget = ICOverview();
+      pageWidget = ICOverview(
+        setPage: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      );
     } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
       pageWidget = ICCacheView(
         cacheid: _userCaches[_selectedIndex - 1].id,
@@ -138,8 +143,6 @@ class _ICMainView extends State<ICMainView> {
                             onTap: () {
                               setState(() {
                                 _selectedIndex = index + 1;
-                                _currentCacheId =
-                                    _userCaches[_selectedIndex - 1].id;
                               });
                             },
                             onEditName: () async {

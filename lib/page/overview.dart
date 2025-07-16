@@ -3,7 +3,9 @@ import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 
 class ICOverview extends StatefulWidget {
-  const ICOverview({super.key});
+  final Function(int) setPage;
+  const ICOverview({super.key, required Function(int) setPage})
+    : setPage = setPage;
   @override
   State<StatefulWidget> createState() {
     return _ICOverview();
@@ -57,15 +59,20 @@ class _ICOverview extends State<ICOverview> {
                 childAspectRatio: 4,
                 shrinkWrap: true,
                 children: _userCaches
+                    .asMap()
+                    .entries
                     .map(
-                      (Cache cache) => Card(
+                      (entry) => Card(
                         clipBehavior: Clip.hardEdge,
                         child: ListTile(
                           leading: Icon(Icons.pages_outlined),
-                          title: Text(cache.name),
+                          title: Text(entry.value.name),
                           subtitle: Text(
-                            "# of Blocks: ${cache.blockIds.length.toString()}",
+                            "# of Blocks: ${entry.value.blockIds.length.toString()}",
                           ),
+                          onTap: () {
+                            widget.setPage(entry.key + 1);
+                          },
                         ),
                       ),
                     )

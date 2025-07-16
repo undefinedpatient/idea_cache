@@ -8,8 +8,13 @@ import 'package:idea_cache/model/filehandler.dart';
 
 class ICCacheOverview extends StatefulWidget {
   final String cacheid;
-  const ICCacheOverview({super.key, required String cacheid})
-    : cacheid = cacheid;
+  final Function(int) setPage;
+  const ICCacheOverview({
+    super.key,
+    required String cacheid,
+    required Function(int) setPage,
+  }) : cacheid = cacheid,
+       setPage = setPage;
   @override
   State<StatefulWidget> createState() {
     return _ICCacheOverviewState();
@@ -42,7 +47,10 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Scaffold(
-        appBar: AppBar(title: Text("Overview")),
+        appBar: AppBar(
+          title: Text("Overview"),
+          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.view_array))],
+        ),
         body: Column(
           children: [
             Card(
@@ -53,16 +61,24 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
             Expanded(
               child: GridView.count(
                 crossAxisCount: (MediaQuery.of(context).size.width > 420)
-                    ? (MediaQuery.of(context).size.width / 210).floor()
+                    ? (MediaQuery.of(context).size.width / 360).floor()
                     : 1.floor(),
                 childAspectRatio: 3,
                 children: _cacheBlocks
+                    .asMap()
+                    .entries
                     .map(
-                      (ICBlock block) => Card(
+                      (entry) => Card(
                         clipBehavior: Clip.hardEdge,
                         child: ListTile(
                           leading: Icon(Icons.square_outlined),
-                          title: Text(block.name),
+                          title: Text(entry.value.name),
+                          trailing: IconButton(
+                            onPressed: () {
+                              widget.setPage(entry.key);
+                            },
+                            icon: Icon(Icons.arrow_right),
+                          ),
                         ),
                       ),
                     )

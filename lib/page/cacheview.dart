@@ -87,7 +87,14 @@ class _ICCacheView extends State<ICCacheView> {
     Widget pageWidget = ICEmptyPage();
     // -1 means that user is in Overview Page
     if (_selectedIndex == -1) {
-      pageWidget = ICCacheOverview(cacheid: widget.cacheid);
+      pageWidget = ICCacheOverview(
+        cacheid: widget.cacheid,
+        setPage: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      );
     } else if (_userBlocks.isNotEmpty) {
       pageWidget = ICBlockView(blockid: _userBlocks[_selectedIndex].id);
     }
