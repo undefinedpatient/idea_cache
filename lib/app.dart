@@ -10,6 +10,7 @@ import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/emptypage.dart';
 import 'package:idea_cache/page/overview.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 
 class ICApp extends StatelessWidget {
@@ -20,9 +21,17 @@ class ICApp extends StatelessWidget {
       home: ICMainView(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 240, 231, 105),
+          seedColor: Colors.purpleAccent,
           brightness: Brightness.light,
         ),
+        textTheme: GoogleFonts.firaCodeTextTheme(),
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.greenAccent,
+          brightness: Brightness.dark,
+        ),
+        textTheme: GoogleFonts.firaCodeTextTheme(),
       ),
       themeMode: ThemeMode.light,
       localizationsDelegates: const [
@@ -31,12 +40,6 @@ class ICApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         FlutterQuillLocalizations.delegate,
       ],
-      // darkTheme: ThemeData(
-      //   colorScheme: ColorScheme.fromSeed(
-      //     seedColor: Colors.greenAccent,
-      //     brightness: Brightness.dark,
-      //   ),
-      // ),
     );
   }
 }
@@ -54,42 +57,6 @@ class _ICMainView extends State<ICMainView> {
   String _currentCacheId = "";
   List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
-  void _addCreateCacheOverlay() {
-    // Ensure current we do not have any entry
-    assert(addCacheOverlayEntry == null);
-    // Create a new entry and assign it to our class property
-    addCacheOverlayEntry = OverlayEntry(
-      builder: (BuildContext buildContext) {
-        double width = MediaQuery.of(buildContext).size.width;
-        double height = MediaQuery.of(buildContext).size.height;
-        return GestureDetector(
-          onTap: _removeAddCacheOverlay,
-          child: Material(
-            color: Colors.black38,
-            child: GestureDetector(
-              onTap: () {},
-              child: Container(
-                color: Colors.white,
-                margin: (width > 1280 && height > 600)
-                    ? EdgeInsets.fromLTRB(360, 128, 360, 128)
-                    : EdgeInsets.fromLTRB(0, 128, 0, 128),
-
-                child: ICCreateCacheForm(onExitForm: _removeAddCacheOverlay),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    //Add the entry to our overlayEntry
-    Overlay.of(context).insert(addCacheOverlayEntry!);
-  }
-
-  void _removeAddCacheOverlay() {
-    addCacheOverlayEntry?.remove();
-    addCacheOverlayEntry?.dispose();
-    addCacheOverlayEntry = null;
-  }
 
   Future<void> _loadCaches() async {
     _userCaches = List.empty();
@@ -122,7 +89,11 @@ class _ICMainView extends State<ICMainView> {
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
-        appBar: AppBar(title: Text("IdeaCache")),
+        backgroundColor: Theme.of(context).colorScheme.surfaceBright,
+        appBar: AppBar(
+          title: Text("IdeaCache"),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
         body: Row(
           children: [
             SizedBox(

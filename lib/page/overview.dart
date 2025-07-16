@@ -51,13 +51,25 @@ class _ICOverview extends State<ICOverview> {
             ),
             Expanded(
               child: GridView.count(
-                crossAxisCount: 2,
+                crossAxisCount: (MediaQuery.of(context).size.width > 420)
+                    ? (MediaQuery.of(context).size.width / 420).floor()
+                    : 1,
+                childAspectRatio: 4,
                 shrinkWrap: true,
-                children: [
-                  Card(child: Text("data")),
-                  Card(child: Text("data")),
-                  Card(child: Text("data")),
-                ],
+                children: _userCaches
+                    .map(
+                      (Cache cache) => Card(
+                        clipBehavior: Clip.hardEdge,
+                        child: ListTile(
+                          leading: Icon(Icons.pages_outlined),
+                          title: Text(cache.name),
+                          subtitle: Text(
+                            "# of Blocks: ${cache.blockIds.length.toString()}",
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ],

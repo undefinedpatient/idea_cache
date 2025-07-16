@@ -32,7 +32,7 @@ class ICCacheView extends StatefulWidget {
 class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
   List<ICBlock> _userBlocks = [];
-  int _selectedIndex = 0;
+  int _selectedIndex = -1;
 
   Future<void> _loadBlocks() async {
     List<ICBlock> blocks = await FileHandler.findBlocksByCacheId(
@@ -87,7 +87,7 @@ class _ICCacheView extends State<ICCacheView> {
     Widget pageWidget = ICEmptyPage();
     // -1 means that user is in Overview Page
     if (_selectedIndex == -1) {
-      pageWidget = ICCacheOverview();
+      pageWidget = ICCacheOverview(cacheid: widget.cacheid);
     } else if (_userBlocks.isNotEmpty) {
       pageWidget = ICBlockView(blockid: _userBlocks[_selectedIndex].id);
     }
@@ -235,31 +235,32 @@ class _ICCacheView extends State<ICCacheView> {
                     await _loadBlocks();
                   },
                   leadingIcon: Icon(Icons.add),
-                  child: Text("Add Block"),
+                  child: Text("Add Block "),
                 ),
-                MenuItemButton(
-                  requestFocusOnHover: false,
-                  onPressed: () async {
-                    ICBlock oldBlock = _userBlocks[_selectedIndex];
-                    userCache!.removeBlockIds(oldBlock.id);
-                    await FileHandler.updateCache(userCache!);
-                    await FileHandler.deleteBlocksById(oldBlock.id);
+                if (_selectedIndex != -1)
+                  MenuItemButton(
+                    requestFocusOnHover: false,
+                    onPressed: () async {
+                      ICBlock oldBlock = _userBlocks[_selectedIndex];
+                      userCache!.removeBlockIds(oldBlock.id);
+                      await FileHandler.updateCache(userCache!);
+                      await FileHandler.deleteBlocksById(oldBlock.id);
 
-                    final SnackBar snackBar = SnackBar(
-                      content: Text("Block ${oldBlock.name} Deleted!"),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    await _loadBlocks();
-                    if (_selectedIndex >= _userBlocks.length) {
-                      _selectedIndex = _userBlocks.length - 1;
-                      // Hard Limiting the _selectedIndex
-                      if (_selectedIndex == -1) {
-                        _selectedIndex = 0;
+                      final SnackBar snackBar = SnackBar(
+                        content: Text("Block ${oldBlock.name} Deleted!"),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      await _loadBlocks();
+                      if (_selectedIndex >= _userBlocks.length) {
+                        _selectedIndex = _userBlocks.length - 1;
+                        // Hard Limiting the _selectedIndex
+                        if (_selectedIndex == -1) {
+                          _selectedIndex = 0;
+                        }
                       }
-                    }
-                  },
-                  leadingIcon: Icon(Icons.delete_outlined),
-                ),
+                    },
+                    leadingIcon: Icon(Icons.delete_outlined),
+                  ),
               ],
             ),
           ),
