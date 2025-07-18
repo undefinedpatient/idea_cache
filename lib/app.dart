@@ -13,34 +13,58 @@ import 'package:idea_cache/page/overview.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 
+import 'package:idea_cache/page/settingpage.dart';
+import 'package:provider/provider.dart';
+
 class ICApp extends StatelessWidget {
   const ICApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ICMainView(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.purpleAccent,
-          brightness: Brightness.light,
-        ),
-        textTheme: GoogleFonts.firaCodeTextTheme(),
+    return ChangeNotifierProvider(
+      create: (context) => ICAppState(),
+      child: Consumer<ICAppState>(
+        builder: (context, value, child) {
+          return MaterialApp(
+            home: ICMainView(),
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.purpleAccent,
+                brightness: Brightness.light,
+              ),
+              textTheme: value.textTheme,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.deepPurpleAccent,
+                brightness: Brightness.dark,
+              ),
+              textTheme: value.textTheme,
+            ),
+            themeMode: value.themeMode,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              FlutterQuillLocalizations.delegate,
+            ],
+          );
+        },
       ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.greenAccent,
-          brightness: Brightness.dark,
-        ),
-        textTheme: GoogleFonts.firaCodeTextTheme(),
-      ),
-      themeMode: ThemeMode.light,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        FlutterQuillLocalizations.delegate,
-      ],
     );
+  }
+}
+
+class ICAppState extends ChangeNotifier {
+  ThemeMode themeMode = ThemeMode.system;
+  TextTheme textTheme = GoogleFonts.firaCodeTextTheme();
+  void changeBrightness(ThemeMode thememode) {
+    themeMode = thememode;
+    notifyListeners();
+  }
+
+  void changeTextTheme(TextTheme texttheme) {
+    textTheme = texttheme;
+    notifyListeners();
   }
 }
 
@@ -89,21 +113,20 @@ class _ICMainView extends State<ICMainView> {
         reloadCaches: _loadCaches,
       );
     } else {
-      pageWidget = ICEmptyPage();
+      pageWidget = ICSettingPage();
     }
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surfaceBright,
         appBar: AppBar(
           title: Text("IdeaCache"),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
         body: Row(
           children: [
-            SizedBox(
+            Container(
+              // color: Theme.of(context).colorScheme.secondaryFixedDim,
               width: 180,
-              // color:,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
