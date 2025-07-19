@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill/quill_delta.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
 
@@ -77,7 +76,11 @@ class _ICBlockView extends State<ICBlockView> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               MenuItemButton(
-                onPressed: _onSave,
+                onPressed: () {
+                  _onSave();
+                  final SnackBar snackBar = SnackBar(content: Text("Saved!"));
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                },
                 child: Text("Save"),
                 requestFocusOnHover: false,
               ),

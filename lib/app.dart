@@ -150,6 +150,7 @@ class _ICMainView extends State<ICMainView> {
                         _selectedIndex = 0;
                       });
                     },
+                    selectedTileColor: Theme.of(context).colorScheme.surfaceDim,
                   ),
                   Expanded(
                     child: ReorderableListView(
@@ -207,6 +208,7 @@ class _ICMainView extends State<ICMainView> {
                         _selectedIndex = _userCaches.length + 1;
                       });
                     },
+                    selectedTileColor: Theme.of(context).colorScheme.surfaceDim,
                   ),
                 ],
               ),

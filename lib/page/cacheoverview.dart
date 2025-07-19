@@ -49,7 +49,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("Overview"),
-          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.view_array))],
+          // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.view_array))],
         ),
         body: Column(
           children: [
@@ -73,12 +73,9 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                         child: ListTile(
                           leading: Icon(Icons.square_outlined),
                           title: Text(entry.value.name),
-                          trailing: IconButton(
-                            onPressed: () {
-                              widget.setPage(entry.key);
-                            },
-                            icon: Icon(Icons.arrow_right),
-                          ),
+                          onTap: () {
+                            widget.setPage(entry.key);
+                          },
                         ),
                       ),
                     )

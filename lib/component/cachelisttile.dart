@@ -100,6 +100,7 @@ class _ICCacheListTileState extends State<ICCacheListTile> {
             ),
       selected: widget._selected,
       onTap: widget._onTap,
+      selectedTileColor: Theme.of(context).colorScheme.surfaceDim,
     );
   }
 }

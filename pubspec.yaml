@@ -1,5 +1,5 @@
 name: idea_cache
-description: "A Flutter Project for cache random idea."
+description: "A Flutter Project for caching random idea."
 publish_to: 'none'
 version: 0.1.0
 
@@ -15,6 +15,7 @@ dependencies:
   uuid: ^4.5.1
   flutter_quill: ^11.4.1
   provider: ^6.1.5
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:

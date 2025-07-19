@@ -248,23 +248,73 @@ class _ICCacheView extends State<ICCacheView> {
                   MenuItemButton(
                     requestFocusOnHover: false,
                     onPressed: () async {
-                      ICBlock oldBlock = _userBlocks[_selectedIndex];
-                      userCache!.removeBlockIds(oldBlock.id);
-                      await FileHandler.updateCache(userCache!);
-                      await FileHandler.deleteBlocksById(oldBlock.id);
+                      await showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) => Dialog(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              spacing: 8,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const Text("Confirm Block Deletion?"),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                        ICBlock oldBlock =
+                                            _userBlocks[_selectedIndex];
+                                        userCache!.removeBlockIds(oldBlock.id);
+                                        await FileHandler.updateCache(
+                                          userCache!,
+                                        );
+                                        await FileHandler.deleteBlocksById(
+                                          oldBlock.id,
+                                        );
 
-                      final SnackBar snackBar = SnackBar(
-                        content: Text("Block ${oldBlock.name} Deleted!"),
+                                        final SnackBar snackBar = SnackBar(
+                                          content: Text(
+                                            "Block ${oldBlock.name} Deleted!",
+                                          ),
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(snackBar);
+                                        await _loadBlocks();
+                                        if (_selectedIndex >=
+                                            _userBlocks.length) {
+                                          _selectedIndex =
+                                              _userBlocks.length - 1;
+                                          // Hard Limiting the _selectedIndex
+                                          if (_selectedIndex == -1) {
+                                            _selectedIndex = 0;
+                                          }
+                                        }
+                                      },
+                                      child: const Text(
+                                        "Delete",
+                                        style: TextStyle(
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("Close"),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      await _loadBlocks();
-                      if (_selectedIndex >= _userBlocks.length) {
-                        _selectedIndex = _userBlocks.length - 1;
-                        // Hard Limiting the _selectedIndex
-                        if (_selectedIndex == -1) {
-                          _selectedIndex = 0;
-                        }
-                      }
                     },
                     leadingIcon: Icon(Icons.delete_outlined),
                   ),
