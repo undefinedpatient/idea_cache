@@ -7,6 +7,7 @@ import 'package:idea_cache/component/cachelisttile.dart';
 import 'package:idea_cache/component/createcacheform.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
+import 'package:idea_cache/model/setting.dart';
 import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/emptypage.dart';
 import 'package:idea_cache/page/overview.dart';
@@ -57,6 +58,12 @@ class ICApp extends StatelessWidget {
 class ICAppState extends ChangeNotifier {
   ThemeMode themeMode = ThemeMode.system;
   TextTheme textTheme = GoogleFonts.firaCodeTextTheme();
+  ICAppState() {
+    FileHandler.loadSetting().then((Setting setting) {
+      changeBrightness(setting.thememode);
+      changeTextTheme(setting.texttheme);
+    });
+  }
   void changeBrightness(ThemeMode thememode) {
     themeMode = thememode;
     notifyListeners();

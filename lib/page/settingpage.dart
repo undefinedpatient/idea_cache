@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
+import 'package:idea_cache/model/filehandler.dart';
+import 'package:idea_cache/model/setting.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,7 +34,24 @@ class _ICSettingPageState extends State<ICSettingPage> {
     ICAppState appState = context.watch<ICAppState>();
     log(name: runtimeType.toString(), "build(BuildContext context)");
     return Scaffold(
-      appBar: AppBar(title: Text("Settings")),
+      appBar: AppBar(
+        title: Text("Settings"),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await FileHandler.saveSetting(
+                Setting(thememode: _themeMode, texttheme: _textTheme),
+              );
+              final SnackBar snackBar = SnackBar(
+                content: Text("Settings Saved!"),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            },
+            icon: Icon(Icons.save),
+          ),
+        ],
+        actionsPadding: EdgeInsets.fromLTRB(0, 0, 0, 16),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

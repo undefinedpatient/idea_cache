@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/setting.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'cache.dart';
 
-enum FileDestinationType { cache, block }
+enum FileDestinationType { cache, block, setting }
 
 class FileHandler {
   // File I/O
@@ -26,6 +27,8 @@ class FileHandler {
         return File("$path/IdeaCache/caches.json").create(recursive: true);
       case FileDestinationType.block:
         return File("$path/IdeaCache/blocks.json").create(recursive: true);
+      case FileDestinationType.setting:
+        return File("$path/IdeaCache/settings.json").create(recursive: true);
     }
   }
 
@@ -180,6 +183,38 @@ class FileHandler {
     return file.writeAsString(
       jsonEncode(caches.map((cache) => cache.toJson()).toList()),
     );
+  }
+
+  static Future<Setting> loadSetting() async {
+    File file = await _localFile(
+      fileDestinationType: FileDestinationType.setting,
+    );
+    try {
+      if (file.existsSync()) {
+        String content = await file.readAsString();
+        Map<String, dynamic> jsonMap =
+            jsonDecode(content) as Map<String, dynamic>;
+        return Setting.fromJson(jsonMap);
+      }
+    } catch (err) {
+      log(name: "FileHandler.loadSetting()", err.toString(), level: 2);
+    }
+    return Setting();
+  }
+
+  static Future<File> saveSetting(Setting setting) async {
+    File file = await _localFile(
+      fileDestinationType: FileDestinationType.setting,
+    );
+    String content = "";
+    try {
+      if (file.existsSync()) {
+        content = jsonEncode(setting.toJson());
+      }
+    } catch (err) {
+      log(name: "FileHandler.saveSetting()", err.toString(), level: 2);
+    }
+    return await file.writeAsString(content);
   }
 
   /*
