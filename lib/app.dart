@@ -131,7 +131,7 @@ class _ICMainView extends State<ICMainView> {
         ),
         body: Row(
           children: [
-            Container(
+            SizedBox(
               // color: Theme.of(context).colorScheme.secondaryFixedDim,
               width: 180,
               child: Column(

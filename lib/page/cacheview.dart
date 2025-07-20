@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
@@ -105,6 +103,21 @@ class _ICCacheView extends State<ICCacheView> {
         actions: [
           IconButton(
             onPressed: () async {
+              setState(() {
+                userCache?.priority = 1 - userCache!.priority;
+              });
+
+              await FileHandler.updateCache(userCache!);
+              _loadCache();
+            },
+            icon: Icon(
+              (userCache?.priority == 0)
+                  ? Icons.push_pin_outlined
+                  : Icons.push_pin,
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
               await showDialog<String>(
                 context: context,
                 builder: (BuildContext context) => Dialog(
@@ -158,7 +171,7 @@ class _ICCacheView extends State<ICCacheView> {
               );
             },
 
-            icon: Icon(Icons.delete),
+            icon: Icon(Icons.delete_outline),
           ),
         ],
       ),

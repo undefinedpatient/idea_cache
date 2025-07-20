@@ -5,20 +5,28 @@ import 'package:uuid/uuid.dart';
 class Cache {
   final String _id;
   final List<String> _blockIds = List.empty(growable: true);
+  // Priorize, current only have 0(Normal) and 1 (Pinned)
+  int priority = 0;
   String name;
   // Construct a new Cache with name
-  Cache({required this.name}) : _id = Uuid().v4();
+  Cache({required this.name}) : _id = Uuid().v4(), priority = 0;
   // Construct a Cache from Json
   Cache.fromJson(Map<String, dynamic> json)
     : _id = json['id'],
-      name = json['name'] {
+      name = json['name'],
+      priority = json['priority'] {
     for (int i = 0; i < json['blockIds'].length; i++) {
       addBlockId(json['blockIds'][i]);
     }
   }
   // Convert Cache object to Json String, the String can be encode with dart:convert jsonEncode()
   Map<String, dynamic> toJson() {
-    return {'id': _id, 'blockIds': _blockIds, 'name': name};
+    return {
+      'id': _id,
+      'blockIds': _blockIds,
+      'name': name,
+      'priority': priority,
+    };
   }
 
   String get id {

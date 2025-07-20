@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ICSettingPage extends StatefulWidget {
+  const ICSettingPage({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _ICSettingPageState();

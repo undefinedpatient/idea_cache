@@ -43,12 +43,56 @@ class _ICOverview extends State<ICOverview> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Card(
+              elevation: 2,
               child: Column(
                 children: [
                   ListTile(
                     title: Text("You have ${_userCaches.length} Caches!"),
                   ),
                 ],
+              ),
+            ),
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.push_pin),
+                      title: Text("Pins"),
+                    ),
+                    GridView.count(
+                      crossAxisCount: (MediaQuery.of(context).size.width > 420)
+                          ? (MediaQuery.of(context).size.width / 420).floor()
+                          : 1,
+                      childAspectRatio: 4,
+                      shrinkWrap: true,
+                      children: _userCaches
+                          .where((Cache cache) => cache.priority == 1)
+                          .toList()
+                          .asMap()
+                          .entries
+                          .map(
+                            (entry) => Card(
+                              elevation: 4,
+                              clipBehavior: Clip.hardEdge,
+                              child: ListTile(
+                                leading: Icon(Icons.pages_outlined),
+                                title: Text(entry.value.name),
+                                subtitle: Text(
+                                  "# of Blocks: ${entry.value.blockIds.length.toString()}",
+                                ),
+                                onTap: () {
+                                  widget.setPage(entry.key + 1);
+                                },
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -59,10 +103,13 @@ class _ICOverview extends State<ICOverview> {
                 childAspectRatio: 4,
                 shrinkWrap: true,
                 children: _userCaches
+                    .where((Cache cache) => cache.priority == 0)
+                    .toList()
                     .asMap()
                     .entries
                     .map(
                       (entry) => Card(
+                        elevation: 2,
                         clipBehavior: Clip.hardEdge,
                         child: ListTile(
                           leading: Icon(Icons.pages_outlined),

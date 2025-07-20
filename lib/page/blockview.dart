@@ -56,7 +56,7 @@ class _ICBlockView extends State<ICBlockView> {
     super.didUpdateWidget(oldWidget);
     _loadBlockContent();
 
-    log(name: runtimeType.toString(), "${widget.blockid}");
+    log(name: runtimeType.toString(), widget.blockid);
   }
 
   @override
@@ -81,8 +81,8 @@ class _ICBlockView extends State<ICBlockView> {
                   final SnackBar snackBar = SnackBar(content: Text("Saved!"));
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 },
-                child: Text("Save"),
                 requestFocusOnHover: false,
+                child: Text("Save"),
               ),
               Text(widget.blockid),
             ],

@@ -1,8 +1,4 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/filehandler.dart';
 
@@ -54,6 +50,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
         body: Column(
           children: [
             Card(
+              elevation: 2,
               child: ListTile(
                 title: Text("You have ${_cacheBlocks.length} blocks!"),
               ),
@@ -69,6 +66,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                     .entries
                     .map(
                       (entry) => Card(
+                        elevation: 2,
                         clipBehavior: Clip.hardEdge,
                         child: ListTile(
                           leading: Icon(Icons.square_outlined),
