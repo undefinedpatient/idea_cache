@@ -29,14 +29,14 @@ class ICApp extends StatelessWidget {
             home: ICMainView(),
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: value.colorseed,
+                seedColor: Color(value.colorcode),
                 brightness: Brightness.light,
               ),
               textTheme: value.textTheme,
             ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: value.colorseed,
+                seedColor: Color(value.colorcode),
                 brightness: Brightness.dark,
               ),
               textTheme: value.textTheme,
@@ -58,12 +58,12 @@ class ICApp extends StatelessWidget {
 class ICAppState extends ChangeNotifier {
   ThemeMode themeMode = ThemeMode.system;
   TextTheme textTheme = GoogleFonts.firaCodeTextTheme();
-  Color colorseed = Colors.purple;
+  int colorcode = Colors.purple.toARGB32();
   ICAppState() {
     FileHandler.loadSetting().then((Setting setting) {
       changeBrightness(setting.thememode);
       changeTextTheme(setting.texttheme);
-      changeColorSeed(setting.colorseed);
+      changeColorCode(setting.colorcode);
     });
   }
   void changeBrightness(ThemeMode thememode) {
@@ -76,8 +76,8 @@ class ICAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeColorSeed(Color color) {
-    colorseed = color;
+  void changeColorCode(int code) {
+    colorcode = code;
     notifyListeners();
   }
 }

@@ -4,13 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 class Setting {
   ThemeMode thememode = ThemeMode.system;
   TextTheme texttheme = GoogleFonts.firaCodeTextTheme();
-  Color colorseed = Colors.purple;
-  Setting({ThemeMode? thememode, TextTheme? texttheme, Color? colorseed}) {
+  int colorcode = Colors.purple.toARGB32();
+  Setting({ThemeMode? thememode, TextTheme? texttheme, int? colorcode}) {
     this.thememode = (thememode != null) ? thememode : ThemeMode.system;
     this.texttheme = (texttheme != null)
         ? texttheme
         : GoogleFonts.firaCodeTextTheme();
-    this.colorseed = (colorseed != null) ? colorseed : Colors.purple;
+    this.colorcode = (colorcode != null) ? colorcode : Colors.purple.toARGB32();
   }
   Setting.fromJson(Map<String, dynamic> jsonMap) {
     String thememodeString = jsonMap["thememode"];
@@ -33,14 +33,13 @@ class Setting {
       default:
         texttheme = GoogleFonts.firaCodeTextTheme();
     }
-    int colorcode = jsonMap["colorseed"];
-    colorseed = Color(colorcode);
+    colorcode = jsonMap["colorseed"];
   }
   Map<String, dynamic> toJson() {
     return {
       "thememode": thememode.toString(),
       "texttheme": texttheme.toStringShort(),
-      "colorseed": colorseed.toARGB32(),
+      "colorseed": colorcode.toString(),
     };
   }
 }

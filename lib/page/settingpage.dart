@@ -19,7 +19,7 @@ class ICSettingPage extends StatefulWidget {
 class _ICSettingPageState extends State<ICSettingPage> {
   ThemeMode _themeMode = ThemeMode.system;
   TextTheme _textTheme = GoogleFonts.firaCodeTextTheme();
-  Color _colorseed = Colors.purple;
+  int _colorseed = Colors.purple.toARGB32();
   @override
   void initState() {
     super.initState();
@@ -28,7 +28,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
       setState(() {
         _themeMode = appState.themeMode;
         _textTheme = appState.textTheme;
-        _colorseed = appState.colorseed;
+        _colorseed = appState.colorcode;
       });
     });
   }
@@ -44,7 +44,11 @@ class _ICSettingPageState extends State<ICSettingPage> {
           IconButton(
             onPressed: () async {
               await FileHandler.saveSetting(
-                Setting(thememode: _themeMode, texttheme: _textTheme),
+                Setting(
+                  thememode: _themeMode,
+                  texttheme: _textTheme,
+                  colorcode: _colorseed,
+                ),
               );
               final SnackBar snackBar = SnackBar(
                 content: Text("Settings Saved!"),
@@ -192,7 +196,6 @@ class _ICSettingPageState extends State<ICSettingPage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(
-                  // mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
@@ -211,7 +214,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       value: _colorseed,
                       items: [
                         DropdownMenuItem(
-                          value: Colors.purple,
+                          value: Colors.purple.toARGB32(),
                           child: Text(
                             "Purple",
                             style: Theme.of(context).textTheme.bodyMedium!
@@ -223,7 +226,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           ),
                         ),
                         DropdownMenuItem(
-                          value: Colors.amber,
+                          value: Colors.amber.toARGB32(),
                           child: Text(
                             "Amber",
                             style: Theme.of(context).textTheme.bodyMedium!
@@ -235,7 +238,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           ),
                         ),
                         DropdownMenuItem(
-                          value: Colors.green,
+                          value: Colors.green.toARGB32(),
                           child: Text(
                             "Green",
                             style: Theme.of(context).textTheme.bodyMedium!
@@ -251,7 +254,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                         setState(() {
                           _colorseed = value!;
                         });
-                        appState.changeColorSeed((_colorseed));
+                        appState.changeColorCode((_colorseed));
                       },
                     ),
                   ],
