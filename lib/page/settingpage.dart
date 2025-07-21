@@ -19,6 +19,7 @@ class ICSettingPage extends StatefulWidget {
 class _ICSettingPageState extends State<ICSettingPage> {
   ThemeMode _themeMode = ThemeMode.system;
   TextTheme _textTheme = GoogleFonts.firaCodeTextTheme();
+  Color _colorseed = Colors.purple;
   @override
   void initState() {
     super.initState();
@@ -27,6 +28,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
       setState(() {
         _themeMode = appState.themeMode;
         _textTheme = appState.textTheme;
+        _colorseed = appState.colorseed;
       });
     });
   }
@@ -180,6 +182,76 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           _textTheme = value!;
                         });
                         appState.changeTextTheme((_textTheme));
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Row(
+                  // mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Main Color",
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
+
+                    DropdownButton(
+                      padding: EdgeInsets.all(4),
+                      underline: Container(
+                        height: 2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      value: _colorseed,
+                      items: [
+                        DropdownMenuItem(
+                          value: Colors.purple,
+                          child: Text(
+                            "Purple",
+                            style: Theme.of(context).textTheme.bodyMedium!
+                                .copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: Colors.amber,
+                          child: Text(
+                            "Amber",
+                            style: Theme.of(context).textTheme.bodyMedium!
+                                .copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: Colors.green,
+                          child: Text(
+                            "Green",
+                            style: Theme.of(context).textTheme.bodyMedium!
+                                .copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                ),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _colorseed = value!;
+                        });
+                        appState.changeColorSeed((_colorseed));
                       },
                     ),
                   ],
