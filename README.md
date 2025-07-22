@@ -9,6 +9,8 @@ flutter_quill: ^11.4.1
 ## Installation
 
 Null
+## Where it stores
+C:\Users\yourname\Documents
 
 ## License
 

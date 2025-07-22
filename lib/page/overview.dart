@@ -79,16 +79,6 @@ class _ICOverview extends State<ICOverview> {
           children: [
             Card(
               elevation: 2,
-              child: Column(
-                children: [
-                  ListTile(
-                    title: Text("You have ${_userCaches.length} Caches!"),
-                  ),
-                ],
-              ),
-            ),
-            Card(
-              elevation: 2,
               child: SearchBar(
                 controller: _textEditingController,
                 shape: WidgetStateProperty<OutlinedBorder>.fromMap(
@@ -124,6 +114,16 @@ class _ICOverview extends State<ICOverview> {
                   await _readCaches();
                   await _filterCaches();
                 },
+              ),
+            ),
+            Card(
+              elevation: 2,
+              child: Column(
+                children: [
+                  ListTile(
+                    title: Text("You have ${_userCaches.length} Caches!"),
+                  ),
+                ],
               ),
             ),
             Card(

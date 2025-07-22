@@ -1,7 +1,7 @@
 name: idea_cache
-description: "A Flutter Project for caching random idea."
-publish_to: 'none'
-version: 0.1.0
+description: "A Flutter Project for caching chaotic idea."
+publish_to: 'Github'
+version: 0.0.1
 
 environment:
   sdk: ^3.8.1
