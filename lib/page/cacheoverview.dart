@@ -40,48 +40,48 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("Overview"),
-          // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.view_array))],
-        ),
-        body: Column(
-          children: [
-            Card(
-              elevation: 2,
-              child: ListTile(
-                title: Text("You have ${_cacheBlocks.length} blocks!"),
-              ),
+    return Scaffold(
+      // backgroundColor: Theme.of(context).colorScheme.surfaceBright,
+      appBar: AppBar(
+        // backgroundColor: Theme.of(context).colorScheme.surfaceBright,
+        // surfaceTintColor: Theme.of(context).colorScheme.surfaceBright,
+        title: Text("Overview"),
+      ),
+      body: Column(
+        spacing: 4,
+        children: [
+          Card(
+            elevation: 2,
+            child: ListTile(
+              title: Text("You have ${_cacheBlocks.length} blocks!"),
             ),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: (MediaQuery.of(context).size.width > 420)
-                    ? (MediaQuery.of(context).size.width / 360).floor()
-                    : 1.floor(),
-                childAspectRatio: 3,
-                children: _cacheBlocks
-                    .asMap()
-                    .entries
-                    .map(
-                      (entry) => Card(
-                        elevation: 2,
-                        clipBehavior: Clip.hardEdge,
-                        child: ListTile(
-                          leading: Icon(Icons.square_outlined),
-                          title: Text(entry.value.name),
-                          onTap: () {
-                            widget.setPage(entry.key);
-                          },
-                        ),
+          ),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: (MediaQuery.of(context).size.width > 420)
+                  ? (MediaQuery.of(context).size.width / 360).floor()
+                  : 1.floor(),
+              childAspectRatio: 3,
+              children: _cacheBlocks
+                  .asMap()
+                  .entries
+                  .map(
+                    (entry) => Card(
+                      elevation: 2,
+                      clipBehavior: Clip.hardEdge,
+                      child: ListTile(
+                        leading: Icon(Icons.square_outlined),
+                        title: Text(entry.value.name),
+                        onTap: () {
+                          widget.setPage(entry.key);
+                        },
                       ),
-                    )
-                    .toList(),
-              ),
+                    ),
+                  )
+                  .toList(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

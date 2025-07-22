@@ -31,6 +31,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.light,
+                contrastLevel: 1,
               ),
               textTheme: value.textTheme,
             ),
@@ -38,6 +39,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.dark,
+                contrastLevel: 1,
               ),
               textTheme: value.textTheme,
             ),
@@ -134,17 +136,19 @@ class _ICMainView extends State<ICMainView> {
       return Scaffold(
         appBar: AppBar(
           title: Text("IdeaCache"),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          // backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          // surfaceTintColor: Theme.of(context).colorScheme.secondaryContainer,
         ),
         body: Row(
           children: [
             SizedBox(
-              // color: Theme.of(context).colorScheme.secondaryFixedDim,
               width: 180,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ListTile(
+                    // focusColor: Theme.of(context).colorScheme.surfaceBright,
+                    // dense: ,
                     leading: Icon(
                       (_selectedIndex == 0)
                           ? Icons.dashboard
@@ -157,7 +161,6 @@ class _ICMainView extends State<ICMainView> {
                         _selectedIndex = 0;
                       });
                     },
-                    selectedTileColor: Theme.of(context).colorScheme.surfaceDim,
                   ),
                   Expanded(
                     child: ReorderableListView(
@@ -215,7 +218,9 @@ class _ICMainView extends State<ICMainView> {
                         _selectedIndex = _userCaches.length + 1;
                       });
                     },
-                    selectedTileColor: Theme.of(context).colorScheme.surfaceDim,
+                    selectedTileColor: Theme.of(
+                      context,
+                    ).colorScheme.onSecondaryContainer,
                   ),
                 ],
               ),
