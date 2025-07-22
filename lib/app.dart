@@ -31,8 +31,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.light,
-                contrastLevel: 1,
-                contrastLevel: 1,
+                contrastLevel: 0.5,
               ),
               textTheme: value.textTheme,
             ),
@@ -40,8 +39,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.dark,
-                contrastLevel: 1,
-                contrastLevel: 1,
+                contrastLevel: 0.5,
               ),
               textTheme: value.textTheme,
             ),
