@@ -128,7 +128,13 @@ class _ICCacheView extends State<ICCacheView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        const Text("Confirm Cache Deletion?"),
+                        Text(
+                          "Confirm Cache Deletion?",
+                          style: Theme.of(context).textTheme.bodyMedium!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
@@ -176,10 +182,10 @@ class _ICCacheView extends State<ICCacheView> {
         ],
       ),
       body: Column(
+        // spacing: 0.0,
         children: [
           const Divider(thickness: 2, height: 2),
           Container(
-            color: Theme.of(context).colorScheme.surface,
             height: widget.tabHeight, // Fixed height for tab bar
             width: MediaQuery.of(context).size.width,
             // Use SizedBox to container listtile to avoid overflow
@@ -271,7 +277,15 @@ class _ICCacheView extends State<ICCacheView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                const Text("Confirm Block Deletion?"),
+                                Text(
+                                  "Confirm Block Deletion?",
+                                  style: Theme.of(context).textTheme.bodyMedium!
+                                      .copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.secondary,
+                                      ),
+                                ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.min,

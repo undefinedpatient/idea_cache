@@ -33,7 +33,7 @@ class Setting {
       default:
         texttheme = GoogleFonts.firaCodeTextTheme();
     }
-    colorcode = jsonMap["colorseed"];
+    colorcode = int.parse(jsonMap["colorseed"]);
   }
   Map<String, dynamic> toJson() {
     return {

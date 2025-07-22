@@ -38,8 +38,10 @@ class _ICSettingPageState extends State<ICSettingPage> {
     ICAppState appState = context.watch<ICAppState>();
     log(name: runtimeType.toString(), "build(BuildContext context)");
     return Scaffold(
+      // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       appBar: AppBar(
         title: Text("Settings"),
+        // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
           IconButton(
             onPressed: () async {
@@ -73,12 +75,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                   // mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Theme",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
+                    Text("Theme"),
                     DropdownButton(
                       padding: EdgeInsets.all(4),
                       underline: Container(
@@ -89,39 +86,15 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       items: [
                         DropdownMenuItem(
                           value: ThemeMode.system,
-                          child: Text(
-                            "Follow System",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Follow System"),
                         ),
                         DropdownMenuItem(
                           value: ThemeMode.light,
-                          child: Text(
-                            "Light",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Light"),
                         ),
                         DropdownMenuItem(
                           value: ThemeMode.dark,
-                          child: Text(
-                            "Dark",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Dark"),
                         ),
                       ],
                       onChanged: (value) {
@@ -139,15 +112,9 @@ class _ICSettingPageState extends State<ICSettingPage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(
-                  // mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Font",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
+                    Text("Font"),
                     DropdownButton(
                       padding: EdgeInsets.all(4),
                       underline: Container(
@@ -158,27 +125,11 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       items: [
                         DropdownMenuItem(
                           value: GoogleFonts.firaCodeTextTheme(),
-                          child: Text(
-                            "Fira Code",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Fira Code"),
                         ),
                         DropdownMenuItem(
                           value: GoogleFonts.notoSerifTextTheme(),
-                          child: Text(
-                            "Noto Serif",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Noto Serif"),
                         ),
                       ],
                       onChanged: (value) {
@@ -198,12 +149,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Main Color",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
+                    Text("Main Color"),
 
                     DropdownButton(
                       padding: EdgeInsets.all(4),
@@ -215,39 +161,15 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       items: [
                         DropdownMenuItem(
                           value: Colors.purple.toARGB32(),
-                          child: Text(
-                            "Purple",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Purple"),
                         ),
                         DropdownMenuItem(
                           value: Colors.amber.toARGB32(),
-                          child: Text(
-                            "Amber",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Amber"),
                         ),
                         DropdownMenuItem(
                           value: Colors.green.toARGB32(),
-                          child: Text(
-                            "Green",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                ),
-                          ),
+                          child: Text("Green"),
                         ),
                       ],
                       onChanged: (value) {

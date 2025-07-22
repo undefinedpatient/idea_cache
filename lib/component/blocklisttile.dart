@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/fileHandler.dart';
@@ -75,11 +74,6 @@ class _ICBlockListTile extends State<ICBlockListTile> {
       width: 200,
       child: MenuItemButton(
         onPressed: widget._onTap,
-        style: MenuItemButton.styleFrom(
-          backgroundColor: widget._isSelected
-              ? Theme.of(context).focusColor
-              : Theme.of(context).cardColor,
-        ),
         clipBehavior: Clip.hardEdge,
         requestFocusOnHover: false,
         leadingIcon: Icon(

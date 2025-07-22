@@ -31,6 +31,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.light,
+                contrastLevel: 1,
               ),
               textTheme: value.textTheme,
             ),
@@ -38,6 +39,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.dark,
+                contrastLevel: 1,
               ),
               textTheme: value.textTheme,
             ),
@@ -56,7 +58,7 @@ class ICApp extends StatelessWidget {
 }
 
 class ICAppState extends ChangeNotifier {
-  ThemeMode themeMode = ThemeMode.system;
+  ThemeMode themeMode = ThemeMode.light;
   TextTheme textTheme = GoogleFonts.firaCodeTextTheme();
   int colorcode = Colors.purple.toARGB32();
   ICAppState() {
@@ -64,6 +66,8 @@ class ICAppState extends ChangeNotifier {
       changeBrightness(setting.thememode);
       changeTextTheme(setting.texttheme);
       changeColorCode(setting.colorcode);
+      log(setting.thememode.toString());
+      log(setting.texttheme.toStringShort());
     });
   }
   void changeBrightness(ThemeMode thememode) {
@@ -132,14 +136,10 @@ class _ICMainView extends State<ICMainView> {
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text("IdeaCache"),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
+        appBar: AppBar(title: Text("IdeaCache")),
         body: Row(
           children: [
             SizedBox(
-              // color: Theme.of(context).colorScheme.secondaryFixedDim,
               width: 180,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -157,7 +157,6 @@ class _ICMainView extends State<ICMainView> {
                         _selectedIndex = 0;
                       });
                     },
-                    selectedTileColor: Theme.of(context).colorScheme.surfaceDim,
                   ),
                   Expanded(
                     child: ReorderableListView(
@@ -215,7 +214,6 @@ class _ICMainView extends State<ICMainView> {
                         _selectedIndex = _userCaches.length + 1;
                       });
                     },
-                    selectedTileColor: Theme.of(context).colorScheme.surfaceDim,
                   ),
                 ],
               ),
