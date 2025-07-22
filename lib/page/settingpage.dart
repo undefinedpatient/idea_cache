@@ -39,8 +39,10 @@ class _ICSettingPageState extends State<ICSettingPage> {
     log(name: runtimeType.toString(), "build(BuildContext context)");
     return Scaffold(
       // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       appBar: AppBar(
         title: Text("Settings"),
+        // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
           IconButton(
@@ -144,6 +146,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
               ),
             ),
             Card(
+              // color: Theme.of(context).colorScheme.secondary,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(

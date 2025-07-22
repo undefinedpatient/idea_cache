@@ -66,7 +66,12 @@ class _ICOverview extends State<ICOverview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Overview")),
+      // backgroundColor: Theme.of(context).colorScheme.surfaceDim,
+      appBar: AppBar(
+        title: Text("Overview"),
+        // backgroundColor: Theme.of(context).colorScheme.surfaceDim,
+        // surfaceTintColor: Theme.of(context).colorScheme.surfaceDim,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
