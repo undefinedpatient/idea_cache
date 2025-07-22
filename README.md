@@ -7,8 +7,8 @@ Currently Support Window only
 flutter_quill: ^11.4.1
 
 ## Installation
+Go to release page
 
-Null
 ## Where it stores
 C:\Users\yourname\Documents
 
