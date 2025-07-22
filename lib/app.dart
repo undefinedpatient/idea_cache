@@ -33,6 +33,7 @@ class ICApp extends StatelessWidget {
                 brightness: Brightness.light,
                 contrastLevel: 0.5,
               ),
+
               textTheme: value.textTheme,
             ),
             darkTheme: ThemeData(
@@ -136,11 +137,10 @@ class _ICMainView extends State<ICMainView> {
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
-        appBar: AppBar(title: Text("IdeaCache")),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
           title: Text("IdeaCache"),
-          // backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-          // surfaceTintColor: Theme.of(context).colorScheme.secondaryContainer,
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         body: Row(
           children: [
@@ -221,9 +221,6 @@ class _ICMainView extends State<ICMainView> {
                         _selectedIndex = _userCaches.length + 1;
                       });
                     },
-                    selectedTileColor: Theme.of(
-                      context,
-                    ).colorScheme.onSecondaryContainer,
                   ),
                 ],
               ),

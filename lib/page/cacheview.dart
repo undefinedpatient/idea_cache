@@ -97,9 +97,9 @@ class _ICCacheView extends State<ICCacheView> {
       pageWidget = ICBlockView(blockid: _userBlocks[_selectedIndex].id);
     }
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(
-        // surfaceTintColor: Theme.of(context).colorScheme.surfaceDim,
-        // backgroundColor: Theme.of(context).colorScheme.surfaceDim,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         title: Text(userCache!.name),
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         actions: [

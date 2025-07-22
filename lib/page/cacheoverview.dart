@@ -41,7 +41,11 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Overview")),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+      appBar: AppBar(
+        title: Text("Overview"),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      ),
       body: Column(
         spacing: 4,
         children: [

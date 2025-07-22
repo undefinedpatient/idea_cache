@@ -70,6 +70,7 @@ class _ICBlockView extends State<ICBlockView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surfaceBright,
       body: Column(
         children: [
           Row(
