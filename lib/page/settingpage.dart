@@ -78,6 +78,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                     Text(
                       "Theme",
                       style: TextStyle(
+                        fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
@@ -137,6 +138,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                     Text(
                       "Font",
                       style: TextStyle(
+                        fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
@@ -149,9 +151,37 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       value: _textTheme,
                       items: [
                         DropdownMenuItem(
+                          value: GoogleFonts.abelTextTheme(),
+                          child: Text(
+                            "Abel",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: GoogleFonts.codaTextTheme(),
+                          child: Text(
+                            "Coda",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
                           value: GoogleFonts.firaCodeTextTheme(),
                           child: Text(
                             "Fira Code",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+
+                        DropdownMenuItem(
+                          value: GoogleFonts.notoSansTextTheme(),
+                          child: Text(
+                            "Noto Sans",
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.secondary,
                             ),
@@ -185,8 +215,9 @@ class _ICSettingPageState extends State<ICSettingPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Main Color",
+                      "Tint",
                       style: TextStyle(
+                        fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
@@ -203,6 +234,24 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           value: Colors.purple.toARGB32(),
                           child: Text(
                             "Purple",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: Colors.blue.toARGB32(),
+                          child: Text(
+                            "Blue",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: Colors.red.toARGB32(),
+                          child: Text(
+                            "Red",
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.secondary,
                             ),
