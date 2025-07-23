@@ -70,33 +70,111 @@ class _ICBlockView extends State<ICBlockView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceBright,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               MenuItemButton(
                 onPressed: () {
                   _onSave();
-                  final SnackBar snackBar = SnackBar(content: Text("Saved!"));
+                  final SnackBar snackBar = SnackBar(
+                    content: Text(
+                      "Saved!",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 },
                 requestFocusOnHover: false,
-                child: Text("Save"),
+                child: Text(" Save "),
               ),
-              Text(widget.blockid),
+              // Text(widget.blockid),
             ],
           ),
           QuillSimpleToolbar(
             controller: _controller,
-            config: const QuillSimpleToolbarConfig(),
+            config: QuillSimpleToolbarConfig(
+              buttonOptions: QuillSimpleToolbarButtonOptions(
+                fontFamily: QuillToolbarFontFamilyButtonOptions(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                fontSize: QuillToolbarFontSizeButtonOptions(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                selectHeaderStyleDropdownButton:
+                    QuillToolbarSelectHeaderStyleDropdownButtonOptions(
+                      textStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+              ),
+              color: Theme.of(context).colorScheme.onSurface,
+              sectionDividerColor: Theme.of(context).colorScheme.onSurface,
+              showInlineCode: false,
+              showSubscript: false,
+              showSuperscript: false,
+            ),
           ),
           Expanded(
             child: QuillEditor.basic(
               controller: _controller,
-              config: const QuillEditorConfig(
-                padding: EdgeInsetsGeometry.all(16),
+              config: QuillEditorConfig(
+                customStyles: DefaultStyles(
+                  quote: DefaultTextBlockStyle(
+                    TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 18,
+                      letterSpacing: 1,
+                    ),
+                    HorizontalSpacing.zero,
+                    VerticalSpacing.zero,
+                    VerticalSpacing.zero,
+                    BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withAlpha(20),
+                      border: BoxBorder.fromLTRB(left: BorderSide(width: 4)),
+                    ),
+                  ),
+                  lists: DefaultListBlockStyle(
+                    TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 18,
+                      letterSpacing: 1,
+                    ),
+                    HorizontalSpacing.zero,
+                    VerticalSpacing.zero,
+                    VerticalSpacing.zero,
+                    null,
+                    null,
+                  ),
+                  sizeSmall: TextStyle(fontSize: 16),
+                  sizeLarge: TextStyle(fontSize: 20),
+                  sizeHuge: TextStyle(fontSize: 24),
+
+                  color: Colors.amber,
+                  paragraph: DefaultTextBlockStyle(
+                    TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 18,
+                      letterSpacing: 1,
+                    ),
+                    HorizontalSpacing.zero,
+                    VerticalSpacing.zero,
+                    VerticalSpacing.zero,
+                    null,
+                  ),
+                ),
+                paintCursorAboveText: true,
+                padding: EdgeInsetsGeometry.all(18),
                 placeholder: "Write Something",
               ),
               focusNode: _focusNode,

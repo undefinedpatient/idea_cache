@@ -73,6 +73,11 @@ class _ICBlockListTile extends State<ICBlockListTile> {
     return SizedBox(
       width: 200,
       child: MenuItemButton(
+        style: MenuItemButton.styleFrom(
+          backgroundColor: (widget._isSelected)
+              ? Theme.of(context).colorScheme.surface
+              : Theme.of(context).colorScheme.surfaceContainer,
+        ),
         onPressed: widget._onTap,
         clipBehavior: Clip.hardEdge,
         requestFocusOnHover: false,

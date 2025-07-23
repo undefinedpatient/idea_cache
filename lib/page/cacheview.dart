@@ -188,10 +188,10 @@ class _ICCacheView extends State<ICCacheView> {
         // spacing: 0.0,
         children: [
           const Divider(thickness: 2, height: 2),
-          Container(
+          // Use SizedBox to container listtile to avoid overflow
+          SizedBox(
             height: widget.tabHeight, // Fixed height for tab bar
             width: MediaQuery.of(context).size.width,
-            // Use SizedBox to container listtile to avoid overflow
             child: Row(
               children: <Widget>[
                 MenuItemButton(
@@ -202,8 +202,8 @@ class _ICCacheView extends State<ICCacheView> {
                   },
                   style: MenuItemButton.styleFrom(
                     backgroundColor: (_selectedIndex == -1)
-                        ? Theme.of(context).focusColor
-                        : Theme.of(context).cardColor,
+                        ? Theme.of(context).colorScheme.surface
+                        : Theme.of(context).colorScheme.surfaceContainer,
                   ),
                   clipBehavior: Clip.hardEdge,
                   requestFocusOnHover: false,
@@ -280,15 +280,6 @@ class _ICCacheView extends State<ICCacheView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                Text(
-                                  "Confirm Block Deletion?",
-                                  style: Theme.of(context).textTheme.bodyMedium!
-                                      .copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.secondary,
-                                      ),
-                                ),
                                 Text(
                                   "Confirm Block Deletion?",
                                   style: Theme.of(context).textTheme.bodyMedium!
