@@ -15,7 +15,7 @@ Currently available for **Windows only**. Support for macOS, Linux, and mobile p
 - Windows 10 or later
 
 ## Installation
-1. Visit the [Releases page]() on GitHub.
+1. Visit the [Releases page](https://github.com/undefinedpatient/idea_cache/releases) on GitHub.
 2. Download the latest `.exe` installer generated using Inno Setup Compiler.
 3. Run the installer and follow the on-screen instructions to install IdeaCache like any other Windows application.
 
