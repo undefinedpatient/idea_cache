@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
@@ -31,6 +34,7 @@ class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
   List<ICBlock> _userBlocks = [];
   int _selectedIndex = -1;
+  FocusNode _focusNode = FocusNode();
 
   Future<void> _loadBlocks() async {
     List<ICBlock> blocks = await FileHandler.findBlocksByCacheId(
@@ -57,6 +61,39 @@ class _ICCacheView extends State<ICCacheView> {
     FileHandler.updateCache(userCache!);
   }
 
+  Future<void> _deleteCache(BuildContext context) async {
+    Navigator.pop(context);
+    final SnackBar snackBar = SnackBar(
+      content: Text("Cache ${userCache!.name} Deleted!"),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    await FileHandler.deleteCacheById(userCache!.id);
+
+    await widget.reloadCaches();
+  }
+
+  Future<void> _deleteBlock(BuildContext context) async {
+    Navigator.pop(context);
+    ICBlock oldBlock = _userBlocks[_selectedIndex];
+    userCache!.removeBlockIds(oldBlock.id);
+    await FileHandler.updateCache(userCache!);
+    await FileHandler.deleteBlocksById(oldBlock.id);
+
+    final SnackBar snackBar = SnackBar(
+      content: Text("Block ${oldBlock.name} Deleted!"),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    await _loadBlocks();
+    if (_selectedIndex >= _userBlocks.length) {
+      _selectedIndex = _userBlocks.length - 1;
+      // Hard Limiting the _selectedIndex
+      if (_selectedIndex == -1) {
+        _selectedIndex = 0;
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +111,12 @@ class _ICCacheView extends State<ICCacheView> {
 
     _loadCache();
     _loadBlocks();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -122,57 +165,59 @@ class _ICCacheView extends State<ICCacheView> {
             onPressed: () async {
               await showDialog<String>(
                 context: context,
-                builder: (BuildContext context) => Dialog(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      spacing: 8,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          "Confirm Cache Deletion?",
-                          style: Theme.of(context).textTheme.bodyMedium!
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.secondary,
+                builder: (BuildContext context) => KeyboardListener(
+                  focusNode: _focusNode,
+                  autofocus: true,
+                  onKeyEvent: (KeyEvent event) async {
+                    log(event.logicalKey.keyLabel);
+                    if (event.logicalKey.keyLabel == 'Y' ||
+                        event.logicalKey.keyLabel == "Enter") {
+                      await _deleteCache(context);
+                    }
+                    if (event.logicalKey.keyLabel == 'N') {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Dialog(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        spacing: 8,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            "Confirm Cache Deletion?",
+                            style: Theme.of(context).textTheme.bodyMedium!
+                                .copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton(
+                                onPressed: () async {
+                                  await _deleteCache(context);
+                                },
+                                child: const Text(
+                                  "Delete (Y)",
+                                  style: TextStyle(color: Colors.redAccent),
+                                ),
                               ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextButton(
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                final SnackBar snackBar = SnackBar(
-                                  content: Text(
-                                    "Cache ${userCache!.name} Deleted!",
-                                  ),
-                                );
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(snackBar);
-
-                                await FileHandler.deleteCacheById(
-                                  userCache!.id,
-                                );
-
-                                await widget.reloadCaches();
-                              },
-                              child: const Text(
-                                "Delete",
-                                style: TextStyle(color: Colors.redAccent),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Close (n)"),
                               ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Close"),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -272,75 +317,62 @@ class _ICCacheView extends State<ICCacheView> {
                     onPressed: () async {
                       await showDialog<String>(
                         context: context,
-                        builder: (BuildContext context) => Dialog(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              spacing: 8,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Text(
-                                  "Confirm Block Deletion?",
-                                  style: Theme.of(context).textTheme.bodyMedium!
-                                      .copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.secondary,
-                                      ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextButton(
-                                      onPressed: () async {
-                                        Navigator.pop(context);
-                                        ICBlock oldBlock =
-                                            _userBlocks[_selectedIndex];
-                                        userCache!.removeBlockIds(oldBlock.id);
-                                        await FileHandler.updateCache(
-                                          userCache!,
-                                        );
-                                        await FileHandler.deleteBlocksById(
-                                          oldBlock.id,
-                                        );
-
-                                        final SnackBar snackBar = SnackBar(
-                                          content: Text(
-                                            "Block ${oldBlock.name} Deleted!",
+                        builder: (BuildContext context) => KeyboardListener(
+                          focusNode: _focusNode,
+                          autofocus: true,
+                          onKeyEvent: (KeyEvent keyEvent) {
+                            if (keyEvent.logicalKey.keyLabel == "Y" ||
+                                keyEvent.logicalKey.keyLabel == "Enter") {
+                              _deleteBlock(context);
+                            }
+                            if (keyEvent.logicalKey.keyLabel == "N") {
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Dialog(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                spacing: 8,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Text(
+                                    "Confirm Block Deletion?",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                        ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () async {
+                                          await _deleteBlock(context);
+                                        },
+                                        child: const Text(
+                                          "Delete",
+                                          style: TextStyle(
+                                            color: Colors.redAccent,
                                           ),
-                                        );
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(snackBar);
-                                        await _loadBlocks();
-                                        if (_selectedIndex >=
-                                            _userBlocks.length) {
-                                          _selectedIndex =
-                                              _userBlocks.length - 1;
-                                          // Hard Limiting the _selectedIndex
-                                          if (_selectedIndex == -1) {
-                                            _selectedIndex = 0;
-                                          }
-                                        }
-                                      },
-                                      child: const Text(
-                                        "Delete",
-                                        style: TextStyle(
-                                          color: Colors.redAccent,
                                         ),
                                       ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Close"),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Close"),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
