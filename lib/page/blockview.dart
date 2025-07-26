@@ -21,12 +21,12 @@ class _ICBlockView extends State<ICBlockView> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final Map<String, String> _fontFamilies = {
-    // 'Abel': GoogleFonts.abel().fontFamily!,
+    'Abel': "Abel",
     'Annie': 'Annie Use Your Telescope',
-    // 'Coda': GoogleFonts.coda().fontFamily!,
+    'Coda': "Coda",
     'EB Garamond': 'EB Garamond',
     'Fira Code': 'FiraCode Nerd Font',
-    // 'Noto Sans': GoogleFonts.notoSans().fontFamily!,
+    'Noto Sans': "Noto Sans Thin",
     'Noto Serif': 'Noto Serif Thin',
     'Roboto': 'Roboto Thin',
   };
@@ -149,7 +149,7 @@ class _ICBlockView extends State<ICBlockView> {
                   quote: DefaultTextBlockStyle(
                     TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 18,
+                      fontSize: 16,
                       letterSpacing: 1,
                     ),
                     HorizontalSpacing.zero,
@@ -159,13 +159,18 @@ class _ICBlockView extends State<ICBlockView> {
                       color: Theme.of(
                         context,
                       ).colorScheme.onSurface.withAlpha(20),
-                      border: BoxBorder.fromLTRB(left: BorderSide(width: 4)),
+                      border: BoxBorder.fromLTRB(
+                        left: BorderSide(
+                          width: 4,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                     ),
                   ),
                   lists: DefaultListBlockStyle(
                     TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 18,
+                      fontSize: 16,
                       letterSpacing: 1,
                     ),
                     HorizontalSpacing.zero,

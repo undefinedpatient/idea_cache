@@ -42,7 +42,7 @@ class ICApp extends StatelessWidget {
               ),
               textTheme: value.getTextTheme(),
             ),
-            themeMode: value.themeMode,
+            themeMode: value.thememode,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
@@ -57,24 +57,24 @@ class ICApp extends StatelessWidget {
 }
 
 class ICAppState extends ChangeNotifier {
-  ThemeMode themeMode = ThemeMode.light;
+  ThemeMode thememode = ThemeMode.light;
   String font = 'FiraCode Nerd Font';
   int colorcode = Colors.purple.toARGB32();
   ICAppState() {
     FileHandler.loadSetting().then((Setting setting) {
       changeBrightness(setting.thememode);
-      changeFont(setting.font);
+      changeFont(setting.fontfamily);
       changeColorCode(setting.colorcode);
       log(setting.thememode.toString());
-      log(setting.font);
+      log(setting.fontfamily);
     });
   }
   TextTheme getTextTheme() {
-    return Typography.blackCupertino.apply(fontFamily: font);
+    return Typography.whiteCupertino.apply(fontFamily: font);
   }
 
   void changeBrightness(ThemeMode thememode) {
-    themeMode = thememode;
+    this.thememode = thememode;
     notifyListeners();
   }
 
@@ -152,8 +152,6 @@ class _ICMainView extends State<ICMainView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ListTile(
-                    // focusColor: Theme.of(context).colorScheme.surfaceBright,
-                    // dense: ,
                     leading: Icon(
                       (_selectedIndex == 0)
                           ? Icons.dashboard

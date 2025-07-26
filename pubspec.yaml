@@ -1,7 +1,7 @@
 name: idea_cache
 description: "A Flutter Project for caching chaotic idea."
 publish_to: 'Github'
-version: 1.0.0
+version: 1.1.0
 
 environment:
   sdk: ^3.8.1
@@ -30,21 +30,38 @@ flutter:
   uses-material-design: true
   
   fonts:
+    - family: Abel
+      fonts:
+        - asset: assets/fonts/Abel-Regular.ttf
+
     - family: EB Garamond
       fonts:
         - asset: assets/fonts/EBGaramond-VariableFont_wght.ttf
+
+    - family: Coda
+      fonts:
+        - asset: assets/fonts/Coda-Regular.ttf
+
     - family: FiraCode Nerd Font
       fonts:
         - asset: assets/fonts/FiraCodeNerdFont-Regular.ttf
+
     - family: Annie Use Your Telescope
       fonts:
         - asset: assets/fonts/AnnieUseYourTelescope-Regular.ttf
+
     - family: Noto Serif Thin
       fonts: 
         - asset: assets/fonts/NotoSerif-VariableFont_wdth,wght.ttf
+
+    - family: Noto Sans Thin
+      fonts: 
+        - asset: assets/fonts/NotoSans-VariableFont_wdth,wght.ttf
+
     - family: Roboto Thin
       fonts: 
         - asset: assets/fonts/Roboto-VariableFont_wdth,wght.ttf
   # assets:
+
   #   - assets/images/
 

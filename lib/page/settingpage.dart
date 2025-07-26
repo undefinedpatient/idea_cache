@@ -25,7 +25,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final appState = context.read<ICAppState>();
       setState(() {
-        _themeMode = appState.themeMode;
+        _themeMode = appState.thememode;
         _font = appState.font;
         _colorseed = appState.colorcode;
       });
@@ -47,7 +47,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
               await FileHandler.saveSetting(
                 Setting(
                   thememode: _themeMode,
-                  font: _font,
+                  fontfamily: _font,
                   colorcode: _colorseed,
                 ),
               );
@@ -149,15 +149,16 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       ),
                       value: _font,
                       items: [
-                        // DropdownMenuItem(
-                        //   value: GoogleFonts.abelTextTheme(),
-                        //   child: Text(
-                        //     "Abel",
-                        //     style: TextStyle(
-                        //       color: Theme.of(context).colorScheme.secondary,
-                        //     ),
-                        //   ),
-                        // ),
+                        DropdownMenuItem(
+                          value: "Abel",
+                          child: Text(
+                            "Abel",
+                            style: TextStyle(
+                              fontFamily: "Abel",
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
                         DropdownMenuItem(
                           value: "Annie Use Your Telescope",
                           child: Text(
@@ -168,15 +169,16 @@ class _ICSettingPageState extends State<ICSettingPage> {
                             ),
                           ),
                         ),
-                        // DropdownMenuItem(
-                        //   value: GoogleFonts.codaTextTheme(),
-                        //   child: Text(
-                        //     "Coda",
-                        //     style: TextStyle(
-                        //       color: Theme.of(context).colorScheme.secondary,
-                        //     ),
-                        //   ),
-                        // ),
+                        DropdownMenuItem(
+                          value: "Coda",
+                          child: Text(
+                            "Coda",
+                            style: TextStyle(
+                              fontFamily: "Coda",
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
                         DropdownMenuItem(
                           value: "EB Garamond",
                           child: Text(
@@ -198,15 +200,16 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           ),
                         ),
 
-                        // DropdownMenuItem(
-                        //   value: GoogleFonts.notoSansTextTheme(),
-                        //   child: Text(
-                        //     "Noto Sans",
-                        //     style: TextStyle(
-                        //       color: Theme.of(context).colorScheme.secondary,
-                        //     ),
-                        //   ),
-                        // ),
+                        DropdownMenuItem(
+                          value: "Noto Sans Thin",
+                          child: Text(
+                            "Noto Sans",
+                            style: TextStyle(
+                              fontFamily: "Noto Sans Thin",
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
                         DropdownMenuItem(
                           value: "Noto Serif Thin",
                           child: Text(
