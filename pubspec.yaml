@@ -21,7 +21,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  google_fonts: 6.2.1
 dependency_overrides: 
   flutter_quill:
     git:
@@ -29,5 +28,23 @@ dependency_overrides:
       ref: fix-flutter-3-32-macos-crash
 flutter:
   uses-material-design: true
+  
+  fonts:
+    - family: EB Garamond
+      fonts:
+        - asset: assets/fonts/EBGaramond-VariableFont_wght.ttf
+    - family: FiraCode Nerd Font
+      fonts:
+        - asset: assets/fonts/FiraCodeNerdFont-Regular.ttf
+    - family: Annie Use Your Telescope
+      fonts:
+        - asset: assets/fonts/AnnieUseYourTelescope-Regular.ttf
+    - family: Noto Serif Thin
+      fonts: 
+        - asset: assets/fonts/NotoSerif-VariableFont_wdth,wght.ttf
+    - family: Roboto Thin
+      fonts: 
+        - asset: assets/fonts/Roboto-VariableFont_wdth,wght.ttf
   # assets:
   #   - assets/images/
+

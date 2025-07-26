@@ -5,7 +5,6 @@ import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ICSettingPage extends StatefulWidget {
   const ICSettingPage({super.key});
@@ -18,7 +17,7 @@ class ICSettingPage extends StatefulWidget {
 
 class _ICSettingPageState extends State<ICSettingPage> {
   ThemeMode _themeMode = ThemeMode.system;
-  TextTheme _textTheme = GoogleFonts.firaCodeTextTheme();
+  String _font = 'FiraCode Nerd Font';
   int _colorseed = Colors.purple.toARGB32();
   @override
   void initState() {
@@ -27,7 +26,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
       final appState = context.read<ICAppState>();
       setState(() {
         _themeMode = appState.themeMode;
-        _textTheme = appState.textTheme;
+        _font = appState.font;
         _colorseed = appState.colorcode;
       });
     });
@@ -48,7 +47,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
               await FileHandler.saveSetting(
                 Setting(
                   thememode: _themeMode,
-                  texttheme: _textTheme,
+                  font: _font,
                   colorcode: _colorseed,
                 ),
               );
@@ -148,50 +147,82 @@ class _ICSettingPageState extends State<ICSettingPage> {
                         height: 2,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      value: _textTheme,
+                      value: _font,
                       items: [
+                        // DropdownMenuItem(
+                        //   value: GoogleFonts.abelTextTheme(),
+                        //   child: Text(
+                        //     "Abel",
+                        //     style: TextStyle(
+                        //       color: Theme.of(context).colorScheme.secondary,
+                        //     ),
+                        //   ),
+                        // ),
                         DropdownMenuItem(
-                          value: GoogleFonts.abelTextTheme(),
+                          value: "Annie Use Your Telescope",
                           child: Text(
-                            "Abel",
+                            "Annie",
                             style: TextStyle(
+                              fontFamily: "Annie Use Your Telescope",
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                        // DropdownMenuItem(
+                        //   value: GoogleFonts.codaTextTheme(),
+                        //   child: Text(
+                        //     "Coda",
+                        //     style: TextStyle(
+                        //       color: Theme.of(context).colorScheme.secondary,
+                        //     ),
+                        //   ),
+                        // ),
+                        DropdownMenuItem(
+                          value: "EB Garamond",
+                          child: Text(
+                            "EB Garamond",
+                            style: TextStyle(
+                              fontFamily: "EB Garamond",
                               color: Theme.of(context).colorScheme.secondary,
                             ),
                           ),
                         ),
                         DropdownMenuItem(
-                          value: GoogleFonts.codaTextTheme(),
-                          child: Text(
-                            "Coda",
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: GoogleFonts.firaCodeTextTheme(),
+                          value: 'FiraCode Nerd Font',
                           child: Text(
                             "Fira Code",
                             style: TextStyle(
+                              fontFamily: 'FiraCode Nerd Font',
                               color: Theme.of(context).colorScheme.secondary,
                             ),
                           ),
                         ),
 
+                        // DropdownMenuItem(
+                        //   value: GoogleFonts.notoSansTextTheme(),
+                        //   child: Text(
+                        //     "Noto Sans",
+                        //     style: TextStyle(
+                        //       color: Theme.of(context).colorScheme.secondary,
+                        //     ),
+                        //   ),
+                        // ),
                         DropdownMenuItem(
-                          value: GoogleFonts.notoSansTextTheme(),
+                          value: "Noto Serif Thin",
                           child: Text(
-                            "Noto Sans",
+                            "Noto Serif",
                             style: TextStyle(
+                              fontFamily: "Noto Serif Thin",
                               color: Theme.of(context).colorScheme.secondary,
                             ),
                           ),
                         ),
                         DropdownMenuItem(
-                          value: GoogleFonts.notoSerifTextTheme(),
+                          value: "Roboto Thin",
                           child: Text(
-                            "Noto Serif",
+                            "Roboto",
                             style: TextStyle(
+                              fontFamily: "Roboto Thin",
                               color: Theme.of(context).colorScheme.secondary,
                             ),
                           ),
@@ -199,9 +230,9 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       ],
                       onChanged: (value) {
                         setState(() {
-                          _textTheme = value!;
+                          _font = value!;
                         });
-                        appState.changeTextTheme((_textTheme));
+                        appState.changeFont((_font));
                       },
                     ),
                   ],

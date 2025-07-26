@@ -20,6 +20,16 @@ class _ICBlockView extends State<ICBlockView> {
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
+  final Map<String, String> _fontFamilies = {
+    // 'Abel': GoogleFonts.abel().fontFamily!,
+    'Annie': 'Annie Use Your Telescope',
+    // 'Coda': GoogleFonts.coda().fontFamily!,
+    'EB Garamond': 'EB Garamond',
+    'Fira Code': 'FiraCode Nerd Font',
+    // 'Noto Sans': GoogleFonts.notoSans().fontFamily!,
+    'Noto Serif': 'Noto Serif Thin',
+    'Roboto': 'Roboto Thin',
+  };
   Future<void> _onSave() async {
     ICBlock? oldBlock = await FileHandler.findBlockById(widget.blockid);
     if (oldBlock == null) {
@@ -100,11 +110,19 @@ class _ICBlockView extends State<ICBlockView> {
             config: QuillSimpleToolbarConfig(
               buttonOptions: QuillSimpleToolbarButtonOptions(
                 fontFamily: QuillToolbarFontFamilyButtonOptions(
+                  items: _fontFamilies,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 fontSize: QuillToolbarFontSizeButtonOptions(
+                  items: Map.from({
+                    '16': '16',
+                    '18': '18',
+                    '24': '24',
+                    '32': '32',
+                    'Clear': '0',
+                  }),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
@@ -124,7 +142,7 @@ class _ICBlockView extends State<ICBlockView> {
             ),
           ),
           Expanded(
-            child: QuillEditor.basic(
+            child: QuillEditor(
               controller: _controller,
               config: QuillEditorConfig(
                 customStyles: DefaultStyles(
@@ -164,6 +182,7 @@ class _ICBlockView extends State<ICBlockView> {
                   paragraph: DefaultTextBlockStyle(
                     TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
+                      fontFamily: 'Roboto Thin',
                       fontSize: 18,
                       letterSpacing: 1,
                     ),

@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/cachelisttile.dart';
-import 'package:idea_cache/component/createcacheform.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
 import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/emptypage.dart';
 import 'package:idea_cache/page/overview.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 
 import 'package:idea_cache/page/settingpage.dart';
@@ -34,7 +32,7 @@ class ICApp extends StatelessWidget {
                 contrastLevel: 1,
               ),
 
-              textTheme: value.textTheme,
+              textTheme: value.getTextTheme(),
             ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
@@ -42,7 +40,7 @@ class ICApp extends StatelessWidget {
                 brightness: Brightness.dark,
                 contrastLevel: 1,
               ),
-              textTheme: value.textTheme,
+              textTheme: value.getTextTheme(),
             ),
             themeMode: value.themeMode,
             localizationsDelegates: const [
@@ -60,24 +58,28 @@ class ICApp extends StatelessWidget {
 
 class ICAppState extends ChangeNotifier {
   ThemeMode themeMode = ThemeMode.light;
-  TextTheme textTheme = GoogleFonts.firaCodeTextTheme();
+  String font = 'FiraCode Nerd Font';
   int colorcode = Colors.purple.toARGB32();
   ICAppState() {
     FileHandler.loadSetting().then((Setting setting) {
       changeBrightness(setting.thememode);
-      changeTextTheme(setting.texttheme);
+      changeFont(setting.font);
       changeColorCode(setting.colorcode);
       log(setting.thememode.toString());
-      log(setting.texttheme.toStringShort());
+      log(setting.font);
     });
   }
+  TextTheme getTextTheme() {
+    return Typography.blackCupertino.apply(fontFamily: font);
+  }
+
   void changeBrightness(ThemeMode thememode) {
     themeMode = thememode;
     notifyListeners();
   }
 
-  void changeTextTheme(TextTheme texttheme) {
-    textTheme = texttheme;
+  void changeFont(String fontFamily) {
+    font = fontFamily;
     notifyListeners();
   }
 

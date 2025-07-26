@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class Setting {
   ThemeMode thememode = ThemeMode.system;
-  TextTheme texttheme = GoogleFonts.firaCodeTextTheme();
+  String font = 'FiraCode Nerd Font';
   int colorcode = Colors.purple.toARGB32();
-  Setting({ThemeMode? thememode, TextTheme? texttheme, int? colorcode}) {
+  Setting({ThemeMode? thememode, String? font, int? colorcode}) {
     this.thememode = (thememode != null) ? thememode : ThemeMode.system;
-    this.texttheme = (texttheme != null)
-        ? texttheme
-        : GoogleFonts.firaCodeTextTheme();
+    this.font = (font != null) ? font : 'FiraCode Nerd Font';
     this.colorcode = (colorcode != null) ? colorcode : Colors.purple.toARGB32();
   }
   Setting.fromJson(Map<String, dynamic> jsonMap) {
@@ -22,23 +19,13 @@ class Setting {
       default:
         thememode = ThemeMode.system;
     }
-    String textthemeString = jsonMap["texttheme"];
-    switch (textthemeString) {
-      // TextTheme#256c8 == Fira Code
-      case "TextTheme#256c8":
-        texttheme = GoogleFonts.firaCodeTextTheme();
-      // TextTheme#256c8 == Noto Serif
-      case "TextTheme#bb442":
-        texttheme = GoogleFonts.notoSerifTextTheme();
-      default:
-        texttheme = GoogleFonts.firaCodeTextTheme();
-    }
+    font = jsonMap["texttheme"];
     colorcode = int.parse(jsonMap["colorseed"]);
   }
   Map<String, dynamic> toJson() {
     return {
       "thememode": thememode.toString(),
-      "texttheme": texttheme.toStringShort(),
+      "font": font,
       "colorseed": colorcode.toString(),
     };
   }
