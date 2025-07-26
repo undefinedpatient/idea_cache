@@ -32,7 +32,9 @@ class ICApp extends StatelessWidget {
                 contrastLevel: 1,
               ),
 
-              textTheme: value.getTextTheme(),
+              textTheme: Typography.blackCupertino.apply(
+                fontFamily: value.font,
+              ),
             ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
@@ -40,7 +42,9 @@ class ICApp extends StatelessWidget {
                 brightness: Brightness.dark,
                 contrastLevel: 1,
               ),
-              textTheme: value.getTextTheme(),
+              textTheme: Typography.whiteCupertino.apply(
+                fontFamily: value.font,
+              ),
             ),
             themeMode: value.thememode,
             localizationsDelegates: const [
@@ -68,9 +72,6 @@ class ICAppState extends ChangeNotifier {
       log(setting.thememode.toString());
       log(setting.fontfamily);
     });
-  }
-  TextTheme getTextTheme() {
-    return Typography.whiteCupertino.apply(fontFamily: font);
   }
 
   void changeBrightness(ThemeMode thememode) {
