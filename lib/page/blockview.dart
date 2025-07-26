@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
@@ -30,13 +31,21 @@ class _ICBlockView extends State<ICBlockView> {
     'Noto Serif': 'Noto Serif Thin',
     'Roboto': 'Roboto Thin',
   };
-  Future<void> _onSave() async {
+
+  Future<void> _onSave(BuildContext context) async {
     ICBlock? oldBlock = await FileHandler.findBlockById(widget.blockid);
     if (oldBlock == null) {
       throw Exception("Block is Null");
     }
     oldBlock.setContent(jsonEncode(_controller.document.toDelta().toJson()));
     FileHandler.updateBlock(oldBlock);
+    final SnackBar snackBar = SnackBar(
+      content: Text(
+        "Saved!",
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      ),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   void _loadBlockContent() async {
@@ -88,16 +97,7 @@ class _ICBlockView extends State<ICBlockView> {
             children: [
               MenuItemButton(
                 onPressed: () {
-                  _onSave();
-                  final SnackBar snackBar = SnackBar(
-                    content: Text(
-                      "Saved!",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  _onSave(context);
                 },
                 requestFocusOnHover: false,
                 child: Text(" Save "),
@@ -142,67 +142,79 @@ class _ICBlockView extends State<ICBlockView> {
             ),
           ),
           Expanded(
-            child: QuillEditor(
-              controller: _controller,
-              config: QuillEditorConfig(
-                customStyles: DefaultStyles(
-                  quote: DefaultTextBlockStyle(
-                    TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 16,
-                      letterSpacing: 1,
-                    ),
-                    HorizontalSpacing.zero,
-                    VerticalSpacing.zero,
-                    VerticalSpacing.zero,
-                    BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withAlpha(20),
-                      border: BoxBorder.fromLTRB(
-                        left: BorderSide(
-                          width: 4,
-                          color: Theme.of(context).colorScheme.onSurface,
+            child: CallbackShortcuts(
+              bindings: <ShortcutActivator, VoidCallback>{
+                LogicalKeySet(
+                  LogicalKeyboardKey.controlLeft,
+                  LogicalKeyboardKey.keyS,
+                ): () {
+                  _onSave(context);
+                },
+              },
+              child: QuillEditor(
+                controller: _controller,
+                config: QuillEditorConfig(
+                  customStyles: DefaultStyles(
+                    quote: DefaultTextBlockStyle(
+                      TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                        letterSpacing: 1,
+                      ),
+                      HorizontalSpacing.zero,
+                      VerticalSpacing.zero,
+                      VerticalSpacing.zero,
+                      BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withAlpha(20),
+                        border: BoxBorder.fromLTRB(
+                          left: BorderSide(
+                            width: 4,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  lists: DefaultListBlockStyle(
-                    TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 16,
-                      letterSpacing: 1,
+                    lists: DefaultListBlockStyle(
+                      TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                        letterSpacing: 1,
+                      ),
+                      HorizontalSpacing.zero,
+                      VerticalSpacing.zero,
+                      VerticalSpacing.zero,
+                      null,
+                      null,
                     ),
-                    HorizontalSpacing.zero,
-                    VerticalSpacing.zero,
-                    VerticalSpacing.zero,
-                    null,
-                    null,
-                  ),
-                  sizeSmall: TextStyle(fontSize: 16),
-                  sizeLarge: TextStyle(fontSize: 20),
-                  sizeHuge: TextStyle(fontSize: 24),
+                    sizeSmall: TextStyle(fontSize: 16),
+                    sizeLarge: TextStyle(fontSize: 20),
+                    sizeHuge: TextStyle(fontSize: 24),
 
-                  color: Colors.amber,
-                  paragraph: DefaultTextBlockStyle(
-                    TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontFamily: 'Roboto Thin',
-                      fontSize: 18,
-                      letterSpacing: 1,
+                    color: Colors.amber,
+                    paragraph: DefaultTextBlockStyle(
+                      TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontFamily: 'Roboto Thin',
+                        fontSize: 18,
+                        letterSpacing: 1,
+                      ),
+                      HorizontalSpacing.zero,
+                      VerticalSpacing.zero,
+                      VerticalSpacing.zero,
+                      null,
                     ),
-                    HorizontalSpacing.zero,
-                    VerticalSpacing.zero,
-                    VerticalSpacing.zero,
-                    null,
                   ),
+                  paintCursorAboveText: true,
+                  padding: EdgeInsetsGeometry.all(18),
+                  placeholder: "Write Something",
+                  // onKeyPressed: (event, node) {
+                  // },
                 ),
-                paintCursorAboveText: true,
-                padding: EdgeInsetsGeometry.all(18),
-                placeholder: "Write Something",
+                focusNode: _focusNode,
+                scrollController: _scrollController,
               ),
-              focusNode: _focusNode,
-              scrollController: _scrollController,
             ),
           ),
         ],
