@@ -43,6 +43,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
           IconButton(
+            iconSize: 24,
             onPressed: () async {
               await FileHandler.saveSetting(
                 Setting(
@@ -59,7 +60,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
             icon: Icon(Icons.save),
           ),
         ],
-        actionsPadding: EdgeInsets.fromLTRB(0, 0, 0, 16),
+        actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -235,7 +236,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                         setState(() {
                           _font = value!;
                         });
-                        appState.changeFont((_font));
+                        appState.changeFontFamily((_font));
                       },
                     ),
                   ],

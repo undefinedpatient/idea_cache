@@ -67,7 +67,7 @@ class ICAppState extends ChangeNotifier {
   ICAppState() {
     FileHandler.loadSetting().then((Setting setting) {
       changeBrightness(setting.thememode);
-      changeFont(setting.fontfamily);
+      changeFontFamily(setting.fontfamily);
       changeColorCode(setting.colorcode);
       log(setting.thememode.toString());
       log(setting.fontfamily);
@@ -79,7 +79,7 @@ class ICAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeFont(String fontFamily) {
+  void changeFontFamily(String fontFamily) {
     font = fontFamily;
     notifyListeners();
   }

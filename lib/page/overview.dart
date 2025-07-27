@@ -80,6 +80,7 @@ class _ICOverview extends State<ICOverview> {
             Card(
               elevation: 2,
               child: SearchBar(
+                hintText: "Search Caches",
                 controller: _textEditingController,
                 shape: WidgetStateProperty<OutlinedBorder>.fromMap(
                   <WidgetStatesConstraint, OutlinedBorder>{

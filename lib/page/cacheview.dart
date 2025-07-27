@@ -235,6 +235,7 @@ class _ICCacheView extends State<ICCacheView> {
           const Divider(thickness: 2, height: 2),
           // Use SizedBox to container listtile to avoid overflow
           SizedBox(
+            
             height: widget.tabHeight, // Fixed height for tab bar
             width: MediaQuery.of(context).size.width,
             child: Row(
@@ -357,7 +358,7 @@ class _ICCacheView extends State<ICCacheView> {
                                           await _deleteBlock(context);
                                         },
                                         child: const Text(
-                                          "Delete",
+                                          "Delete (Y)",
                                           style: TextStyle(
                                             color: Colors.redAccent,
                                           ),
@@ -367,7 +368,7 @@ class _ICCacheView extends State<ICCacheView> {
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },
-                                        child: const Text("Close"),
+                                        child: const Text("Close (n)"),
                                       ),
                                     ],
                                   ),
