@@ -207,7 +207,7 @@ class _ICBlockView extends State<ICBlockView> {
                     ),
                   ),
                   paintCursorAboveText: true,
-                  padding: EdgeInsetsGeometry.all(18),
+                  padding: EdgeInsets.all(18),
                   placeholder: "Write Something",
                   // onKeyPressed: (event, node) {
                   // },

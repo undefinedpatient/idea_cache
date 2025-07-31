@@ -1,9 +1,12 @@
 import 'dart:developer';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/main.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/cachelisttile.dart';
+import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
@@ -14,6 +17,12 @@ import 'dart:io';
 
 import 'package:idea_cache/page/settingpage.dart';
 import 'package:provider/provider.dart';
+
+/* 
+  Background color: Theme.of(context).colorScheme.surfaceContainerHigh,
+  App Bar color: Theme.of(context).colorScheme.surfaceContainer
+  Card color: -
+*/
 
 class ICApp extends StatelessWidget {
   const ICApp({super.key});
@@ -69,8 +78,6 @@ class ICAppState extends ChangeNotifier {
       changeBrightness(setting.thememode);
       changeFontFamily(setting.fontfamily);
       changeColorCode(setting.colorcode);
-      log(setting.thememode.toString());
-      log(setting.fontfamily);
     });
   }
 
@@ -102,6 +109,7 @@ class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
   List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
+  OverlayEntry? overlayEntryImport;
 
   Future<void> _loadCaches() async {
     _userCaches = List.empty();
@@ -118,8 +126,14 @@ class _ICMainView extends State<ICMainView> {
   }
 
   @override
+  void dispose() {
+    // overlayEntryExport?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext buildContext) {
-    log("build", name: runtimeType.toString());
+    // log("build", name: runtimeType.toString());
     Widget pageWidget = ICEmptyPage();
     if (_selectedIndex == 0) {
       pageWidget = ICOverview(
@@ -144,6 +158,15 @@ class _ICMainView extends State<ICMainView> {
         appBar: AppBar(
           title: Text("IdeaCache"),
           backgroundColor: Theme.of(context).colorScheme.surface,
+          // actions: [
+          //   TextButton(
+          //     onPressed: () {
+          //       _toggleImportOverlay(context);
+          //     },
+          //     child: Text("Import"),
+          //   ),
+          // ],
+          // actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         ),
         body: Row(
           children: [

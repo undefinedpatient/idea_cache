@@ -1,7 +1,10 @@
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
@@ -34,6 +37,7 @@ class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
   List<ICBlock> _userBlocks = [];
   int _selectedIndex = -1;
+  OverlayEntry? overlayEntryImport;
   FocusNode _focusNode = FocusNode();
 
   Future<void> _loadBlocks() async {
@@ -91,6 +95,151 @@ class _ICCacheView extends State<ICCacheView> {
       if (_selectedIndex == -1) {
         _selectedIndex = 0;
       }
+    }
+  }
+
+  void _toggleImportOverlay(BuildContext context) {
+    if (overlayEntryImport == null) {
+      overlayEntryImport = OverlayEntry(
+        builder: (BuildContext context) {
+          String selectedFileName = "None";
+          List<ICBlock> externalBlocks = List.empty(growable: true);
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setOverlayState) {
+              return GestureDetector(
+                onTap: () {
+                  overlayEntryImport?.remove();
+                  overlayEntryImport?.dispose();
+                  overlayEntryImport = null;
+                },
+                child: Material(
+                  color: Color.fromRGBO(0, 0, 0, 0.5),
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () {},
+                      child: Container(
+                        padding: EdgeInsets.all(16),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHigh,
+                        // Clamping
+                        height: (MediaQuery.of(context).size.height < 600)
+                            ? MediaQuery.of(context).size.height - 24
+                            : 600,
+                        width: (MediaQuery.of(context).size.width < 800)
+                            ? MediaQuery.of(context).size.width - 96
+                            : 800,
+                        //
+                        child: Column(
+                          spacing: 16,
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Import", textScaler: TextScaler.linear(1.1)),
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainer,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Select File: $selectedFileName"),
+                                  IconButton(
+                                    onPressed: () async {
+                                      FilePickerResult? result =
+                                          await FilePicker.platform.pickFiles(
+                                            allowMultiple: false,
+                                            allowedExtensions: ["json"],
+                                          );
+
+                                      if (result != null) {
+                                        File file = File(
+                                          result.files.single.path!,
+                                        );
+                                        log(file.path);
+                                        List<ICBlock> tempBlockList =
+                                            await FileHandler.readBlocks(
+                                              dataString: file
+                                                  .readAsStringSync(),
+                                            );
+                                        setOverlayState(() {
+                                          selectedFileName = file.path;
+                                          externalBlocks = tempBlockList;
+                                        });
+                                      }
+                                    },
+                                    icon: const Icon(Icons.folder),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainer,
+                                child: ListView(
+                                  children: externalBlocks.map((ICBlock block) {
+                                    return ListTile(
+                                      title: Text(block.name),
+                                      trailing: IconButton(
+                                        onPressed: () {
+                                          setOverlayState(() {
+                                            externalBlocks.remove(block);
+                                          });
+                                        },
+                                        icon: Icon(Icons.remove),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                            const Text(
+                              "Hint: Duplicate blocks will be replaced",
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                for (
+                                  int i = 0;
+                                  i < externalBlocks.length;
+                                  i++
+                                ) {
+                                  ICBlock newBlock = ICBlock(
+                                    cacheid: userCache!.id,
+                                    name: externalBlocks[i].name,
+                                  );
+                                  newBlock.content = externalBlocks[i].content;
+                                  await FileHandler.appendBlock(newBlock);
+                                  userCache!.addBlockId(newBlock.id);
+                                  await FileHandler.updateCache(userCache!);
+                                }
+                                // After importing remove the overlay and reload the blocks
+                                await _loadBlocks();
+                                overlayEntryImport?.remove();
+                                overlayEntryImport?.dispose();
+                                overlayEntryImport = null;
+                              },
+                              child: Text("Import Blocks"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+      Overlay.of(context).insert(overlayEntryImport!);
+    } else {
+      overlayEntryImport?.remove();
+      overlayEntryImport?.dispose();
+      overlayEntryImport = null;
     }
   }
 
@@ -160,6 +309,12 @@ class _ICCacheView extends State<ICCacheView> {
                   ? Icons.push_pin_outlined
                   : Icons.push_pin,
             ),
+          ),
+          IconButton(
+            onPressed: () async {
+              _toggleImportOverlay(context);
+            },
+            icon: Icon(Icons.import_export),
           ),
           IconButton(
             onPressed: () async {
@@ -235,7 +390,6 @@ class _ICCacheView extends State<ICCacheView> {
           const Divider(thickness: 2, height: 2),
           // Use SizedBox to container listtile to avoid overflow
           SizedBox(
-            
             height: widget.tabHeight, // Fixed height for tab bar
             width: MediaQuery.of(context).size.width,
             child: Row(
@@ -312,6 +466,7 @@ class _ICCacheView extends State<ICCacheView> {
                   leadingIcon: Icon(Icons.add),
                   child: Text("Add Block "),
                 ),
+                // Delete Block Button can only Appear when user is viewing a block
                 if (_selectedIndex != -1)
                   MenuItemButton(
                     requestFocusOnHover: false,

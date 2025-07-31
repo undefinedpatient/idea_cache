@@ -57,11 +57,13 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
-
+    // If the new block name is already in form abc.001, strip away the .001 first
+    block.name = block.name.split('.')[0];
     List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheid);
     if (blocks.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < blocks.length; i++) {
+        log(blocks[i].name);
         String oldName = block.name;
         if (blocks[i].name == block.name) {
           occurrence++;
@@ -378,7 +380,15 @@ class FileHandler {
     return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
   }
 
-  static Future<List<ICBlock>> readBlocks() async {
+  // If data is empty, the readBlocks will automatically fetch data from default storage location
+  static Future<List<ICBlock>> readBlocks({String? dataString}) async {
+    if (dataString != null && dataString.isNotEmpty) {
+      final List<dynamic> jsonList = jsonDecode(dataString) as List<dynamic>;
+      // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic>
+      return jsonList
+          .map((json) => ICBlock.fromJson(json as Map<String, dynamic>))
+          .toList();
+    }
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
