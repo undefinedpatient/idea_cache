@@ -47,8 +47,11 @@ class FileHandler {
     }
     List<Cache> existingCaches = await readCaches();
     existingCaches.add(cache);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
-      jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(
+        existingCaches.map((value) => value.toJson()).toList(),
+      ),
     );
   }
 
@@ -75,8 +78,11 @@ class FileHandler {
 
     List<ICBlock> existingBlocks = await readBlocks();
     existingBlocks.add(block);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
-      jsonEncode(existingBlocks.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(
+        existingBlocks.map((value) => value.toJson()).toList(),
+      ),
     );
   }
 
@@ -130,9 +136,12 @@ class FileHandler {
         break;
       }
     }
-    // log("Cache Updated", name: "updateCache");
+
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
-      jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(
+        existingCaches.map((value) => value.toJson()).toList(),
+      ),
     );
   }
 
@@ -167,8 +176,13 @@ class FileHandler {
         break;
       }
     }
+
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+
     return await file.writeAsString(
-      jsonEncode(exisitingBlock.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(
+        exisitingBlock.map((value) => value.toJson()).toList(),
+      ),
     );
   }
 
