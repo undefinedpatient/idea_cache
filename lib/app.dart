@@ -43,6 +43,7 @@ class ICApp extends StatelessWidget {
 
               textTheme: Typography.blackCupertino.apply(
                 fontFamily: value.font,
+                displayColor: Colors.black,
               ),
             ),
             darkTheme: ThemeData(
@@ -53,6 +54,7 @@ class ICApp extends StatelessWidget {
               ),
               textTheme: Typography.whiteCupertino.apply(
                 fontFamily: value.font,
+                displayColor: Colors.white,
               ),
             ),
             themeMode: value.thememode,
@@ -163,7 +165,18 @@ class _ICMainView extends State<ICMainView> {
       return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
-          title: Text("IdeaCache"),
+          title: RichText(
+            text: TextSpan(
+              text: "IdeaCache ",
+              style: Theme.of(context).textTheme.headlineMedium,
+              children: <TextSpan>[
+                TextSpan(
+                  text: " v1.2.0",
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ],
+            ),
+          ),
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         body: Row(
