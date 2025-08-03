@@ -18,6 +18,8 @@ class ICBlockView extends StatefulWidget {
 }
 
 class _ICBlockView extends State<ICBlockView> {
+  bool isAdvancedToolBarOn = false;
+
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -93,8 +95,29 @@ class _ICBlockView extends State<ICBlockView> {
       body: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                child: Row(
+                  children: [
+                    Text("Advanced Tool Bar"),
+                    Transform.scale(
+                      scale: 0.7,
+                      child: Switch(
+                        value: isAdvancedToolBarOn,
+
+                        onChanged: (value) {
+                          setState(() {
+                            isAdvancedToolBarOn = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               MenuItemButton(
                 onPressed: () {
                   _onSave(context);
@@ -136,9 +159,14 @@ class _ICBlockView extends State<ICBlockView> {
               ),
               color: Theme.of(context).colorScheme.onSurface,
               sectionDividerColor: Theme.of(context).colorScheme.onSurface,
-              showInlineCode: false,
-              showSubscript: false,
-              showSuperscript: false,
+              showInlineCode: isAdvancedToolBarOn,
+              showSubscript: isAdvancedToolBarOn,
+              showSuperscript: isAdvancedToolBarOn,
+              showColorButton: isAdvancedToolBarOn,
+              showHeaderStyle: isAdvancedToolBarOn,
+              showLink: isAdvancedToolBarOn,
+              showCodeBlock: isAdvancedToolBarOn,
+              showBackgroundColorButton: isAdvancedToolBarOn,
             ),
           ),
           Expanded(

@@ -15,6 +15,8 @@ class ICOverview extends StatefulWidget {
 }
 
 class _ICOverview extends State<ICOverview> {
+  bool isScrollVertical = true;
+  double itemScaleFactor = 1.0;
   List<Cache> _userCaches = List.empty(growable: true);
   TextEditingController _textEditingController = TextEditingController(
     text: "",
@@ -70,6 +72,43 @@ class _ICOverview extends State<ICOverview> {
       appBar: AppBar(
         title: Text("Overview"),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        actions: [
+          DropdownButton(
+            padding: EdgeInsets.all(4),
+            value: isScrollVertical,
+            items: [
+              DropdownMenuItem(value: false, child: Text("Horizontal")),
+              DropdownMenuItem(value: true, child: Text("Vertical")),
+            ],
+            onChanged: (value) {
+              setState(() {
+                if (value == null) {
+                  isScrollVertical = false;
+                } else {
+                  isScrollVertical = value;
+                }
+              });
+            },
+          ),
+          DropdownButton(
+            autofocus: false,
+            padding: EdgeInsets.all(4),
+            value: itemScaleFactor,
+            items: [
+              DropdownMenuItem(value: 1.0, child: Text("1x")),
+              DropdownMenuItem(value: 2.0, child: Text("2x")),
+            ],
+            onChanged: (value) {
+              setState(() {
+                if (value == null) {
+                  itemScaleFactor = 1.0;
+                } else {
+                  itemScaleFactor = value;
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -171,13 +210,17 @@ class _ICOverview extends State<ICOverview> {
               ),
             ),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: (MediaQuery.of(context).size.width > 420)
-                    ? (MediaQuery.of(context).size.width / 420).floor()
-                    : 1,
-                childAspectRatio: 4,
+              child: GridView.extent(
+                maxCrossAxisExtent: (isScrollVertical == true)
+                    ? itemScaleFactor * 360
+                    : itemScaleFactor * 160,
+                scrollDirection: (isScrollVertical == true)
+                    ? Axis.vertical
+                    : Axis.horizontal,
+                childAspectRatio: (isScrollVertical == true) ? 3 : 1 / 2,
                 shrinkWrap: true,
                 children: _userCaches
+                    // Only take whose not pinned
                     .where((Cache cache) => cache.priority == 0)
                     .toList()
                     .asMap()

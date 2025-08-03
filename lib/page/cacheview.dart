@@ -409,8 +409,8 @@ class _ICCacheView extends State<ICCacheView> {
                   requestFocusOnHover: false,
                   leadingIcon: Icon(
                     (_selectedIndex == -1)
-                        ? Icons.square
-                        : Icons.square_outlined,
+                        ? Icons.description
+                        : Icons.description_outlined,
                   ),
                   child: SizedBox(width: 120, child: Text("Overview")),
                 ),
