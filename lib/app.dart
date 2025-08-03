@@ -73,12 +73,18 @@ class ICAppState extends ChangeNotifier {
   ThemeMode thememode = ThemeMode.light;
   String font = 'FiraCode Nerd Font';
   int colorcode = Colors.purple.toARGB32();
+
+  // Used to ensure user explicity save the content before switch views
+  bool isContentEdited = false;
   ICAppState() {
     FileHandler.loadSetting().then((Setting setting) {
       changeBrightness(setting.thememode);
       changeFontFamily(setting.fontfamily);
       changeColorCode(setting.colorcode);
     });
+  }
+  void setContentEditedState(bool isEdited) {
+    isContentEdited = isEdited;
   }
 
   void changeBrightness(ThemeMode thememode) {
@@ -133,6 +139,7 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
+    ICAppState appState = context.watch<ICAppState>();
     // log("build", name: runtimeType.toString());
     Widget pageWidget = ICEmptyPage();
     if (_selectedIndex == 0) {
@@ -158,15 +165,6 @@ class _ICMainView extends State<ICMainView> {
         appBar: AppBar(
           title: Text("IdeaCache"),
           backgroundColor: Theme.of(context).colorScheme.surface,
-          // actions: [
-          //   TextButton(
-          //     onPressed: () {
-          //       _toggleImportOverlay(context);
-          //     },
-          //     child: Text("Import"),
-          //   ),
-          // ],
-          // actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         ),
         body: Row(
           children: [
@@ -184,6 +182,16 @@ class _ICMainView extends State<ICMainView> {
                     title: Text("Overview"),
                     selected: _selectedIndex == 0,
                     onTap: () {
+                      if (appState.isContentEdited) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Warning: Content Not Saved"),
+                            duration: Durations.extralong3,
+                          ),
+                        );
+                        appState.setContentEditedState(false);
+                        return;
+                      }
                       setState(() {
                         _selectedIndex = 0;
                       });
@@ -209,6 +217,16 @@ class _ICMainView extends State<ICMainView> {
                             title: title,
                             cacheid: id,
                             onTap: () {
+                              if (appState.isContentEdited) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Warning: Content Not Saved"),
+                                    duration: Durations.extralong3,
+                                  ),
+                                );
+                                appState.setContentEditedState(false);
+                                return;
+                              }
                               setState(() {
                                 _selectedIndex = index + 1;
                               });

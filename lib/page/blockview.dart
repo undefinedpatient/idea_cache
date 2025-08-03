@@ -4,8 +4,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:provider/provider.dart';
 
 class ICBlockView extends StatefulWidget {
   final String blockid;
@@ -19,7 +21,6 @@ class ICBlockView extends StatefulWidget {
 
 class _ICBlockView extends State<ICBlockView> {
   bool isAdvancedToolBarOn = false;
-
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -42,10 +43,8 @@ class _ICBlockView extends State<ICBlockView> {
     oldBlock.setContent(jsonEncode(_controller.document.toDelta().toJson()));
     FileHandler.updateBlock(oldBlock);
     final SnackBar snackBar = SnackBar(
-      content: Text(
-        "Saved!",
-        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-      ),
+      content: Text("Saved!"),
+      duration: Durations.long4,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
@@ -90,6 +89,7 @@ class _ICBlockView extends State<ICBlockView> {
 
   @override
   Widget build(BuildContext context) {
+    ICAppState appState = context.watch<ICAppState>();
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
@@ -121,9 +121,13 @@ class _ICBlockView extends State<ICBlockView> {
               MenuItemButton(
                 onPressed: () {
                   _onSave(context);
+                  appState.setContentEditedState(false);
+                  setState(() {});
                 },
                 requestFocusOnHover: false,
-                child: Text(" Save "),
+                child: (appState.isContentEdited)
+                    ? Text(" Not Saved! ")
+                    : Text(" Save "),
               ),
               // Text(widget.blockid),
             ],
@@ -175,8 +179,10 @@ class _ICBlockView extends State<ICBlockView> {
                 LogicalKeySet(
                   LogicalKeyboardKey.controlLeft,
                   LogicalKeyboardKey.keyS,
-                ): () {
-                  _onSave(context);
+                ): () async {
+                  appState.setContentEditedState(false);
+                  await _onSave(context);
+                  setState(() {}); // Trigger Rebuild
                 },
               },
               child: QuillEditor(
@@ -237,8 +243,16 @@ class _ICBlockView extends State<ICBlockView> {
                   paintCursorAboveText: true,
                   padding: EdgeInsets.all(18),
                   placeholder: "Write Something",
-                  // onKeyPressed: (event, node) {
-                  // },
+                  enableAlwaysIndentOnTab: true,
+                  onTapDown:
+                      (
+                        TapDownDetails details,
+                        TextPosition Function(Offset) ValueKey,
+                      ) {
+                        appState.setContentEditedState(true);
+                        setState(() {}); //Trigger Rebuild
+                        return false;
+                      },
                 ),
                 focusNode: _focusNode,
                 scrollController: _scrollController,

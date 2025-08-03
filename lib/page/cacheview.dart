@@ -5,13 +5,15 @@ import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/blockview.dart';
 import 'package:idea_cache/page/cacheoverview.dart';
-import 'package:idea_cache/page/emptypage.dart'; // Removed unused imports
+import 'package:idea_cache/page/emptypage.dart';
+import 'package:provider/provider.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
   final String cacheid;
@@ -69,6 +71,7 @@ class _ICCacheView extends State<ICCacheView> {
     Navigator.pop(context);
     final SnackBar snackBar = SnackBar(
       content: Text("Cache ${userCache!.name} Deleted!"),
+      duration: Durations.extralong3,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
@@ -86,6 +89,7 @@ class _ICCacheView extends State<ICCacheView> {
 
     final SnackBar snackBar = SnackBar(
       content: Text("Block ${oldBlock.name} Deleted!"),
+      duration: Durations.extralong3,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
     await _loadBlocks();
@@ -284,6 +288,7 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   Widget build(BuildContext context) {
+    ICAppState appState = context.watch<ICAppState>();
     if (userCache == null) {
       return ICEmptyPage();
     }
@@ -407,8 +412,6 @@ class _ICCacheView extends State<ICCacheView> {
         ],
       ),
       body: Column(
-        // spacing: 0.0,
-        // spacing: 0.0,
         children: [
           const Divider(thickness: 2, height: 2),
           // Use SizedBox to container listtile to avoid overflow
@@ -419,6 +422,16 @@ class _ICCacheView extends State<ICCacheView> {
               children: <Widget>[
                 MenuItemButton(
                   onPressed: () {
+                    if (appState.isContentEdited) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Warning: Content Not Saved"),
+                          duration: Durations.extralong3,
+                        ),
+                      );
+                      appState.setContentEditedState(false);
+                      return;
+                    }
                     setState(() {
                       _selectedIndex = -1;
                     });
@@ -451,6 +464,19 @@ class _ICCacheView extends State<ICCacheView> {
                           name: entry.value.name,
                           blockid: entry.value.id,
                           onTap: () {
+                            // One special case is user somehow return to the overview (_selectedIndex != -1)
+                            if (appState.isContentEdited &&
+                                _selectedIndex != -1) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Warning: Content Not Saved"),
+                                  duration: Durations.extralong3,
+                                ),
+                              );
+                              // set the edited state such that user can ignore the warning
+                              appState.setContentEditedState(false);
+                              return;
+                            }
                             setState(() {
                               _selectedIndex = entry.key;
                             });
