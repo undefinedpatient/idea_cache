@@ -334,10 +334,10 @@ class FileHandler {
         unorderedBlocks.add(readblocks[i]);
       }
     }
-    // log(
-    //   name: "readblocks",
-    //   readblocks.map((block) => block.id).toList().toString(),
-    // );
+    log(
+      name: "readblocks",
+      readblocks.map((block) => block.id).toList().toString(),
+    );
     // log(
     //   name: "unorderedBlocks",
     //   unorderedBlocks.map((block) => block.id).toList().toString(),
