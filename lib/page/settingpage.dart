@@ -18,7 +18,13 @@ class ICSettingPage extends StatefulWidget {
 class _ICSettingPageState extends State<ICSettingPage> {
   ThemeMode _themeMode = ThemeMode.system;
   String _font = 'FiraCode Nerd Font';
-  int _colorseed = Colors.purple.toARGB32();
+  int _colorSeed = Colors.purple.toARGB32();
+  Future<void> onSave() async {
+    await FileHandler.saveSetting(
+      Setting(thememode: _themeMode, fontfamily: _font, colorcode: _colorSeed),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +33,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
       setState(() {
         _themeMode = appState.thememode;
         _font = appState.font;
-        _colorseed = appState.colorcode;
+        _colorSeed = appState.colorcode;
       });
     });
   }
@@ -41,25 +47,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
       appBar: AppBar(
         title: Text("Settings"),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        actions: [
-          IconButton(
-            iconSize: 24,
-            onPressed: () async {
-              await FileHandler.saveSetting(
-                Setting(
-                  thememode: _themeMode,
-                  fontfamily: _font,
-                  colorcode: _colorseed,
-                ),
-              );
-              final SnackBar snackBar = SnackBar(
-                content: Text("Settings Saved!"),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            },
-            icon: Icon(Icons.save),
-          ),
-        ],
+        actions: [],
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
       ),
       body: Padding(
@@ -123,6 +111,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           _themeMode = value!;
                         });
                         appState.changeBrightness((_themeMode));
+                        onSave();
                       },
                     ),
                   ],
@@ -237,6 +226,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           _font = value!;
                         });
                         appState.changeFontFamily((_font));
+                        onSave();
                       },
                     ),
                   ],
@@ -263,7 +253,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
                         height: 2,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      value: _colorseed,
+                      value: _colorSeed,
                       items: [
                         DropdownMenuItem(
                           value: Colors.purple.toARGB32(),
@@ -313,9 +303,10 @@ class _ICSettingPageState extends State<ICSettingPage> {
                       ],
                       onChanged: (value) {
                         setState(() {
-                          _colorseed = value!;
+                          _colorSeed = value!;
                         });
-                        appState.changeColorCode((_colorseed));
+                        appState.changeColorCode((_colorSeed));
+                        onSave();
                       },
                     ),
                   ],

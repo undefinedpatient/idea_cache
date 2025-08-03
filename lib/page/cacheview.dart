@@ -135,7 +135,7 @@ class _ICCacheView extends State<ICCacheView> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Import", textScaler: TextScaler.linear(1.1)),
+                            Text("Import", textScaler: TextScaler.linear(1.4)),
                             Container(
                               padding: EdgeInsets.all(16),
                               color: Theme.of(
@@ -145,7 +145,7 @@ class _ICCacheView extends State<ICCacheView> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Select File: $selectedFileName"),
+                                  Text("Select Blocks File: $selectedFileName"),
                                   IconButton(
                                     onPressed: () async {
                                       FilePickerResult? result =
@@ -158,7 +158,6 @@ class _ICCacheView extends State<ICCacheView> {
                                         File file = File(
                                           result.files.single.path!,
                                         );
-                                        log(file.path);
                                         List<ICBlock> tempBlockList =
                                             await FileHandler.readBlocks(
                                               dataString: file
@@ -184,12 +183,27 @@ class _ICCacheView extends State<ICCacheView> {
                                   children: externalBlocks.map((ICBlock block) {
                                     return ListTile(
                                       title: Text(block.name),
+                                      isThreeLine: true,
+                                      subtitle: Text(
+                                        "Cache Id: ${block.cacheid}",
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                      ),
                                       trailing: IconButton(
                                         onPressed: () {
                                           setOverlayState(() {
                                             externalBlocks.remove(block);
                                           });
                                         },
+                                        onHover: (value) {
+                                          log("hover");
+                                        },
+                                        hoverColor: Theme.of(
+                                          context,
+                                        ).colorScheme.onError,
                                         icon: Icon(Icons.remove),
                                       ),
                                     );
@@ -198,7 +212,7 @@ class _ICCacheView extends State<ICCacheView> {
                               ),
                             ),
                             const Text(
-                              "Hint: Duplicate blocks will be replaced",
+                              "Hint: Only blocks.json format is allowed, incorrect format will lead to crashes",
                             ),
                             TextButton(
                               onPressed: () async {
@@ -295,91 +309,100 @@ class _ICCacheView extends State<ICCacheView> {
         title: Text(userCache!.name),
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         actions: [
-          IconButton(
-            onPressed: () async {
-              setState(() {
-                userCache?.priority = 1 - userCache!.priority;
-              });
+          Tooltip(
+            message: "Pin",
+            child: IconButton(
+              onPressed: () async {
+                setState(() {
+                  userCache?.priority = 1 - userCache!.priority;
+                });
 
-              await FileHandler.updateCache(userCache!);
-              _loadCache();
-            },
-            icon: Icon(
-              (userCache?.priority == 0)
-                  ? Icons.push_pin_outlined
-                  : Icons.push_pin,
+                await FileHandler.updateCache(userCache!);
+                _loadCache();
+              },
+              icon: Icon(
+                (userCache?.priority == 0)
+                    ? Icons.push_pin_outlined
+                    : Icons.push_pin,
+              ),
             ),
           ),
-          IconButton(
-            onPressed: () async {
-              _toggleImportOverlay(context);
-            },
-            icon: Icon(Icons.import_export),
+          Tooltip(
+            message: "Import Blocks",
+            child: IconButton(
+              onPressed: () async {
+                _toggleImportOverlay(context);
+              },
+              icon: Icon(Icons.import_export),
+            ),
           ),
-          IconButton(
-            onPressed: () async {
-              await showDialog<String>(
-                context: context,
-                builder: (BuildContext context) => KeyboardListener(
-                  focusNode: _focusNode,
-                  autofocus: true,
-                  onKeyEvent: (KeyEvent event) async {
-                    log(event.logicalKey.keyLabel);
-                    if (event.logicalKey.keyLabel == 'Y' ||
-                        event.logicalKey.keyLabel == "Enter") {
-                      await _deleteCache(context);
-                    }
-                    if (event.logicalKey.keyLabel == 'N') {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Dialog(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        spacing: 8,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            "Confirm Cache Deletion?",
-                            style: Theme.of(context).textTheme.bodyMedium!
-                                .copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
+          Tooltip(
+            message: "Delete Cache",
+            child: IconButton(
+              onPressed: () async {
+                await showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) => KeyboardListener(
+                    focusNode: _focusNode,
+                    autofocus: true,
+                    onKeyEvent: (KeyEvent event) async {
+                      log(event.logicalKey.keyLabel);
+                      if (event.logicalKey.keyLabel == 'Y' ||
+                          event.logicalKey.keyLabel == "Enter") {
+                        await _deleteCache(context);
+                      }
+                      if (event.logicalKey.keyLabel == 'N') {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Dialog(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          spacing: 8,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              "Confirm Cache Deletion?",
+                              style: Theme.of(context).textTheme.bodyMedium!
+                                  .copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
+                                  ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextButton(
+                                  onPressed: () async {
+                                    await _deleteCache(context);
+                                  },
+                                  child: const Text(
+                                    "Delete (Y)",
+                                    style: TextStyle(color: Colors.redAccent),
+                                  ),
                                 ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextButton(
-                                onPressed: () async {
-                                  await _deleteCache(context);
-                                },
-                                child: const Text(
-                                  "Delete (Y)",
-                                  style: TextStyle(color: Colors.redAccent),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Close (n)"),
                                 ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text("Close (n)"),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
 
-            icon: Icon(Icons.delete_outline),
+              icon: Icon(Icons.delete_outline),
+            ),
           ),
         ],
       ),
@@ -451,90 +474,96 @@ class _ICCacheView extends State<ICCacheView> {
                     },
                   ),
                 ),
-                MenuItemButton(
-                  requestFocusOnHover: false,
-                  onPressed: () async {
-                    ICBlock block = ICBlock(
-                      cacheid: widget.cacheid,
-                      name: "Untitled",
-                    );
-                    await FileHandler.appendBlock(block);
-                    userCache!.addBlockId(block.id);
-                    await FileHandler.updateCache(userCache!);
-                    await _loadBlocks();
-                  },
-                  leadingIcon: Icon(Icons.add),
-                  child: Text("Add Block "),
+                Tooltip(
+                  message: "Add Block",
+                  child: MenuItemButton(
+                    requestFocusOnHover: false,
+                    onPressed: () async {
+                      ICBlock block = ICBlock(
+                        cacheid: widget.cacheid,
+                        name: "Untitled",
+                      );
+                      await FileHandler.appendBlock(block);
+                      userCache!.addBlockId(block.id);
+                      await FileHandler.updateCache(userCache!);
+                      await _loadBlocks();
+                    },
+                    child: Icon(Icons.add),
+                  ),
                 ),
                 // Delete Block Button can only Appear when user is viewing a block
                 if (_selectedIndex != -1)
-                  MenuItemButton(
-                    requestFocusOnHover: false,
-                    onPressed: () async {
-                      await showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => KeyboardListener(
-                          focusNode: _focusNode,
-                          autofocus: true,
-                          onKeyEvent: (KeyEvent keyEvent) {
-                            if (keyEvent.logicalKey.keyLabel == "Y" ||
-                                keyEvent.logicalKey.keyLabel == "Enter") {
-                              _deleteBlock(context);
-                            }
-                            if (keyEvent.logicalKey.keyLabel == "N") {
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Dialog(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Column(
-                                spacing: 8,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Text(
-                                    "Confirm Block Deletion?",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium!
-                                        .copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                        ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      TextButton(
-                                        onPressed: () async {
-                                          await _deleteBlock(context);
-                                        },
-                                        child: const Text(
-                                          "Delete (Y)",
-                                          style: TextStyle(
-                                            color: Colors.redAccent,
+                  Tooltip(
+                    message: "Delete Block",
+                    child: MenuItemButton(
+                      requestFocusOnHover: false,
+                      onPressed: () async {
+                        await showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => KeyboardListener(
+                            focusNode: _focusNode,
+                            autofocus: true,
+                            onKeyEvent: (KeyEvent keyEvent) {
+                              if (keyEvent.logicalKey.keyLabel == "Y" ||
+                                  keyEvent.logicalKey.keyLabel == "Enter") {
+                                _deleteBlock(context);
+                              }
+                              if (keyEvent.logicalKey.keyLabel == "N") {
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: Dialog(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  spacing: 8,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                      "Confirm Block Deletion?",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.secondary,
+                                          ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () async {
+                                            await _deleteBlock(context);
+                                          },
+                                          child: const Text(
+                                            "Delete (Y)",
+                                            style: TextStyle(
+                                              color: Colors.redAccent,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text("Close (n)"),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Close (n)"),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                    leadingIcon: Icon(Icons.delete_outlined),
+                        );
+                      },
+                      leadingIcon: Icon(Icons.delete_outlined),
+                    ),
                   ),
               ],
             ),
