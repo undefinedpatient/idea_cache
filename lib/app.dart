@@ -1,12 +1,9 @@
 import 'dart:developer';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_launcher_icons/main.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/cachelisttile.dart';
-import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
@@ -272,6 +269,17 @@ class _ICMainView extends State<ICMainView> {
                     title: Text('Settings'),
                     selected: _selectedIndex == _userCaches.length + 1,
                     onTap: () {
+                      if (appState.isContentEdited) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Warning: Content Not Saved"),
+                            duration: Durations.extralong3,
+                          ),
+                        );
+                        // set the edited state such that user can ignore the warning
+                        appState.setContentEditedState(false);
+                        return;
+                      }
                       setState(() {
                         _selectedIndex = _userCaches.length + 1;
                       });

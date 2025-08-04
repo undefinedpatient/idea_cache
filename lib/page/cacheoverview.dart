@@ -23,7 +23,7 @@ class ICCacheOverview extends StatefulWidget {
 class _ICCacheOverviewState extends State<ICCacheOverview> {
   bool isScrollVertical = true;
   double itemScaleFactor = 1.0;
-  TextEditingController _textEditingController = TextEditingController(
+  final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
   List<ICBlock> _cacheBlocks = List.empty(growable: true);

@@ -18,7 +18,7 @@ class _ICOverview extends State<ICOverview> {
   bool isScrollVertical = true;
   double itemScaleFactor = 1.0;
   List<Cache> _userCaches = List.empty(growable: true);
-  TextEditingController _textEditingController = TextEditingController(
+  final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
   String searchString = "";

@@ -40,7 +40,7 @@ class _ICCacheView extends State<ICCacheView> {
   List<ICBlock> _userBlocks = [];
   int _selectedIndex = -1;
   OverlayEntry? overlayEntryImport;
-  FocusNode _focusNode = FocusNode();
+  final FocusNode _focusNode = FocusNode();
 
   Future<void> _loadBlocks() async {
     List<ICBlock> blocks = await FileHandler.findBlocksByCacheId(
@@ -292,7 +292,6 @@ class _ICCacheView extends State<ICCacheView> {
     if (userCache == null) {
       return ICEmptyPage();
     }
-    // log("build", name: runtimeType.toString());
     Widget pageWidget = ICEmptyPage();
     // -1 means that user is in Overview Page
     if (_selectedIndex == -1) {
@@ -464,9 +463,7 @@ class _ICCacheView extends State<ICCacheView> {
                           name: entry.value.name,
                           blockid: entry.value.id,
                           onTap: () {
-                            // One special case is user somehow return to the overview (_selectedIndex != -1)
-                            if (appState.isContentEdited &&
-                                _selectedIndex != -1) {
+                            if (appState.isContentEdited) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text("Warning: Content Not Saved"),

@@ -8,6 +8,8 @@
 - **Local Storage**: Notes are securely saved on your device for offline access.
 - **Simple Organization**: Easily manage and categorize your notes.
 
+![image](./demo/demo.jpg)
+
 ## Supported Platforms
 Currently available for **Windows only**. Support for macOS, Linux, and mobile platforms is not under development yet.
 
