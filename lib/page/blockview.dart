@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,6 +92,14 @@ class _ICBlockView extends State<ICBlockView> {
   @override
   Widget build(BuildContext context) {
     ICAppState appState = context.watch<ICAppState>();
+    _controller.document.changes.listen((event) {
+      appState.setContentEditedState(true);
+      setState(() {}); //Trigger Rebuild
+    });
+    // Rebuild the widget when the focus change, used to indicate whether the editor is being edited
+    _focusNode.addListener(() {
+      setState(() {});
+    });
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
@@ -174,88 +184,94 @@ class _ICBlockView extends State<ICBlockView> {
             ),
           ),
           Expanded(
-            child: CallbackShortcuts(
-              bindings: <ShortcutActivator, VoidCallback>{
-                LogicalKeySet(
-                  LogicalKeyboardKey.controlLeft,
-                  LogicalKeyboardKey.keyS,
-                ): () async {
-                  appState.setContentEditedState(false);
-                  await _onSave(context);
-                  setState(() {}); // Trigger Rebuild
+            child: ColorFiltered(
+              colorFilter: (_focusNode.hasPrimaryFocus)
+                  ? ColorFilter.srgbToLinearGamma()
+                  : ColorFilter.matrix(<double>[
+                      0.5, 0.0, 0.0, 0.0, 0.0,
+                      //
+                      0.0, 0.5, 0.0, 0.0, 0.0,
+                      //
+                      0.0, 0.0, 0.5, 0.0, 0.0,
+                      //
+                      0.0, 0.0, 0.0, 1, 0.0,
+                      //
+                    ]),
+              child: CallbackShortcuts(
+                bindings: <ShortcutActivator, VoidCallback>{
+                  LogicalKeySet(
+                    LogicalKeyboardKey.controlLeft,
+                    LogicalKeyboardKey.keyS,
+                  ): () async {
+                    appState.setContentEditedState(false);
+                    await _onSave(context);
+                    setState(() {}); // Trigger Rebuild
+                  },
                 },
-              },
-              child: QuillEditor(
-                controller: _controller,
-                config: QuillEditorConfig(
-                  customStyles: DefaultStyles(
-                    quote: DefaultTextBlockStyle(
-                      TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 16,
-                        letterSpacing: 1,
-                      ),
-                      HorizontalSpacing.zero,
-                      VerticalSpacing.zero,
-                      VerticalSpacing.zero,
-                      BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withAlpha(20),
-                        border: BoxBorder.fromLTRB(
-                          left: BorderSide(
-                            width: 4,
-                            color: Theme.of(context).colorScheme.onSurface,
+                child: QuillEditor(
+                  controller: _controller,
+                  config: QuillEditorConfig(
+                    customStyles: DefaultStyles(
+                      quote: DefaultTextBlockStyle(
+                        TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 16,
+                          letterSpacing: 1,
+                        ),
+                        HorizontalSpacing.zero,
+                        VerticalSpacing.zero,
+                        VerticalSpacing.zero,
+                        BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withAlpha(20),
+                          border: BoxBorder.fromLTRB(
+                            left: BorderSide(
+                              width: 4,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    lists: DefaultListBlockStyle(
-                      TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 16,
-                        letterSpacing: 1,
+                      lists: DefaultListBlockStyle(
+                        TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 16,
+                          letterSpacing: 1,
+                        ),
+                        HorizontalSpacing.zero,
+                        VerticalSpacing.zero,
+                        VerticalSpacing.zero,
+                        null,
+                        null,
                       ),
-                      HorizontalSpacing.zero,
-                      VerticalSpacing.zero,
-                      VerticalSpacing.zero,
-                      null,
-                      null,
-                    ),
-                    sizeSmall: TextStyle(fontSize: 16),
-                    sizeLarge: TextStyle(fontSize: 20),
-                    sizeHuge: TextStyle(fontSize: 24),
+                      sizeSmall: TextStyle(fontSize: 16),
+                      sizeLarge: TextStyle(fontSize: 20),
+                      sizeHuge: TextStyle(fontSize: 24),
 
-                    color: Colors.amber,
-                    paragraph: DefaultTextBlockStyle(
-                      TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontFamily: 'Roboto Thin',
-                        fontSize: 18,
-                        letterSpacing: 1,
+                      color: Colors.amber,
+                      paragraph: DefaultTextBlockStyle(
+                        TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontFamily: 'Roboto Thin',
+                          fontSize: 18,
+                          letterSpacing: 1,
+                        ),
+                        HorizontalSpacing.zero,
+                        VerticalSpacing.zero,
+                        VerticalSpacing.zero,
+                        null,
                       ),
-                      HorizontalSpacing.zero,
-                      VerticalSpacing.zero,
-                      VerticalSpacing.zero,
-                      null,
                     ),
+                    paintCursorAboveText: true,
+                    padding: EdgeInsets.all(18),
+                    placeholder: "Write Something",
+                    enableAlwaysIndentOnTab: true,
+                    expands: true,
                   ),
-                  paintCursorAboveText: true,
-                  padding: EdgeInsets.all(18),
-                  placeholder: "Write Something",
-                  enableAlwaysIndentOnTab: true,
-                  onTapDown:
-                      (
-                        TapDownDetails details,
-                        TextPosition Function(Offset) ValueKey,
-                      ) {
-                        appState.setContentEditedState(true);
-                        setState(() {}); //Trigger Rebuild
-                        return false;
-                      },
+                  focusNode: _focusNode,
+                  scrollController: _scrollController,
                 ),
-                focusNode: _focusNode,
-                scrollController: _scrollController,
               ),
             ),
           ),
