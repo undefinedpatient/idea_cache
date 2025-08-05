@@ -104,85 +104,96 @@ class _ICBlockView extends State<ICBlockView> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
-                child: Row(
+          Container(
+            padding: EdgeInsets.all(4),
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Advanced Tool Bar"),
-                    Transform.scale(
-                      scale: 0.7,
-                      child: Switch(
-                        value: isAdvancedToolBarOn,
+                    Container(
+                      padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                      child: Row(
+                        children: [
+                          Text("Advanced Tool Bar"),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Switch(
+                              value: isAdvancedToolBarOn,
 
-                        onChanged: (value) {
-                          setState(() {
-                            isAdvancedToolBarOn = value;
-                          });
-                        },
+                              onChanged: (value) {
+                                setState(() {
+                                  isAdvancedToolBarOn = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
+                    MenuItemButton(
+                      onPressed: () {
+                        _onSave(context);
+                        appState.setContentEditedState(false);
+                        setState(() {});
+                      },
+                      requestFocusOnHover: false,
+                      child: (appState.isContentEdited)
+                          ? Text(" Not Saved! ")
+                          : Text(" Save "),
+                    ),
+                    // Text(widget.blockid),
                   ],
                 ),
-              ),
-
-              MenuItemButton(
-                onPressed: () {
-                  _onSave(context);
-                  appState.setContentEditedState(false);
-                  setState(() {});
-                },
-                requestFocusOnHover: false,
-                child: (appState.isContentEdited)
-                    ? Text(" Not Saved! ")
-                    : Text(" Save "),
-              ),
-              // Text(widget.blockid),
-            ],
-          ),
-          QuillSimpleToolbar(
-            controller: _controller,
-            config: QuillSimpleToolbarConfig(
-              buttonOptions: QuillSimpleToolbarButtonOptions(
-                fontFamily: QuillToolbarFontFamilyButtonOptions(
-                  items: _fontFamilies,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                fontSize: QuillToolbarFontSizeButtonOptions(
-                  items: Map.from({
-                    '16': '16',
-                    '18': '18',
-                    '24': '24',
-                    '32': '32',
-                    'Clear': '0',
-                  }),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                selectHeaderStyleDropdownButton:
-                    QuillToolbarSelectHeaderStyleDropdownButtonOptions(
-                      textStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
+                QuillSimpleToolbar(
+                  controller: _controller,
+                  config: QuillSimpleToolbarConfig(
+                    buttonOptions: QuillSimpleToolbarButtonOptions(
+                      fontFamily: QuillToolbarFontFamilyButtonOptions(
+                        items: _fontFamilies,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
+                      fontSize: QuillToolbarFontSizeButtonOptions(
+                        items: Map.from({
+                          '16': '16',
+                          '18': '18',
+                          '24': '24',
+                          '32': '32',
+                          'Clear': '0',
+                        }),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      selectHeaderStyleDropdownButton:
+                          QuillToolbarSelectHeaderStyleDropdownButtonOptions(
+                            textStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
                     ),
-              ),
-              color: Theme.of(context).colorScheme.onSurface,
-              sectionDividerColor: Theme.of(context).colorScheme.onSurface,
-              showInlineCode: isAdvancedToolBarOn,
-              showSubscript: isAdvancedToolBarOn,
-              showSuperscript: isAdvancedToolBarOn,
-              showColorButton: isAdvancedToolBarOn,
-              showHeaderStyle: isAdvancedToolBarOn,
-              showLink: isAdvancedToolBarOn,
-              showCodeBlock: isAdvancedToolBarOn,
-              showBackgroundColorButton: isAdvancedToolBarOn,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    sectionDividerColor: Theme.of(
+                      context,
+                    ).colorScheme.onSurface,
+                    showInlineCode: isAdvancedToolBarOn,
+                    showSubscript: isAdvancedToolBarOn,
+                    showSuperscript: isAdvancedToolBarOn,
+                    showColorButton: isAdvancedToolBarOn,
+                    showHeaderStyle: isAdvancedToolBarOn,
+                    showLink: isAdvancedToolBarOn,
+                    showCodeBlock: isAdvancedToolBarOn,
+                    showBackgroundColorButton: isAdvancedToolBarOn,
+                  ),
+                ),
+              ],
             ),
           ),
+
           Expanded(
             child: ColorFiltered(
               colorFilter: (_focusNode.hasPrimaryFocus)
