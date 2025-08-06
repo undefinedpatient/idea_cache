@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/cachelisttile.dart';
+import 'package:idea_cache/component/sidenavigationbar.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
@@ -111,6 +112,7 @@ class ICMainView extends StatefulWidget {
 }
 
 class _ICMainView extends State<ICMainView> {
+  Widget pageWidget = ICEmptyPage();
   int _selectedIndex = 0;
   List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
@@ -138,26 +140,6 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    ICAppState appState = context.watch<ICAppState>();
-    // log("build", name: runtimeType.toString());
-    Widget pageWidget = ICEmptyPage();
-    if (_selectedIndex == 0) {
-      pageWidget = ICOverview(
-        setPage: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      );
-    } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
-      pageWidget = ICCacheView(
-        cacheid: _userCaches[_selectedIndex - 1].id,
-        reloadCaches: _loadCaches,
-      );
-    } else {
-      pageWidget = ICSettingPage();
-    }
-
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -168,7 +150,7 @@ class _ICMainView extends State<ICMainView> {
               style: Theme.of(context).textTheme.headlineMedium,
               children: <TextSpan>[
                 TextSpan(
-                  text: " v1.2.0",
+                  text: " v1.2.1",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ],
@@ -178,115 +160,12 @@ class _ICMainView extends State<ICMainView> {
         ),
         body: Row(
           children: [
-            SizedBox(
-              width: 180,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ListTile(
-                    leading: Icon(
-                      (_selectedIndex == 0)
-                          ? Icons.dashboard
-                          : Icons.dashboard_outlined,
-                    ),
-                    title: Text("Overview"),
-                    selected: _selectedIndex == 0,
-                    onTap: () {
-                      if (appState.isContentEdited) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Warning: Content Not Saved"),
-                            duration: Durations.extralong3,
-                          ),
-                        );
-                        appState.setContentEditedState(false);
-                        return;
-                      }
-                      setState(() {
-                        _selectedIndex = 0;
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      onReorder: (int oldIndex, int newIndex) async {
-                        log("$oldIndex $newIndex");
-                        await FileHandler.reorderCaches(oldIndex, newIndex);
-                        await _loadCaches();
-                      },
-
-                      children: _userCaches.asMap().entries.map((entry) {
-                        final int index = entry.key;
-                        final String title = entry.value.name;
-                        final String id = entry.value.id;
-                        return ReorderableDelayedDragStartListener(
-                          key: ValueKey(id),
-                          index: index,
-                          child: ICCacheListTile(
-                            title: title,
-                            cacheid: id,
-                            onTap: () {
-                              if (appState.isContentEdited) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Warning: Content Not Saved"),
-                                    duration: Durations.extralong3,
-                                  ),
-                                );
-                                appState.setContentEditedState(false);
-                                return;
-                              }
-                              setState(() {
-                                _selectedIndex = index + 1;
-                              });
-                            },
-                            onEditName: () async {
-                              await _loadCaches();
-                            },
-                            selected: _selectedIndex == index + 1,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.add),
-                    title: Text('Add Cache'),
-                    selected: false,
-                    onTap: () async {
-                      Cache newCache = Cache(name: "Untitled");
-                      await FileHandler.appendCache(newCache);
-                      await _loadCaches();
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      _selectedIndex == _userCaches.length + 1
-                          ? Icons.settings
-                          : Icons.settings_outlined,
-                    ),
-                    title: Text('Settings'),
-                    selected: _selectedIndex == _userCaches.length + 1,
-                    onTap: () {
-                      if (appState.isContentEdited) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Warning: Content Not Saved"),
-                            duration: Durations.extralong3,
-                          ),
-                        );
-                        // set the edited state such that user can ignore the warning
-                        appState.setContentEditedState(false);
-                        return;
-                      }
-                      setState(() {
-                        _selectedIndex = _userCaches.length + 1;
-                      });
-                    },
-                  ),
-                ],
-              ),
+            ICSideNavBar(
+              onPageChanged: (Widget widget) {
+                setState(() {
+                  pageWidget = widget;
+                });
+              },
             ),
             const VerticalDivider(thickness: 2, width: 2),
             Expanded(child: pageWidget),

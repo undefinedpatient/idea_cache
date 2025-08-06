@@ -280,6 +280,7 @@ class _ICBlockView extends State<ICBlockView> {
                     enableAlwaysIndentOnTab: true,
                     expands: true,
                   ),
+                  
                   focusNode: _focusNode,
                   scrollController: _scrollController,
                 ),

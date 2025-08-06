@@ -5,9 +5,9 @@ import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 
 class ICOverview extends StatefulWidget {
-  final Function(int) setPage;
-  const ICOverview({super.key, required Function(int) setPage})
-    : setPage = setPage;
+  final void Function(int) onSetPage;
+  const ICOverview({super.key, required void Function(int) onSetPage})
+    : onSetPage = onSetPage;
   @override
   State<StatefulWidget> createState() {
     return _ICOverview();
@@ -198,7 +198,7 @@ class _ICOverview extends State<ICOverview> {
                                   "# of Blocks: ${entry.value.blockIds.length.toString()}",
                                 ),
                                 onTap: () {
-                                  widget.setPage(entry.key + 1);
+                                  widget.onSetPage(entry.key + 1);
                                 },
                               ),
                             ),
@@ -236,7 +236,7 @@ class _ICOverview extends State<ICOverview> {
                             "# of Blocks: ${entry.value.blockIds.length.toString()}",
                           ),
                           onTap: () {
-                            widget.setPage(entry.key + 1);
+                            widget.onSetPage(entry.key + 1);
                           },
                         ),
                       ),
