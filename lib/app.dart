@@ -173,7 +173,35 @@ class _ICMainView extends State<ICMainView> {
         ),
       );
     } else {
-      return ICEmptyPage();
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        appBar: AppBar(
+          title: RichText(
+            text: TextSpan(
+              text: "IdeaCache ",
+              style: Theme.of(context).textTheme.headlineMedium,
+              children: <TextSpan>[
+                TextSpan(
+                  text: " v1.2.1-beta",
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ],
+            ),
+          ),
+
+          backgroundColor: Theme.of(context).colorScheme.surface,
+        ),
+        drawer: Drawer(
+          child: ICSideNavBar(
+            onPageChanged: (Widget widget) {
+              setState(() {
+                pageWidget = widget;
+              });
+            },
+          ),
+        ),
+        body: Expanded(child: pageWidget),
+      );
     }
   }
 }

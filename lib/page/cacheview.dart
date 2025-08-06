@@ -360,6 +360,7 @@ class _ICCacheView extends State<ICCacheView> {
                       }
                     },
                     child: Dialog(
+                      shape: BeveledRectangleBorder(),
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Column(
@@ -536,6 +537,7 @@ class _ICCacheView extends State<ICCacheView> {
                               }
                             },
                             child: Dialog(
+                              shape: BeveledRectangleBorder(),
                               child: Padding(
                                 padding: const EdgeInsets.all(24),
                                 child: Column(
