@@ -3,17 +3,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:idea_cache/component/cachelisttile.dart';
 import 'package:idea_cache/component/sidenavigationbar.dart';
-import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
-import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/emptypage.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
-
-import 'package:idea_cache/page/settingpage.dart';
 import 'package:provider/provider.dart';
 
 /* 
@@ -113,23 +108,10 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   Widget pageWidget = ICEmptyPage();
-  int _selectedIndex = 0;
-  List<Cache> _userCaches = [];
-  OverlayEntry? addCacheOverlayEntry;
-  OverlayEntry? overlayEntryImport;
-
-  Future<void> _loadCaches() async {
-    _userCaches = List.empty();
-    final caches = await FileHandler.readCaches();
-    setState(() {
-      _userCaches = caches;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _loadCaches();
   }
 
   @override
@@ -140,6 +122,17 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
+    // Widget pageWidget = ICOverview(onSetPage: (int index) {
+    //                   setState(() {
+    //                     _selectedIndex = index;
+    //                   });
+    //                   widget.onPageChanged(
+    //                     ICCacheView(
+    //                       cacheid: _userCaches[_selectedIndex - 1].id,
+    //                       reloadCaches: _loadCaches,
+    //                     ),
+    //                   );
+    //                 };
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -150,7 +143,7 @@ class _ICMainView extends State<ICMainView> {
               style: Theme.of(context).textTheme.headlineMedium,
               children: <TextSpan>[
                 TextSpan(
-                  text: " v1.2.1",
+                  text: " v1.3.0",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ],

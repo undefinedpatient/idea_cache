@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/filehandler.dart';
 
@@ -78,41 +77,53 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
         title: Text("Overview"),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
-          DropdownButton(
-            autofocus: false,
-            padding: EdgeInsets.all(4),
-            value: isScrollVertical,
-            items: [
-              DropdownMenuItem(value: false, child: Text("Horizontal")),
-              DropdownMenuItem(value: true, child: Text("Vertical")),
+          VerticalDivider(),
+          Row(
+            children: [
+              Text("View"),
+              DropdownButton(
+                autofocus: false,
+                padding: EdgeInsets.all(4),
+                value: isScrollVertical,
+                items: [
+                  DropdownMenuItem(value: false, child: Text("Horizontal")),
+                  DropdownMenuItem(value: true, child: Text("Vertical")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    if (value == null) {
+                      isScrollVertical = false;
+                    } else {
+                      isScrollVertical = value;
+                    }
+                  });
+                },
+              ),
             ],
-            onChanged: (value) {
-              setState(() {
-                if (value == null) {
-                  isScrollVertical = false;
-                } else {
-                  isScrollVertical = value;
-                }
-              });
-            },
           ),
-          DropdownButton(
-            autofocus: false,
-            padding: EdgeInsets.all(4),
-            value: itemScaleFactor,
-            items: [
-              DropdownMenuItem(value: 1.0, child: Text("1x")),
-              DropdownMenuItem(value: 2.0, child: Text("2x")),
+          VerticalDivider(),
+          Row(
+            children: [
+              Text("View"),
+              DropdownButton(
+                autofocus: false,
+                padding: EdgeInsets.all(4),
+                value: itemScaleFactor,
+                items: [
+                  DropdownMenuItem(value: 1.0, child: Text("1x")),
+                  DropdownMenuItem(value: 2.0, child: Text("2x")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    if (value == null) {
+                      itemScaleFactor = 1.0;
+                    } else {
+                      itemScaleFactor = value;
+                    }
+                  });
+                },
+              ),
             ],
-            onChanged: (value) {
-              setState(() {
-                if (value == null) {
-                  itemScaleFactor = 1.0;
-                } else {
-                  itemScaleFactor = value;
-                }
-              });
-            },
           ),
         ],
       ),

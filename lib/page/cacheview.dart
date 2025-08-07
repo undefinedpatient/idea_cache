@@ -1,10 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
@@ -39,7 +37,7 @@ class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
   List<ICBlock> _userBlocks = [];
   int _selectedIndex = -1;
-  OverlayEntry? overlayEntryImport;
+  OverlayEntry? entryImportOverlay;
   final FocusNode _focusNode = FocusNode();
 
   Future<void> _loadBlocks() async {
@@ -49,7 +47,6 @@ class _ICCacheView extends State<ICCacheView> {
     setState(() {
       _userBlocks = blocks;
     });
-    // log(name: "_loadBlocks()", "${blocks.map((block) => block.id)}");
   }
 
   Future<void> _loadCache() async {
@@ -83,7 +80,7 @@ class _ICCacheView extends State<ICCacheView> {
   Future<void> _deleteBlock(BuildContext context) async {
     Navigator.pop(context);
     ICBlock oldBlock = _userBlocks[_selectedIndex];
-    userCache!.removeBlockIds(oldBlock.id);
+    userCache!.removeBlockId(oldBlock.id);
     await FileHandler.updateCache(userCache!);
     await FileHandler.deleteBlocksById(oldBlock.id);
 
@@ -103,8 +100,8 @@ class _ICCacheView extends State<ICCacheView> {
   }
 
   void _toggleImportOverlay(BuildContext context) {
-    if (overlayEntryImport == null) {
-      overlayEntryImport = OverlayEntry(
+    if (entryImportOverlay == null) {
+      entryImportOverlay = OverlayEntry(
         builder: (BuildContext context) {
           String selectedFileName = "None";
           List<ICBlock> externalBlocks = List.empty(growable: true);
@@ -112,9 +109,9 @@ class _ICCacheView extends State<ICCacheView> {
             builder: (BuildContext context, StateSetter setOverlayState) {
               return GestureDetector(
                 onTap: () {
-                  overlayEntryImport?.remove();
-                  overlayEntryImport?.dispose();
-                  overlayEntryImport = null;
+                  entryImportOverlay?.remove();
+                  entryImportOverlay?.dispose();
+                  entryImportOverlay = null;
                 },
                 child: Material(
                   color: Color.fromRGBO(0, 0, 0, 0.5),
@@ -189,7 +186,7 @@ class _ICCacheView extends State<ICCacheView> {
                                       title: Text(block.name),
                                       isThreeLine: true,
                                       subtitle: Text(
-                                        "Cache Id: ${block.cacheid}",
+                                        "Cache Id: ${block.cacheId}",
                                         style: TextStyle(
                                           color: Theme.of(
                                             context,
@@ -236,9 +233,9 @@ class _ICCacheView extends State<ICCacheView> {
                                 }
                                 // After importing remove the overlay and reload the blocks
                                 await _loadBlocks();
-                                overlayEntryImport?.remove();
-                                overlayEntryImport?.dispose();
-                                overlayEntryImport = null;
+                                entryImportOverlay?.remove();
+                                entryImportOverlay?.dispose();
+                                entryImportOverlay = null;
                               },
                               child: Text("Import Blocks"),
                             ),
@@ -253,11 +250,11 @@ class _ICCacheView extends State<ICCacheView> {
           );
         },
       );
-      Overlay.of(context).insert(overlayEntryImport!);
+      Overlay.of(context).insert(entryImportOverlay!);
     } else {
-      overlayEntryImport?.remove();
-      overlayEntryImport?.dispose();
-      overlayEntryImport = null;
+      entryImportOverlay?.remove();
+      entryImportOverlay?.dispose();
+      entryImportOverlay = null;
     }
   }
 

@@ -7,6 +7,8 @@ import 'package:idea_cache/component/cachelisttile.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/cacheview.dart';
+import 'package:idea_cache/page/emptypage.dart';
+import 'package:idea_cache/page/managestatusview.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'package:idea_cache/page/settingpage.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +29,7 @@ class ICSideNavBar extends StatefulWidget {
 class _ICSideNavBarState extends State<ICSideNavBar> {
   int _selectedIndex = 0;
   List<Cache> _userCaches = [];
+  OverlayEntry? manageStatusOverlay;
   Future<void> _loadCaches() async {
     _userCaches = List.empty();
     final caches = await FileHandler.readCaches();
@@ -35,15 +38,57 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
     });
   }
 
+  void _toggleManageStatusView(BuildContext context) {
+    if (manageStatusOverlay != null) {
+      manageStatusOverlay?.remove();
+      manageStatusOverlay?.dispose();
+      manageStatusOverlay = null;
+      return;
+    }
+    manageStatusOverlay = OverlayEntry(
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setOverlayState) {
+            return GestureDetector(
+              onTap: () {
+                manageStatusOverlay?.remove();
+                manageStatusOverlay?.dispose();
+                manageStatusOverlay = null;
+              },
+              child: ICManageStatus(),
+            );
+          },
+        );
+      },
+    );
+    Overlay.of(context).insert(manageStatusOverlay!);
+  }
+
   @override
   void initState() {
     super.initState();
     _loadCaches();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onPageChanged(
+        ICOverview(
+          onSetPage: (int index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+            widget.onPageChanged(
+              ICCacheView(
+                cacheid: _userCaches[_selectedIndex - 1].id,
+                reloadCaches: _loadCaches,
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 
   @override
   void dispose() {
-    // overlayEntryExport?.dispose();
     super.dispose();
   }
 
@@ -157,11 +202,35 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
             ListTile(
               leading: Icon(
                 _selectedIndex == _userCaches.length + 1
+                    ? Icons.straighten
+                    : Icons.straighten,
+              ),
+              title: Text('Manage Status'),
+              selected: _selectedIndex == _userCaches.length + 1,
+              onTap: () {
+                if (appState.isContentEdited) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Warning: Content Not Saved"),
+                      duration: Durations.extralong3,
+                    ),
+                  );
+                  // set the edited state such that user can ignore the warning
+                  appState.setContentEditedState(false);
+
+                  return;
+                }
+                _toggleManageStatusView(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                _selectedIndex == _userCaches.length + 2
                     ? Icons.settings
                     : Icons.settings_outlined,
               ),
               title: Text('Settings'),
-              selected: _selectedIndex == _userCaches.length + 1,
+              selected: _selectedIndex == _userCaches.length + 2,
               onTap: () {
                 if (appState.isContentEdited) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -175,7 +244,7 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
                   return;
                 }
                 setState(() {
-                  _selectedIndex = _userCaches.length + 1;
+                  _selectedIndex = _userCaches.length + 2;
                 });
                 widget.onPageChanged(ICSettingPage());
               },
@@ -184,7 +253,7 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
         ),
       );
     } else {
-      return SizedBox.expand(
+      return SizedBox(
         child: Column(
           children: [
             const DrawerHeader(child: Text("CacheList")),

@@ -3,11 +3,12 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/setting.dart';
+import 'package:idea_cache/model/status.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'cache.dart';
 
-enum FileDestinationType { cache, block, setting }
+enum FileDestinationType { cache, block, setting, status }
 
 class FileHandler {
   // File I/O
@@ -27,6 +28,8 @@ class FileHandler {
         return File("$path/IdeaCache/caches.json").create(recursive: true);
       case FileDestinationType.block:
         return File("$path/IdeaCache/blocks.json").create(recursive: true);
+      case FileDestinationType.status:
+        return File("$path/IdeaCache/status.json").create(recursive: true);
       case FileDestinationType.setting:
         return File("$path/IdeaCache/settings.json").create(recursive: true);
     }
@@ -62,7 +65,7 @@ class FileHandler {
     );
     // If the new block name is already in form abc.001, strip away the .001 first
     block.name = block.name.split('.')[0];
-    List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheid);
+    List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheId);
     if (blocks.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < blocks.length; i++) {
@@ -153,8 +156,8 @@ class FileHandler {
     if (oldBlock == null) {
       return appendBlock(block);
     }
-
-    List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheid);
+    //Retrieve a list of blocks from the file
+    List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheId);
     blocks.removeWhere((item) => item.id == block.id);
     if (blocks.isNotEmpty) {
       int occurrence = 0;
@@ -168,11 +171,11 @@ class FileHandler {
       }
     }
 
-    List<ICBlock> exisitingBlock = await readBlocks();
+    List<ICBlock> existingBlock = await readBlocks();
     //Replacing Block
-    for (int i = 0; i < exisitingBlock.length; i++) {
-      if (exisitingBlock[i].id == block.id) {
-        exisitingBlock[i] = block;
+    for (int i = 0; i < existingBlock.length; i++) {
+      if (existingBlock[i].id == block.id) {
+        existingBlock[i] = block;
         break;
       }
     }
@@ -181,7 +184,7 @@ class FileHandler {
 
     return await file.writeAsString(
       jsonEncoder.convert(
-        exisitingBlock.map((value) => value.toJson()).toList(),
+        existingBlock.map((value) => value.toJson()).toList(),
       ),
     );
   }
@@ -266,7 +269,7 @@ class FileHandler {
     final List<ICBlock> existingBlocks = await readBlocks();
     List<ICBlock> newBlocks = List.empty(growable: true);
     for (int i = 0; i < existingBlocks.length; i++) {
-      if (existingBlocks[i].cacheid != cacheId) {
+      if (existingBlocks[i].cacheId != cacheId) {
         newBlocks.add(existingBlocks[i]);
       }
     }
@@ -320,30 +323,19 @@ class FileHandler {
     return null;
   }
 
-  static Future<List<ICBlock>> findBlocksByCacheId(String cacheid) async {
+  static Future<List<ICBlock>> findBlocksByCacheId(String cacheId) async {
     List<ICBlock>? unorderedBlocks = List.empty(growable: true);
-    //
     List<ICBlock>? orderedblocks = List.empty(growable: true);
     List<ICBlock>? readblocks = await readBlocks();
-    Cache? cache = await findCacheById(cacheid);
+    Cache? cache = await findCacheById(cacheId);
     if (cache == null) {
       throw Exception("findBlocksByCacheId: cache is null!");
     }
     for (int i = 0; i < readblocks.length; i++) {
-      if (readblocks[i].cacheid == cacheid) {
+      if (readblocks[i].cacheId == cacheId) {
         unorderedBlocks.add(readblocks[i]);
       }
     }
-    log(
-      name: "readblocks",
-      readblocks.map((block) => block.id).toList().toString(),
-    );
-    // log(
-    //   name: "unorderedBlocks",
-    //   unorderedBlocks.map((block) => block.id).toList().toString(),
-    // );
-    // log(name: "cache.blockIds", cache.blockIds.toString());
-
     for (int i = 0; i < cache.blockIds.length; i++) {
       int indexOfTargetBlock = unorderedBlocks
           .map((block) => block.id)
@@ -414,6 +406,34 @@ class FileHandler {
 
           return jsonList
               .map((json) => ICBlock.fromJson(json as Map<String, dynamic>))
+              .toList();
+        }
+      }
+    } catch (e) {
+      log('Error reading blocks: $e');
+    }
+    return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
+  }
+
+  static Future<List<ICStatus>> readStatus({String? dataString}) async {
+    if (dataString != null && dataString.isNotEmpty) {
+      final List<dynamic> jsonList = jsonDecode(dataString) as List<dynamic>;
+      // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic>
+      return jsonList
+          .map((json) => ICStatus.fromJson(json as Map<String, dynamic>))
+          .toList();
+    }
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.status,
+    );
+    try {
+      if (await file.exists()) {
+        final String content = await file.readAsString();
+        if (content.isNotEmpty) {
+          final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
+
+          return jsonList
+              .map((json) => ICStatus.fromJson(json as Map<String, dynamic>))
               .toList();
         }
       }

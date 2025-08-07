@@ -132,7 +132,11 @@ class _ICBlockView extends State<ICBlockView> {
                         ],
                       ),
                     ),
-
+                    MenuItemButton(
+                      onPressed: () {},
+                      requestFocusOnHover: false,
+                      child: Text("Manage Status"),
+                    ),
                     MenuItemButton(
                       onPressed: () {
                         _onSave(context);
@@ -280,7 +284,7 @@ class _ICBlockView extends State<ICBlockView> {
                     enableAlwaysIndentOnTab: true,
                     expands: true,
                   ),
-                  
+
                   focusNode: _focusNode,
                   scrollController: _scrollController,
                 ),
