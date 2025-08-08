@@ -102,165 +102,6 @@ class _ICCacheView extends State<ICCacheView> {
     }
   }
 
-  void _toggleImportOverlay(BuildContext context) {
-    if (entryImportOverlay == null) {
-      entryImportOverlay = OverlayEntry(
-        builder: (BuildContext context) {
-          String selectedFileName = "None";
-          List<ICBlock> externalBlocks = List.empty(growable: true);
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setOverlayState) {
-              return GestureDetector(
-                onTap: () {
-                  entryImportOverlay?.remove();
-                  entryImportOverlay?.dispose();
-                  entryImportOverlay = null;
-                },
-                child: Material(
-                  color: Color.fromRGBO(0, 0, 0, 0.5),
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.all(16),
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHigh,
-                        // Clamping
-                        height: (MediaQuery.of(context).size.height < 600)
-                            ? MediaQuery.of(context).size.height - 24
-                            : 600,
-                        width: (MediaQuery.of(context).size.width < 800)
-                            ? MediaQuery.of(context).size.width - 96
-                            : 800,
-                        //
-                        child: Column(
-                          spacing: 16,
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Import", textScaler: TextScaler.linear(1.4)),
-                            Container(
-                              padding: EdgeInsets.all(16),
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainer,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Select Blocks File: $selectedFileName"),
-                                  IconButton(
-                                    onPressed: () async {
-                                      FilePickerResult? result =
-                                          await FilePicker.platform.pickFiles(
-                                            allowMultiple: false,
-                                            allowedExtensions: ["json"],
-                                          );
-
-                                      if (result != null) {
-                                        File file = File(
-                                          result.files.single.path!,
-                                        );
-                                        List<ICBlock> tempBlockList =
-                                            await FileHandler.readBlocks(
-                                              dataString: file
-                                                  .readAsStringSync(),
-                                            );
-                                        setOverlayState(() {
-                                          selectedFileName = file.path;
-                                          externalBlocks = tempBlockList;
-                                        });
-                                      }
-                                    },
-                                    icon: const Icon(Icons.folder),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainer,
-                                child: ListView(
-                                  children: externalBlocks.map((ICBlock block) {
-                                    return ListTile(
-                                      title: Text(block.name),
-                                      isThreeLine: true,
-                                      subtitle: Text(
-                                        "Cache Id: ${block.cacheId}",
-                                        style: TextStyle(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                      ),
-                                      trailing: IconButton(
-                                        onPressed: () {
-                                          setOverlayState(() {
-                                            externalBlocks.remove(block);
-                                          });
-                                        },
-                                        onHover: (value) {
-                                          log("hover");
-                                        },
-                                        hoverColor: Theme.of(
-                                          context,
-                                        ).colorScheme.onError,
-                                        icon: Icon(Icons.remove),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
-                            const Text(
-                              "Hint: Only blocks.json format is allowed, incorrect format will lead to crashes",
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                for (
-                                  int i = 0;
-                                  i < externalBlocks.length;
-                                  i++
-                                ) {
-                                  ICBlock newBlock = ICBlock(
-                                    cacheid: userCache!.id,
-                                    name: externalBlocks[i].name,
-                                  );
-                                  newBlock.content = externalBlocks[i].content;
-                                  await FileHandler.appendBlock(newBlock);
-                                  userCache!.addBlockId(newBlock.id);
-                                  await FileHandler.updateCache(userCache!);
-                                }
-                                // After importing remove the overlay and reload the blocks
-                                await _loadBlocks();
-                                entryImportOverlay?.remove();
-                                entryImportOverlay?.dispose();
-                                entryImportOverlay = null;
-                              },
-                              child: Text("Import Blocks"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      );
-      Overlay.of(context).insert(entryImportOverlay!);
-    } else {
-      entryImportOverlay?.remove();
-      entryImportOverlay?.dispose();
-      entryImportOverlay = null;
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -325,10 +166,11 @@ class _ICCacheView extends State<ICCacheView> {
                       _textEditingController.text = userCache!.name;
                       return Dialog(
                         child: Container(
-                          width: 400,
+                          width: 240,
                           padding: EdgeInsets.all(16),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
+                            spacing: 8,
                             children: [
                               TextField(
                                 controller: _textEditingController,
@@ -383,15 +225,6 @@ class _ICCacheView extends State<ICCacheView> {
                     ? Icons.push_pin_outlined
                     : Icons.push_pin,
               ),
-            ),
-          ),
-          Tooltip(
-            message: (appState.toolTipsEnabled) ? "Import Blocks" : "",
-            child: IconButton(
-              onPressed: () async {
-                _toggleImportOverlay(context);
-              },
-              icon: Icon(Icons.import_export),
             ),
           ),
           Tooltip(

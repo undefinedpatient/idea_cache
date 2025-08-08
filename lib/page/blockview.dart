@@ -7,6 +7,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/page/importdocumentview.dart';
 import 'package:provider/provider.dart';
 
 class ICBlockView extends StatefulWidget {
@@ -132,6 +133,22 @@ class _ICBlockView extends State<ICBlockView> {
                     Container(
                       child: Row(
                         children: [
+                          MenuItemButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    child: ICImportDocumentView(
+                                      quillController: _controller,
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            requestFocusOnHover: false,
+                            child: Text(" Import "),
+                          ),
                           MenuItemButton(
                             onPressed: () {
                               _onSave(context);

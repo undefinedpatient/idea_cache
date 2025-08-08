@@ -187,10 +187,11 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                 context: context,
                                 builder: (BuildContext context) => Dialog(
                                   child: Container(
-                                    width: 400,
+                                    width: 240,
                                     padding: EdgeInsets.all(16),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
+                                      spacing: 8,
                                       children: [
                                         TextField(
                                           controller: _textEditingController,
