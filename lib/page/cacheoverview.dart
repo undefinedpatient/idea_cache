@@ -90,6 +90,8 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(
@@ -165,12 +167,10 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
               ),
             ),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 1,
+              child: ListView(
                 scrollDirection: (isScrollVertical == true)
                     ? Axis.vertical
                     : Axis.horizontal,
-                childAspectRatio: (isScrollVertical == true) ? 7 : 1,
                 children: _cacheBlocks.asMap().entries.map((entry) {
                   return ICBlockCard(
                     key: ObjectKey(entry.value),
@@ -188,6 +188,32 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                   );
                 }).toList(),
               ),
+              // child: GridView.count(
+              //   crossAxisCount: (isScrollVertical == true)
+              //       ? (width / 360).floor()
+              //       : (height / 240).floor(),
+              //   scrollDirection: (isScrollVertical == true)
+              //       ? Axis.vertical
+              //       : Axis.horizontal,
+
+              //   childAspectRatio: (isScrollVertical == true) ? 3 : 1 / 2,
+              //   children: _cacheBlocks.asMap().entries.map((entry) {
+              //     return ICBlockCard(
+              //       key: ObjectKey(entry.value),
+              //       block: entry.value,
+              //       onTap: () {
+              //         widget.setPage(entry.key);
+              //       },
+              //       direction: (isScrollVertical == true)
+              //           ? Axis.horizontal
+              //           : Axis.vertical,
+              //       onBlockUpdated: () async {
+              //         await _loadBlocksUnconditional();
+              //         await _filterBlocks();
+              //       },
+              //     );
+              //   }).toList(),
+              // ),
             ),
           ],
         ),

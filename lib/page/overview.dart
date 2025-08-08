@@ -14,7 +14,6 @@ class ICOverview extends StatefulWidget {
 
 class _ICOverview extends State<ICOverview> {
   bool isScrollVertical = true;
-  double itemScaleFactor = 1.0;
   List<Cache> _userCaches = List.empty(growable: true);
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
@@ -65,6 +64,8 @@ class _ICOverview extends State<ICOverview> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(
@@ -190,13 +191,14 @@ class _ICOverview extends State<ICOverview> {
               ),
             ),
             Expanded(
-              child: GridView.extent(
-                maxCrossAxisExtent: (isScrollVertical == true)
-                    ? itemScaleFactor * 360
-                    : itemScaleFactor * 160,
+              child: GridView.count(
+                crossAxisCount: (isScrollVertical == true)
+                    ? (width / 360).floor()
+                    : (height / 240).floor(),
                 scrollDirection: (isScrollVertical == true)
                     ? Axis.vertical
                     : Axis.horizontal,
+
                 childAspectRatio: (isScrollVertical == true) ? 3 : 1 / 2,
                 shrinkWrap: true,
                 children: _userCaches

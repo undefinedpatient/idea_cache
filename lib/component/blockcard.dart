@@ -144,50 +144,54 @@ class _ICBlockCardState extends State<ICBlockCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      clipBehavior: Clip.hardEdge,
-      child: Flex(
-        direction: widget.direction,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            fit: FlexFit.tight,
-            flex: 2,
-            child: ListTile(
-              onTap: widget.onTap,
-              leading: Icon(Icons.square_outlined),
-              title: Text(widget.block.name),
-              // trailing: PopupMenuButton(
-              //   tooltip: "",
-              //   itemBuilder: (context) => [
-              //     PopupMenuItem(
-              //       child: Text("Assign Status"),
-              //       onTap: () {
-              //         _toggleManageStatusView(context);
-              //       },
-              //     ),
-              //   ],
-              // ),
+    return SizedBox(
+      height: (widget.direction == Axis.horizontal) ? 80 : 160,
+      width: (widget.direction == Axis.horizontal) ? 360 : 180,
+      child: Card(
+        elevation: 2,
+        clipBehavior: Clip.hardEdge,
+        child: Flex(
+          direction: widget.direction,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              flex: 2,
+              child: ListTile(
+                onTap: widget.onTap,
+                leading: Icon(Icons.square_outlined),
+                title: Text(widget.block.name),
+                // trailing: PopupMenuButton(
+                //   tooltip: "",
+                //   itemBuilder: (context) => [
+                //     PopupMenuItem(
+                //       child: Text("Assign Status"),
+                //       onTap: () {
+                //         _toggleManageStatusView(context);
+                //       },
+                //     ),
+                //   ],
+                // ),
+              ),
             ),
-          ),
-          Flexible(
-            fit: FlexFit.tight,
-            flex: 1,
-            child: ListTile(
-              title: (status == null) ? Text("") : Text(status!.statusName),
-              tileColor: (status != null)
-                  // Use Alpha 0.5 for the color to make it semi-transparent, so as to not obscure the text
-                  ? Color(status!.colorCode).withValues(alpha: 0.7)
-                  : Theme.of(context).colorScheme.surfaceDim,
-              onTap: () {
-                _toggleManageStatusView(context);
-              },
+            Flexible(
+              fit: FlexFit.tight,
+              flex: 1,
+              child: ListTile(
+                title: (status == null) ? Text("") : Text(status!.statusName),
+                tileColor: (status != null)
+                    // Use Alpha 0.5 for the color to make it semi-transparent, so as to not obscure the text
+                    ? Color(status!.colorCode).withValues(alpha: 0.7)
+                    : Theme.of(context).colorScheme.surfaceDim,
+                onTap: () {
+                  _toggleManageStatusView(context);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

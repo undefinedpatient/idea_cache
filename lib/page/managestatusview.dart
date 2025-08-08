@@ -24,6 +24,9 @@ class ICManageStatus extends StatefulWidget {
 }
 
 class _ICManageStatus extends State<ICManageStatus> {
+  TextEditingController _textEditingController = TextEditingController(
+    text: "",
+  );
   List<ICStatus> statuses = List.empty(growable: true);
   OverlayEntry? colorPickerOverlay;
   Future<void> _readStatuses() async {
