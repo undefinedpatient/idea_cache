@@ -160,6 +160,102 @@ class _ICBlockView extends State<ICBlockView> {
                             : "",
                         items: _fontFamilies,
                       ),
+                      selectAlignmentButtons:
+                          QuillToolbarSelectAlignmentButtonOptions(
+                            tooltips: QuillSelectAlignmentValues(
+                              leftAlignment: "",
+                              centerAlignment: "",
+                              rightAlignment: "",
+                              justifyAlignment: "",
+                            ),
+                          ),
+                      redoHistory: QuillToolbarHistoryButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Redo" : "",
+                      ),
+                      undoHistory: QuillToolbarHistoryButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Undo" : "",
+                      ),
+                      bold: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Bold" : "",
+                      ),
+                      italic: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Italic" : "",
+                      ),
+                      underLine: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Underline" : "",
+                      ),
+                      strikeThrough: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Strike Through"
+                            : "",
+                      ),
+                      clearFormat: QuillToolbarClearFormatButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Clear Format"
+                            : "",
+                      ),
+                      listNumbers: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Numbered List"
+                            : "",
+                      ),
+                      listBullets: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Bulleted List"
+                            : "",
+                      ),
+                      toggleCheckList: QuillToolbarToggleCheckListButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Toggle Check List"
+                            : "",
+                      ),
+                      quote: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Quote" : "",
+                      ),
+                      indentDecrease: QuillToolbarIndentButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Decrease Indent"
+                            : "",
+                      ),
+                      indentIncrease: QuillToolbarIndentButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Increase Indent"
+                            : "",
+                      ),
+                      codeBlock: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Code Block" : "",
+                      ),
+                      search: QuillToolbarSearchButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Search" : "",
+                      ),
+                      inlineCode: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Inline Code"
+                            : "",
+                      ),
+                      color: QuillToolbarColorButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Text Color" : "",
+                      ),
+                      backgroundColor: QuillToolbarColorButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Background Color"
+                            : "",
+                      ),
+
+                      subscript: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Subscript" : "",
+                      ),
+                      superscript: QuillToolbarToggleStyleButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Superscript"
+                            : "",
+                      ),
+                      selectHeaderStyleDropdownButton:
+                          QuillToolbarSelectHeaderStyleDropdownButtonOptions(
+                            tooltip: (appState.toolTipsEnabled)
+                                ? "Select Header Style"
+                                : "",
+                          ),
                       fontSize: QuillToolbarFontSizeButtonOptions(
                         tooltip: (appState.toolTipsEnabled) ? "Font Size" : "",
                         items: Map.from({
@@ -174,10 +270,12 @@ class _ICBlockView extends State<ICBlockView> {
                         ),
                       ),
                     ),
+
                     color: Theme.of(context).colorScheme.onSurface,
                     sectionDividerColor: Theme.of(
                       context,
                     ).colorScheme.onSurface,
+                    showAlignmentButtons: isAdvancedToolBarOn,
                     showInlineCode: isAdvancedToolBarOn,
                     showSubscript: isAdvancedToolBarOn,
                     showSuperscript: isAdvancedToolBarOn,

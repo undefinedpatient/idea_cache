@@ -552,7 +552,7 @@ class _ICCacheView extends State<ICCacheView> {
                   ),
                 ),
                 Tooltip(
-                  message: "Add Block",
+                  message: (appState.toolTipsEnabled) ? "Add Block" : "",
                   child: MenuItemButton(
                     requestFocusOnHover: false,
                     onPressed: () async {
@@ -571,7 +571,7 @@ class _ICCacheView extends State<ICCacheView> {
                 // Delete Block Button can only Appear when user is viewing a block
                 if (_selectedIndex != -1)
                   Tooltip(
-                    message: "Delete Block",
+                    message: (appState.toolTipsEnabled) ? "Delete Block" : "",
                     child: MenuItemButton(
                       requestFocusOnHover: false,
                       onPressed: () async {
