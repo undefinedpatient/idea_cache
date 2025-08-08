@@ -155,12 +155,13 @@ class _ICBlockView extends State<ICBlockView> {
                   config: QuillSimpleToolbarConfig(
                     buttonOptions: QuillSimpleToolbarButtonOptions(
                       fontFamily: QuillToolbarFontFamilyButtonOptions(
+                        tooltip: (appState.toolTipsEnabled)
+                            ? "Font Family"
+                            : "",
                         items: _fontFamilies,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
                       ),
                       fontSize: QuillToolbarFontSizeButtonOptions(
+                        tooltip: (appState.toolTipsEnabled) ? "Font Size" : "",
                         items: Map.from({
                           '16': '16',
                           '18': '18',
@@ -172,12 +173,6 @@ class _ICBlockView extends State<ICBlockView> {
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                      selectHeaderStyleDropdownButton:
-                          QuillToolbarSelectHeaderStyleDropdownButtonOptions(
-                            textStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
                     ),
                     color: Theme.of(context).colorScheme.onSurface,
                     sectionDividerColor: Theme.of(
@@ -202,13 +197,13 @@ class _ICBlockView extends State<ICBlockView> {
               colorFilter: (_focusNode.hasPrimaryFocus)
                   ? ColorFilter.srgbToLinearGamma()
                   : ColorFilter.matrix(<double>[
-                      0.5, 0.0, 0.0, 0.0, 0.0,
+                      1, 0.0, 0.0, 0.0, 0.0,
                       //
-                      0.0, 0.5, 0.0, 0.0, 0.0,
+                      0.0, 1, 0.0, 0.0, 0.0,
                       //
-                      0.0, 0.0, 0.5, 0.0, 0.0,
+                      0.0, 0.0, 1, 0.0, 0.0,
                       //
-                      0.0, 0.0, 0.0, 1, 0.0,
+                      0.0, 0.0, 0.0, 0.3, 0.0,
                       //
                     ]),
               child: CallbackShortcuts(

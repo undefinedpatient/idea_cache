@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
@@ -54,6 +56,17 @@ class _ICCacheListTileState extends State<ICCacheListTile> {
       _inputText = widget._title;
       _controller.text = _inputText;
     });
+  }
+
+  @override
+  void didUpdateWidget(ICCacheListTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget._title != widget._title) {
+      setState(() {
+        _inputText = widget._title;
+        _controller.text = _inputText;
+      });
+    }
   }
 
   @override

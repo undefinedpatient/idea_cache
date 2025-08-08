@@ -333,6 +333,13 @@ class FileHandler {
         break;
       }
     }
+    //Remove all the status associated with this cache
+    List<ICStatus> statuses = await readStatus();
+    for (int i = 0; i < statuses.length; i++) {
+      if (statuses[i].cacheId == cacheId) {
+        await deleteStatusById(statuses[i].id);
+      }
+    }
     //Delete all the cacheBlock related
     deleteBlocksByCacheId(cacheId);
     return file.writeAsString(

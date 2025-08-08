@@ -257,12 +257,14 @@ class ICApp extends StatelessWidget {
 }
 
 class ICAppState extends ChangeNotifier {
+  // User Settings
   ThemeMode thememode = ThemeMode.light;
   String font = 'FiraCode Nerd Font';
   int colorcode = Colors.purple.toARGB32();
-
-  // Used to ensure user explicity save the content before switch views
+  bool toolTipsEnabled = true;
+  // App States
   bool isContentEdited = false;
+
   ICAppState() {
     FileHandler.loadSetting().then((Setting setting) {
       changeBrightness(setting.thememode);
@@ -286,6 +288,11 @@ class ICAppState extends ChangeNotifier {
 
   void changeColorCode(int code) {
     colorcode = code;
+    notifyListeners();
+  }
+
+  void changeTooltipsEnabled(bool enable) {
+    toolTipsEnabled = enable;
     notifyListeners();
   }
 }

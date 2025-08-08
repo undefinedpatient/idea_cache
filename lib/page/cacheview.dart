@@ -35,6 +35,9 @@ class ICCacheView extends StatefulWidget {
 
 class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
+  TextEditingController _textEditingController = TextEditingController(
+    text: "",
+  );
   List<ICBlock> _userBlocks = [];
   int _selectedIndex = -1;
   OverlayEntry? entryImportOverlay;
@@ -267,7 +270,6 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   void didUpdateWidget(covariant ICCacheView oldWidget) {
-    // log("didUpdateWidget", name: runtimeType.toString());
     super.didUpdateWidget(oldWidget);
     setState(() {
       _selectedIndex = -1;
@@ -279,6 +281,7 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   void dispose() {
+    _textEditingController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -307,11 +310,65 @@ class _ICCacheView extends State<ICCacheView> {
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        title: Text(userCache!.name),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 8,
+          children: [
+            Text(userCache!.name),
+            Tooltip(
+              message: (appState.toolTipsEnabled) ? "Rename Cache" : "",
+              child: IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      _textEditingController.text = userCache!.name;
+                      return Dialog(
+                        child: Container(
+                          width: 400,
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                controller: _textEditingController,
+                                decoration: InputDecoration(
+                                  labelText: "Edit Cache Name",
+                                ),
+                                onSubmitted: (value) async {
+                                  userCache!.name = value;
+                                  await FileHandler.updateCache(userCache!);
+                                  await widget.reloadCaches();
+
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  userCache!.name = _textEditingController.text;
+                                  await FileHandler.updateCache(userCache!);
+                                  await widget.reloadCaches();
+
+                                  Navigator.pop(context);
+                                },
+                                child: Text("Save"),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                icon: Icon(Icons.edit_outlined),
+              ),
+            ),
+          ],
+        ),
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         actions: [
           Tooltip(
-            message: "Pin",
+            message: (appState.toolTipsEnabled) ? "Pin Cache" : "",
             child: IconButton(
               onPressed: () async {
                 setState(() {
@@ -329,7 +386,7 @@ class _ICCacheView extends State<ICCacheView> {
             ),
           ),
           Tooltip(
-            message: "Import Blocks",
+            message: (appState.toolTipsEnabled) ? "Import Blocks" : "",
             child: IconButton(
               onPressed: () async {
                 _toggleImportOverlay(context);
@@ -338,7 +395,7 @@ class _ICCacheView extends State<ICCacheView> {
             ),
           ),
           Tooltip(
-            message: "Delete Cache",
+            message: (appState.toolTipsEnabled) ? "Delete Cache" : "",
             child: IconButton(
               onPressed: () async {
                 await showDialog<String>(

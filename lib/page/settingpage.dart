@@ -19,9 +19,15 @@ class _ICSettingPageState extends State<ICSettingPage> {
   ThemeMode _themeMode = ThemeMode.system;
   String _font = 'FiraCode Nerd Font';
   int _colorSeed = Colors.purple.toARGB32();
+  bool _tooltipsEnabled = true;
   Future<void> onSave() async {
     await FileHandler.saveSetting(
-      Setting(thememode: _themeMode, fontfamily: _font, colorcode: _colorSeed),
+      Setting(
+        thememode: _themeMode,
+        fontfamily: _font,
+        colorcode: _colorSeed,
+        toolTipsEnabled: _tooltipsEnabled,
+      ),
     );
   }
 
@@ -34,6 +40,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
         _themeMode = appState.thememode;
         _font = appState.font;
         _colorSeed = appState.colorcode;
+        _tooltipsEnabled = appState.toolTipsEnabled;
       });
     });
   }
@@ -305,6 +312,33 @@ class _ICSettingPageState extends State<ICSettingPage> {
                           _colorSeed = value!;
                         });
                         appState.changeColorCode((_colorSeed));
+                        onSave();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Tooltips",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
+                    Switch(
+                      value: _tooltipsEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _tooltipsEnabled = value;
+                        });
+                        appState.changeTooltipsEnabled(value);
                         onSave();
                       },
                     ),
