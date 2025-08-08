@@ -36,6 +36,10 @@ class _ICBlockCardState extends State<ICBlockCard> {
       setState(() {
         status = readStatus;
       });
+    } else {
+      setState(() {
+        status = null;
+      });
     }
   }
 
@@ -231,7 +235,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
     return LayoutBuilder(
       builder: (context, contraint) {
         return SizedBox(
-          height: (widget.direction == Axis.horizontal) ? 120 : 160,
+          height: (widget.direction == Axis.horizontal) ? 80 : 160,
           width: (widget.direction == Axis.horizontal) ? 360 : 180,
           child: Card(
             elevation: 2,
@@ -244,23 +248,136 @@ class _ICBlockCardState extends State<ICBlockCard> {
                 Flexible(
                   fit: FlexFit.tight,
                   flex: 3,
-                  child: ListTile(
-                    onTap: widget.onTap,
-                    leading: Icon(Icons.square_outlined),
-                    title: Text(widget.block.name),
+                  child: ClipRRect(
+                    child: ListTile(
+                      onTap: widget.onTap,
+                      // leading: Icon(Icons.square_outlined),
+                      // subtitle: PopupMenuButton(
+                      //   tooltip: "",
+                      //   menuPadding: EdgeInsets.all(0),
+                      //   elevation: 2,
+                      //   clipBehavior: Clip.hardEdge,
+                      //   borderRadius: BorderRadius.circular(8),
+                      //   itemBuilder: (context) => statuses
+                      //       .map(
+                      //         (status) => PopupMenuItem(
+                      //           child: Row(
+                      //             spacing: 8,
+                      //             children: [
+                      //               Icon(
+                      //                 Icons.circle,
+                      //                 color: Color(status.colorCode),
+                      //                 size: 16,
+                      //               ),
+                      //               Text(status.statusName),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       )
+                      //       .followedBy([PopupMenuItem(child: Text("No"))])
+                      //       .toList(),
+
+                      //   child: Row(
+                      //     mainAxisSize: MainAxisSize.min,
+                      //     children: [
+                      //       if (status != null)
+                      //         Icon(
+                      //           Icons.circle,
+                      //           color: Color(status!.colorCode),
+                      //         ),
+                      //       Text(
+                      //         status?.statusName ?? "No status",
+                      //         overflow: TextOverflow.ellipsis,
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(widget.block.name),
+                          PopupMenuButton(
+                            tooltip: "",
+                            menuPadding: EdgeInsets.all(0),
+                            elevation: 2,
+                            clipBehavior: Clip.antiAlias,
+                            borderRadius: BorderRadius.circular(8),
+                            itemBuilder: (context) => statuses
+                                .map(
+                                  (status) => PopupMenuItem(
+                                    onTap: () async {
+                                      ICBlock block = widget.block;
+                                      block.statusId = status.id;
+                                      await FileHandler.updateBlock(block);
+                                      await _loadCurrentBlockStatus();
+                                    },
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          color: Color(status.colorCode),
+                                          size: 16,
+                                        ),
+                                        Text(status.statusName),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .followedBy([
+                                  PopupMenuItem(
+                                    onTap: () async {
+                                      ICBlock block = widget.block;
+                                      block.statusId = "";
+                                      await FileHandler.updateBlock(block);
+                                      await _loadCurrentBlockStatus();
+                                    },
+                                    child: Text("Empty Status"),
+                                  ),
+                                ])
+                                .toList(),
+
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (status != null)
+                                  Icon(
+                                    Icons.circle,
+                                    color: Color(status!.colorCode),
+                                  ),
+                                Text(
+                                  status?.statusName ?? "No status",
+                                  style: TextStyle(
+                                    color: (status != null)
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.surfaceContainerHighest,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 Flexible(
                   fit: FlexFit.tight,
                   flex: 2,
-                  child: ListTile(
-                    tileColor: (status != null)
-                        ? Color(status!.colorCode).withAlpha(100)
-                        : Theme.of(context).colorScheme.surfaceDim,
-                    onTap: widget.onTap,
-                    title: (status != null)
-                        ? Text(widget.block.name)
-                        : Text(""),
+                  child: ClipRRect(
+                    child: ListTile(
+                      tileColor: (status != null)
+                          ? Color(status!.colorCode).withAlpha(100)
+                          : Theme.of(context).colorScheme.surfaceDim,
+                      onTap: widget.onTap,
+                      title: (status != null)
+                          ? Text(widget.block.name)
+                          : Text(""),
+                    ),
                   ),
                 ),
               ],
