@@ -17,7 +17,7 @@ class ICManageStatusPage extends StatefulWidget {
 }
 
 class _ICManageStatus extends State<ICManageStatusPage> {
-  TextEditingController _textEditingController = TextEditingController(
+  final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
   List<Cache> _caches = List.empty(growable: true);

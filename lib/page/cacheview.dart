@@ -35,7 +35,7 @@ class ICCacheView extends StatefulWidget {
 
 class _ICCacheView extends State<ICCacheView> {
   Cache? userCache = Cache(name: "loading");
-  TextEditingController _textEditingController = TextEditingController(
+  final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
   List<ICBlock> _userBlocks = [];

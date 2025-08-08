@@ -1,10 +1,8 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/filehandler.dart';
-import 'package:idea_cache/model/status.dart';
 
 class ICCacheOverview extends StatefulWidget {
   final String cacheid;

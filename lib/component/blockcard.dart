@@ -1,11 +1,8 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/status.dart';
-import 'package:idea_cache/page/managestatuspage.dart';
 
 class ICBlockCard extends StatefulWidget {
   final Function() onTap;

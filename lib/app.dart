@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -83,6 +81,7 @@ class ICAppState extends ChangeNotifier {
       changeBrightness(setting.thememode);
       changeFontFamily(setting.fontfamily);
       changeColorCode(setting.colorcode);
+      changeTooltipsEnabled(setting.toolTipsEnabled);
     });
   }
   void setContentEditedState(bool isEdited) {
