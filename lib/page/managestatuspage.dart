@@ -196,12 +196,17 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                   ),
                 );
               }).toList(),
-              onReorder: (int oldIndex, int newIndex) {
-                if (oldIndex < newIndex) {
-                  newIndex -= 1;
-                }
-                statuses.insert(newIndex, statuses.removeAt(oldIndex));
+              onReorder: (int oldIndex, int newIndex) async {
+                // Local update
+                statuses.insert(
+                  (oldIndex < newIndex) ? newIndex - 1 : newIndex,
+                  statuses.removeAt(oldIndex),
+                );
                 setState(() {});
+
+                // Reorder in file
+                await FileHandler.reorderStatuses(oldIndex, newIndex);
+                _readStatuses();
               },
             ),
           ),

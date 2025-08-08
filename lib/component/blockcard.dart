@@ -44,7 +44,8 @@ class _ICBlockCardState extends State<ICBlockCard> {
   }
 
   Future<void> _readStatuses() async {
-    List<ICStatus> readStatuses = await FileHandler.readStatus();
+    List<ICStatus> readStatuses =
+        await FileHandler.readAvailableStatusByCacheId(widget.block.cacheId);
     setState(() {
       statuses = readStatuses;
     });
@@ -340,11 +341,13 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                 .toList(),
 
                             child: Row(
+                              spacing: 8,
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (status != null)
                                   Icon(
                                     Icons.circle,
+                                    size: 16,
                                     color: Color(status!.colorCode),
                                   ),
                                 Text(
@@ -374,9 +377,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                           ? Color(status!.colorCode).withAlpha(100)
                           : Theme.of(context).colorScheme.surfaceDim,
                       onTap: widget.onTap,
-                      title: (status != null)
-                          ? Text(widget.block.name)
-                          : Text(""),
+                      title: (status != null) ? Text("") : Text(""),
                     ),
                   ),
                 ),

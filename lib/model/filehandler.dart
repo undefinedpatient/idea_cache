@@ -144,7 +144,7 @@ class FileHandler {
     }
 
     List<Cache> existingCaches = await readCaches();
-    // Replacing Cache
+    // Updating Cache with the same id
     for (int i = 0; i < existingCaches.length; i++) {
       if (existingCaches[i].id == cache.id) {
         existingCaches[i] = cache;
@@ -205,9 +205,21 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.status,
     );
-    final ICStatus? oldCache = await findStatusById(status.id);
-    if (oldCache == null) {
+    final ICStatus? oldStatus = await findStatusById(status.id);
+    if (oldStatus == null) {
       return appendStatus(status);
+    }
+    // If it is a cache that switch from Global to Local visibility
+    if (status.cacheId != "" && oldStatus.cacheId == "") {
+      // First read all block first
+      List<ICBlock> blocks = await readBlocks();
+      // Then iterate through all blocks, if the block has this status, remove it
+      for (int i = 0; i < blocks.length; i++) {
+        if (blocks[i].statusId == status.id) {
+          blocks[i].statusId = "";
+          await updateBlock(blocks[i]);
+        }
+      }
     }
     List<ICStatus>? statuses = await readStatus();
     statuses.removeWhere((item) => item.id == status.id);
@@ -224,7 +236,7 @@ class FileHandler {
     }
 
     List<ICStatus> existingStatuses = await readStatus();
-    // Replacing Cache
+    // Updating Status with the same id
     for (int i = 0; i < existingStatuses.length; i++) {
       if (existingStatuses[i].id == status.id) {
         existingStatuses[i] = status;
@@ -252,6 +264,21 @@ class FileHandler {
     caches.insert(to, item);
     return file.writeAsString(
       jsonEncode(caches.map((cache) => cache.toJson()).toList()),
+    );
+  }
+
+  static Future<File> reorderStatuses(int from, int to) async {
+    File file = await _localFile(
+      fileDestinationType: FileDestinationType.status,
+    );
+    List<ICStatus> statuses = await readStatus();
+    if (from < to) {
+      to -= 1;
+    }
+    final ICStatus item = statuses.removeAt(from);
+    statuses.insert(to, item);
+    return file.writeAsString(
+      jsonEncode(statuses.map((status) => status.toJson()).toList()),
     );
   }
 
