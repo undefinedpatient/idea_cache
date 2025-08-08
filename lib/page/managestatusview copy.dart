@@ -8,10 +8,10 @@ class ICManageStatus extends StatefulWidget {
   final void Function(String) onStatusClicked;
   final void Function(String) onTogglePicker;
   final void Function(String) onStatusDeleted;
-  final StateSetter _stateSetter;
+  final StateSetter? _stateSetter;
   const ICManageStatus({
     super.key,
-    required StateSetter stateSetter,
+    StateSetter? stateSetter,
     required this.onStatusClicked,
     required this.onTogglePicker,
     required this.onStatusDeleted,
@@ -31,12 +31,11 @@ class _ICManageStatus extends State<ICManageStatus> {
   OverlayEntry? colorPickerOverlay;
   Future<void> _readStatuses() async {
     List<ICStatus> readStatuses = await FileHandler.readStatus();
-    widget._stateSetter(() {
+    setState(() {
       statuses = readStatuses;
     });
   }
 
-  void changeColor(HSVColor color) {}
   @override
   void initState() {
     super.initState();
@@ -77,6 +76,7 @@ class _ICManageStatus extends State<ICManageStatus> {
                     child: ReorderableListView(
                       children: statuses.asMap().entries.map((entry) {
                         return ListTile(
+                          hoverColor: Theme.of(context).focusColor,
                           onTap: () {
                             widget.onStatusClicked(entry.value.id);
                           },
@@ -108,14 +108,28 @@ class _ICManageStatus extends State<ICManageStatus> {
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () async {
-                    ICStatus status = ICStatus(statusName: "UnnamedStatus");
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // TextButton(
+                    //   onPressed: () {
+                    //     // widget._stateSetter(() {
+                    //     //   colorPickerOverlay?.remove();
+                    //     //   colorPickerOverlay = null;
+                    //     // });
+                    //   },
+                    //   child: Text("Confirm"),
+                    // ),
+                    TextButton(
+                      onPressed: () async {
+                        ICStatus status = ICStatus(statusName: "UnnamedStatus");
 
-                    await FileHandler.appendStatus(status);
-                    await _readStatuses();
-                  },
-                  child: Text("Add Status"),
+                        await FileHandler.appendStatus(status);
+                        await _readStatuses();
+                      },
+                      child: Text("Add Status"),
+                    ),
+                  ],
                 ),
               ],
             ),

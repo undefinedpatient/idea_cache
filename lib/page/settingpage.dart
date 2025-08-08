@@ -41,7 +41,6 @@ class _ICSettingPageState extends State<ICSettingPage> {
   @override
   Widget build(BuildContext context) {
     ICAppState appState = context.watch<ICAppState>();
-    log(name: runtimeType.toString(), "build(BuildContext context)");
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(

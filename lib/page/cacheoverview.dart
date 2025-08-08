@@ -178,13 +178,13 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                     onTap: () {
                       widget.setPage(entry.key);
                     },
-                    direction: (isScrollVertical == true)
-                        ? Axis.horizontal
-                        : Axis.vertical,
                     onBlockUpdated: () async {
                       await _loadBlocksUnconditional();
                       await _filterBlocks();
                     },
+                    direction: (isScrollVertical == true)
+                        ? Axis.horizontal
+                        : Axis.vertical,
                   );
                 }).toList(),
               ),
