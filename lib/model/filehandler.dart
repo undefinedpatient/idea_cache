@@ -209,8 +209,8 @@ class FileHandler {
     if (oldStatus == null) {
       return appendStatus(status);
     }
-    // If it is a cache that switch from Global to Local visibility
-    if (status.cacheId != "" && oldStatus.cacheId == "") {
+    // If it is a cache that switch from Global to Local/Local to Local visibility
+    if (status.cacheId != oldStatus.cacheId) {
       // First read all block first
       List<ICBlock> blocks = await readBlocks();
       // Then iterate through all blocks, if the block has this status, remove it

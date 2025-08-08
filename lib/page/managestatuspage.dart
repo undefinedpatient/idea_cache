@@ -54,7 +54,20 @@ class _ICManageStatus extends State<ICManageStatusPage> {
       appBar: AppBar(
         title: Text("Statuses Manager"),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        actions: [],
+        actions: [
+          Tooltip(
+            message: "Create Status",
+            child: IconButton(
+              onPressed: () async {
+                ICStatus status = ICStatus(statusName: "UnnamedStatus");
+
+                await FileHandler.appendStatus(status);
+                await _readStatuses();
+              },
+              icon: Icon(Icons.add),
+            ),
+          ),
+        ],
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
       ),
       body: Column(
@@ -123,6 +136,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DropdownButton(
+                          autofocus: false,
                           value: entry.value.cacheId,
                           items: _caches
                               .map(
