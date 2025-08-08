@@ -83,9 +83,12 @@ class _ICManageStatus extends State<ICManageStatusPage> {
               buildDefaultDragHandles: false,
               children: statuses.asMap().entries.map((entry) {
                 List<Color> colors = [
+                  Colors.black,
+                  Colors.grey,
                   Colors.red,
                   Colors.green,
                   Colors.blue,
+                  Colors.cyanAccent,
                   Colors.yellow,
                   Colors.purple,
                   Colors.orange,

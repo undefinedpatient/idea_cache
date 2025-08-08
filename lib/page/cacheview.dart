@@ -156,55 +156,57 @@ class _ICCacheView extends State<ICCacheView> {
           spacing: 8,
           children: [
             Text(userCache!.name),
-            Tooltip(
-              message: (appState.toolTipsEnabled) ? "Rename Cache" : "",
-              child: IconButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      _textEditingController.text = userCache!.name;
-                      return Dialog(
-                        child: Container(
-                          width: 240,
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 8,
-                            children: [
-                              TextField(
-                                controller: _textEditingController,
-                                decoration: InputDecoration(
-                                  labelText: "Edit Cache Name",
+            if (MediaQuery.of(context).size.width > 520)
+              Tooltip(
+                message: (appState.toolTipsEnabled) ? "Rename Cache" : "",
+                child: IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        _textEditingController.text = userCache!.name;
+                        return Dialog(
+                          child: Container(
+                            width: 240,
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 8,
+                              children: [
+                                TextField(
+                                  controller: _textEditingController,
+                                  decoration: InputDecoration(
+                                    labelText: "Edit Cache Name",
+                                  ),
+                                  onSubmitted: (value) async {
+                                    userCache!.name = value;
+                                    await FileHandler.updateCache(userCache!);
+                                    await widget.reloadCaches();
+
+                                    Navigator.pop(context);
+                                  },
                                 ),
-                                onSubmitted: (value) async {
-                                  userCache!.name = value;
-                                  await FileHandler.updateCache(userCache!);
-                                  await widget.reloadCaches();
+                                TextButton(
+                                  onPressed: () async {
+                                    userCache!.name =
+                                        _textEditingController.text;
+                                    await FileHandler.updateCache(userCache!);
+                                    await widget.reloadCaches();
 
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  userCache!.name = _textEditingController.text;
-                                  await FileHandler.updateCache(userCache!);
-                                  await widget.reloadCaches();
-
-                                  Navigator.pop(context);
-                                },
-                                child: Text("Save"),
-                              ),
-                            ],
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("Save"),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                icon: Icon(Icons.edit_outlined),
+                        );
+                      },
+                    );
+                  },
+                  icon: Icon(Icons.edit_outlined),
+                ),
               ),
-            ),
           ],
         ),
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),

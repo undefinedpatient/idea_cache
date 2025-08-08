@@ -51,165 +51,6 @@ class _ICBlockCardState extends State<ICBlockCard> {
     });
   }
 
-  // void _toggleManageStatusView(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) => AlertDialog(
-  //       content: ICManageStatus(
-  //         // stateSetter: setOverlayState,
-  //         onStatusClicked: (String selectedStatusId) async {
-  //           ICBlock block = widget.block;
-  //           block.statusId = selectedStatusId;
-  //           await FileHandler.updateBlock(block);
-  //           await _loadStatus();
-  //           widget.onBlockUpdated?.call();
-  //         },
-  //         onStatusDeleted: (String selectedStatusId) async {
-  //           ICBlock block = widget.block;
-  //           if (block.statusId == selectedStatusId) {
-  //             block.statusId = "";
-  //             await FileHandler.updateBlock(block);
-  //             await _loadStatus();
-  //           }
-  //           widget.onBlockUpdated?.call();
-  //         },
-  //         onTogglePicker: (String selectedStatusId) async {
-  //           List<Color> colors = [
-  //             Colors.purple,
-  //             Colors.pink,
-  //             Colors.red,
-  //             Colors.orange,
-  //             Colors.yellow,
-  //             Colors.green,
-  //             Colors.cyan,
-  //             Colors.blue,
-  //           ];
-  //           manageStatusOverlay?.remove();
-  //           manageStatusOverlay?.dispose();
-  //           manageStatusOverlay = null;
-  //           await showDialog(
-  //             context: context,
-  //             builder: (context) => AlertDialog(
-  //               shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(0),
-  //               ),
-  //               content: Row(
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 children: colors.map((color) {
-  //                   return IconButton(
-  //                     color: color,
-  //                     onPressed: () async {
-  //                       Navigator.of(context).pop();
-  //                       ICStatus? status = await FileHandler.findStatusById(
-  //                         selectedStatusId,
-  //                       );
-  //                       if (status != null) {
-  //                         status.colorCode = color.toARGB32();
-  //                         await FileHandler.updateStatus(status);
-  //                         await _loadStatus();
-  //                       }
-
-  //                       widget.onBlockUpdated?.call();
-  //                     },
-  //                     icon: Icon(Icons.square, color: color),
-  //                   );
-  //                 }).toList(),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       ),
-  //     ),
-  //   );
-  //   // if (manageStatusOverlay != null) {
-  //   //   manageStatusOverlay?.remove();
-  //   //   manageStatusOverlay?.dispose();
-  //   //   manageStatusOverlay = null;
-  //   //   return;
-  //   // }
-  //   // manageStatusOverlay = OverlayEntry(
-  //   //   builder: (BuildContext context) {
-  //   //     return StatefulBuilder(
-  //   //       builder: (BuildContext context, StateSetter setOverlayState) {
-  //   //         return GestureDetector(
-  //   //           onTap: () {
-  //   //             manageStatusOverlay?.remove();
-  //   //             manageStatusOverlay?.dispose();
-  //   //             manageStatusOverlay = null;
-  //   //           },
-  //   //           child: ICManageStatus(
-  //   //             stateSetter: setOverlayState,
-  //   //             onStatusClicked: (String selectedStatusId) async {
-  //   //               ICBlock block = widget.block;
-  //   //               block.statusId = selectedStatusId;
-  //   //               await FileHandler.updateBlock(block);
-  //   //               await _loadStatus();
-  //   //               widget.onBlockUpdated?.call();
-  //   //             },
-  //   //             onStatusDeleted: (String selectedStatusId) async {
-  //   //               ICBlock block = widget.block;
-  //   //               if (block.statusId == selectedStatusId) {
-  //   //                 block.statusId = "";
-  //   //                 await FileHandler.updateBlock(block);
-  //   //                 await _loadStatus();
-  //   //               }
-  //   //               widget.onBlockUpdated?.call();
-  //   //             },
-  //   //             onTogglePicker: (String selectedStatusId) async {
-  //   //               List<Color> colors = [
-  //   //                 Colors.purple,
-  //   //                 Colors.pink,
-  //   //                 Colors.red,
-  //   //                 Colors.orange,
-  //   //                 Colors.yellow,
-  //   //                 Colors.green,
-  //   //                 Colors.cyan,
-  //   //                 Colors.blue,
-  //   //               ];
-  //   //               manageStatusOverlay?.remove();
-  //   //               manageStatusOverlay?.dispose();
-  //   //               manageStatusOverlay = null;
-  //   //               await showDialog(
-  //   //                 context: context,
-  //   //                 builder: (context) => AlertDialog(
-  //   //                   shape: RoundedRectangleBorder(
-  //   //                     borderRadius: BorderRadius.circular(0),
-  //   //                   ),
-  //   //                   content: Row(
-  //   //                     mainAxisSize: MainAxisSize.min,
-  //   //                     children: colors.map((color) {
-  //   //                       return IconButton(
-  //   //                         color: color,
-  //   //                         onPressed: () async {
-  //   //                           Navigator.of(context).pop();
-  //   //                           ICStatus? status =
-  //   //                               await FileHandler.findStatusById(
-  //   //                                 selectedStatusId,
-  //   //                               );
-  //   //                           if (status != null) {
-  //   //                             status.colorCode = color.toARGB32();
-  //   //                             await FileHandler.updateStatus(status);
-  //   //                             await _loadStatus();
-  //   //                           }
-
-  //   //                           widget.onBlockUpdated?.call();
-  //   //                         },
-  //   //                         icon: Icon(Icons.square, color: color),
-  //   //                       );
-  //   //                     }).toList(),
-  //   //                   ),
-  //   //                 ),
-  //   //               );
-  //   //             },
-  //   //           ),
-  //   //         );
-  //   //       },
-  //   //     );
-  //   //   },
-  //   // );
-  //   // Overlay.of(context, rootOverlay: true).insert(manageStatusOverlay!);
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -236,8 +77,8 @@ class _ICBlockCardState extends State<ICBlockCard> {
     return LayoutBuilder(
       builder: (context, contraint) {
         return SizedBox(
-          height: (widget.direction == Axis.horizontal) ? 80 : 160,
-          width: (widget.direction == Axis.horizontal) ? 360 : 180,
+          height: (widget.direction == Axis.horizontal) ? 90 : 160,
+          width: (widget.direction == Axis.horizontal) ? 360 : 200,
           child: Card(
             elevation: 2,
             clipBehavior: Clip.hardEdge,
@@ -252,51 +93,11 @@ class _ICBlockCardState extends State<ICBlockCard> {
                   child: ClipRRect(
                     child: ListTile(
                       onTap: widget.onTap,
-                      // leading: Icon(Icons.square_outlined),
-                      // subtitle: PopupMenuButton(
-                      //   tooltip: "",
-                      //   menuPadding: EdgeInsets.all(0),
-                      //   elevation: 2,
-                      //   clipBehavior: Clip.hardEdge,
-                      //   borderRadius: BorderRadius.circular(8),
-                      //   itemBuilder: (context) => statuses
-                      //       .map(
-                      //         (status) => PopupMenuItem(
-                      //           child: Row(
-                      //             spacing: 8,
-                      //             children: [
-                      //               Icon(
-                      //                 Icons.circle,
-                      //                 color: Color(status.colorCode),
-                      //                 size: 16,
-                      //               ),
-                      //               Text(status.statusName),
-                      //             ],
-                      //           ),
-                      //         ),
-                      //       )
-                      //       .followedBy([PopupMenuItem(child: Text("No"))])
-                      //       .toList(),
-
-                      //   child: Row(
-                      //     mainAxisSize: MainAxisSize.min,
-                      //     children: [
-                      //       if (status != null)
-                      //         Icon(
-                      //           Icons.circle,
-                      //           color: Color(status!.colorCode),
-                      //         ),
-                      //       Text(
-                      //         status?.statusName ?? "No status",
-                      //         overflow: TextOverflow.ellipsis,
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         mainAxisSize: MainAxisSize.min,
+                        spacing: 8,
                         children: [
                           Text(widget.block.name),
                           PopupMenuButton(
@@ -344,20 +145,32 @@ class _ICBlockCardState extends State<ICBlockCard> {
                               spacing: 8,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if (status != null)
-                                  Icon(
-                                    Icons.circle,
-                                    size: 16,
-                                    color: Color(status!.colorCode),
+                                Material(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                Text(
-                                  status?.statusName ?? "No status",
-                                  style: TextStyle(
-                                    color: (status != null)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.surfaceContainerHighest,
+                                  color: Color(
+                                    status?.colorCode ?? 0xFF000000,
+                                  ).withAlpha(100),
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      8,
+                                      4,
+                                      8,
+                                      4,
+                                    ),
+                                    child: Text(
+                                      status?.statusName ?? "No status",
+                                      style: TextStyle(
+                                        color: (status != null)
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
+                                            : Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
