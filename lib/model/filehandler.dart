@@ -201,35 +201,54 @@ class FileHandler {
     );
   }
 
-  static Future<File> updateStatus(ICStatus status) async {
+  static Future<File> updateStatus(ICStatus newStatus) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.status,
     );
-    final ICStatus? oldStatus = await findStatusById(status.id);
+    final ICStatus? oldStatus = await findStatusById(newStatus.id);
     if (oldStatus == null) {
-      return appendStatus(status);
+      return appendStatus(newStatus);
     }
-    // If it is a cache that switch from Global to Local/Local to Local visibility
-    if (status.cacheId != oldStatus.cacheId) {
+    // If it is a cache that switch any visibility
+    if (newStatus.cacheId != oldStatus.cacheId) {
       // First read all block first
       List<ICBlock> blocks = await readBlocks();
       // Then iterate through all blocks, if the block has this status, remove it
       for (int i = 0; i < blocks.length; i++) {
-        if (blocks[i].statusId == status.id) {
-          blocks[i].statusId = "";
-          await updateBlock(blocks[i]);
+        // If the block has the statusId that is being updated
+        if (blocks[i].statusId == newStatus.id) {
+          // log("Match! Checking");
+          // log("Old CacheId: ${oldStatus.cacheId}");
+          // log("New CacheId: ${newStatus.cacheId}");
+          // log("Block CacheId: ${blocks[i].cacheId}");
+          // From Global to Local, plus the block is not included anymore
+          if (newStatus.cacheId != "" &&
+              oldStatus.cacheId == "" &&
+              blocks[i].cacheId != newStatus.cacheId) {
+            blocks[i].statusId = "";
+            await updateBlock(blocks[i]);
+            continue;
+          }
+          // From Local to Local, plus the block is excluded
+          if (newStatus.cacheId != "" &&
+              oldStatus.cacheId != "" &&
+              blocks[i].cacheId != newStatus.cacheId) {
+            blocks[i].statusId = "";
+            await updateBlock(blocks[i]);
+            continue;
+          }
         }
       }
     }
     List<ICStatus>? statuses = await readStatus();
-    statuses.removeWhere((item) => item.id == status.id);
+    statuses.removeWhere((item) => item.id == newStatus.id);
     if (statuses.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < statuses.length; i++) {
-        String oldName = status.statusName;
-        if (statuses[i].statusName == status.statusName) {
+        String oldName = newStatus.statusName;
+        if (statuses[i].statusName == newStatus.statusName) {
           occurrence++;
-          status.statusName =
+          newStatus.statusName =
               "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
         }
       }
@@ -238,8 +257,8 @@ class FileHandler {
     List<ICStatus> existingStatuses = await readStatus();
     // Updating Status with the same id
     for (int i = 0; i < existingStatuses.length; i++) {
-      if (existingStatuses[i].id == status.id) {
-        existingStatuses[i] = status;
+      if (existingStatuses[i].id == newStatus.id) {
+        existingStatuses[i] = newStatus;
         break;
       }
     }
