@@ -8,7 +8,7 @@ void main() async {
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     WidgetsFlutterBinding.ensureInitialized();
     await windowManager.ensureInitialized();
-    await windowManager.setMinimumSize(const Size(720, 420));
+    await windowManager.setMinimumSize(const Size(480, 480));
   }
 
   runApp(const ICApp());

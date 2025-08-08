@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/filehandler.dart';
+import 'package:idea_cache/model/status.dart';
 
 class ICCacheOverview extends StatefulWidget {
   final String cacheid;
@@ -26,11 +27,29 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
     text: "",
   );
   List<ICBlock> _cacheBlocks = List.empty(growable: true);
-  Future<void> _loadBlocks() async {
+  Future<void> _loadBlocksUnconditional() async {
     List<ICBlock> temp = await FileHandler.findBlocksByCacheId(widget.cacheid);
     setState(() {
       _cacheBlocks = temp;
     });
+  }
+
+  Future<void> _loadBlocks() async {
+    List<ICBlock> temp = await FileHandler.findBlocksByCacheId(widget.cacheid);
+    if (temp.length != _cacheBlocks.length) {
+      setState(() {
+        _cacheBlocks = temp;
+      });
+      return;
+    }
+    for (int i = 0; i < temp.length; i++) {
+      if (_cacheBlocks[i] != temp[i]) {
+        setState(() {
+          _cacheBlocks = temp;
+        });
+        return;
+      }
+    }
   }
 
   Future<void> _filterBlocks() async {
@@ -152,30 +171,22 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                     ? Axis.vertical
                     : Axis.horizontal,
                 childAspectRatio: (isScrollVertical == true) ? 7 : 1,
-                children: _cacheBlocks
-                    .asMap()
-                    .entries
-                    .map(
-                      (entry) => ICBlockCard(
-                        key: Key(
-                          entry.value.id +
-                              entry.value.name +
-                              entry.value.statusId,
-                        ),
-                        block: entry.value,
-                        onTap: () {
-                          widget.setPage(entry.key);
-                        },
-                        direction: (isScrollVertical == true)
-                            ? Axis.horizontal
-                            : Axis.vertical,
-                        onBlockUpdated: () async {
-                          await _loadBlocks();
-                          await _filterBlocks();
-                        },
-                      ),
-                    )
-                    .toList(),
+                children: _cacheBlocks.asMap().entries.map((entry) {
+                  return ICBlockCard(
+                    key: ObjectKey(entry.value),
+                    block: entry.value,
+                    onTap: () {
+                      widget.setPage(entry.key);
+                    },
+                    direction: (isScrollVertical == true)
+                        ? Axis.horizontal
+                        : Axis.vertical,
+                    onBlockUpdated: () async {
+                      await _loadBlocksUnconditional();
+                      await _filterBlocks();
+                    },
+                  );
+                }).toList(),
               ),
             ),
           ],

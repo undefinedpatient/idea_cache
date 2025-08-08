@@ -25,6 +25,27 @@ class ICBlock {
     return _id;
   }
 
+  @override
+  bool operator ==(Object other) {
+    // if (identical(this, other)) return true;
+    // if (other.runtimeType != runtimeType) return false;
+    other = other as ICBlock;
+    return other._id == _id &&
+        other.cacheId == cacheId &&
+        other.name == name &&
+        other.content == content &&
+        other.statusId == statusId;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(_id, cacheId, name, content, statusId);
+  }
+
+  // (json['content'] as List<dynamic>)
+  //     .map((item) => Map<String, dynamic>.from(item as Map))
+  //     .toList();
+  // Convert Cache object to Json String, the String can be encode with dart:convert jsonEncode()
   Map<String, dynamic> toJson() {
     return {
       'id': _id,

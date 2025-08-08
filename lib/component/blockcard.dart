@@ -63,9 +63,6 @@ class _ICBlockCardState extends State<ICBlockCard> {
                   await FileHandler.updateBlock(block);
                   await _loadStatus();
                   if (selectedStatusId == "") {}
-                  manageStatusOverlay?.remove();
-                  manageStatusOverlay?.dispose();
-                  manageStatusOverlay = null;
                 },
                 onStatusDeleted: (String selectedStatusId) async {
                   ICBlock block = widget.block;
@@ -112,7 +109,8 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                 await FileHandler.updateStatus(status);
                                 await _loadStatus();
                               }
-                              // widget.onBlockUpdated!();
+
+                              widget.onBlockUpdated?.call();
                             },
                             icon: Icon(Icons.square, color: color),
                           );
@@ -138,6 +136,9 @@ class _ICBlockCardState extends State<ICBlockCard> {
 
   @override
   void dispose() {
+    manageStatusOverlay?.remove();
+    manageStatusOverlay?.dispose();
+    manageStatusOverlay = null;
     super.dispose();
   }
 

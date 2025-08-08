@@ -128,7 +128,9 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
                   widget.onPageChanged(
                     ICCacheView(
                       cacheid: _userCaches[_selectedIndex - 1].id,
-                      reloadCaches: _loadCaches,
+                      reloadCaches: () async {
+                        await _loadCaches();
+                      },
                     ),
                   );
                 },

@@ -347,7 +347,6 @@ class _ICCacheView extends State<ICCacheView> {
                     focusNode: _focusNode,
                     autofocus: true,
                     onKeyEvent: (KeyEvent event) async {
-                      log(event.logicalKey.keyLabel);
                       if (event.logicalKey.keyLabel == 'Y' ||
                           event.logicalKey.keyLabel == "Enter") {
                         await _deleteCache(context);
