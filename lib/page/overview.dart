@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/fileHandler.dart';
@@ -86,24 +84,6 @@ class _ICOverview extends State<ICOverview> {
                   isScrollVertical = false;
                 } else {
                   isScrollVertical = value;
-                }
-              });
-            },
-          ),
-          DropdownButton(
-            autofocus: false,
-            padding: EdgeInsets.all(4),
-            value: itemScaleFactor,
-            items: [
-              DropdownMenuItem(value: 1.0, child: Text("1x")),
-              DropdownMenuItem(value: 2.0, child: Text("2x")),
-            ],
-            onChanged: (value) {
-              setState(() {
-                if (value == null) {
-                  itemScaleFactor = 1.0;
-                } else {
-                  itemScaleFactor = value;
                 }
               });
             },

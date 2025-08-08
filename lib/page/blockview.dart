@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -26,6 +24,7 @@ class _ICBlockView extends State<ICBlockView> {
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
+
   final Map<String, String> _fontFamilies = {
     'Abel': "Abel",
     'Annie': 'Annie Use Your Telescope',
@@ -51,10 +50,9 @@ class _ICBlockView extends State<ICBlockView> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void _loadBlockContent() async {
+  Future<void> _loadBlockContent() async {
     ICBlock? block = await FileHandler.findBlockById(widget.blockid);
     if (block == null) {
-      // throw Exception("Block is Null");
       return;
     }
     if (block.content == "") {
@@ -77,8 +75,6 @@ class _ICBlockView extends State<ICBlockView> {
   void didUpdateWidget(covariant ICBlockView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _loadBlockContent();
-
-    log(name: runtimeType.toString(), widget.blockid);
   }
 
   @override
@@ -100,6 +96,7 @@ class _ICBlockView extends State<ICBlockView> {
     _focusNode.addListener(() {
       setState(() {});
     });
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
@@ -132,22 +129,24 @@ class _ICBlockView extends State<ICBlockView> {
                         ],
                       ),
                     ),
-                    MenuItemButton(
-                      onPressed: () {},
-                      requestFocusOnHover: false,
-                      child: Text("Manage Status"),
+                    Container(
+                      child: Row(
+                        children: [
+                          MenuItemButton(
+                            onPressed: () {
+                              _onSave(context);
+                              appState.setContentEditedState(false);
+                              setState(() {});
+                            },
+                            requestFocusOnHover: false,
+                            child: (appState.isContentEdited)
+                                ? Text(" Not Saved! ")
+                                : Text(" Save "),
+                          ),
+                        ],
+                      ),
                     ),
-                    MenuItemButton(
-                      onPressed: () {
-                        _onSave(context);
-                        appState.setContentEditedState(false);
-                        setState(() {});
-                      },
-                      requestFocusOnHover: false,
-                      child: (appState.isContentEdited)
-                          ? Text(" Not Saved! ")
-                          : Text(" Save "),
-                    ),
+
                     // Text(widget.blockid),
                   ],
                 ),

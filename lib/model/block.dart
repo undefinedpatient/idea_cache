@@ -1,4 +1,5 @@
-import 'package:idea_cache/model/status.dart';
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 class ICBlock {
@@ -24,10 +25,6 @@ class ICBlock {
     return _id;
   }
 
-  // (json['content'] as List<dynamic>)
-  //     .map((item) => Map<String, dynamic>.from(item as Map))
-  //     .toList();
-  // Convert Cache object to Json String, the String can be encode with dart:convert jsonEncode()
   Map<String, dynamic> toJson() {
     return {
       'id': _id,

@@ -5,13 +5,19 @@ class ICStatus {
   final String _id;
   String cacheId = ""; //If cacheId is empty, then it is a global status
   String statusName = "";
-  int colorCode = Colors.black.toARGB32();
-  ICStatus({String? cacheId, String? statusName, int? colorCode})
-    : _id = Uuid().v4() {
+  int colorCode = const Color.fromARGB(
+    255,
+    0,
+    0,
+    0,
+  ).toARGB32(); //If all 0, then default color is used, default is depending on the theme
+  ICStatus({String? cacheId, required String statusName, int? colorCode})
+    : _id = Uuid().v4(),
+      statusName = statusName {
     this.cacheId = (cacheId != null) ? cacheId : this.cacheId;
-    this.statusName = (statusName != null) ? statusName : this.statusName;
     this.colorCode = (colorCode != null) ? colorCode : this.colorCode;
   }
+  ICStatus.empty() : _id = "", statusName = "None";
   ICStatus.fromJson(Map<String, dynamic> json)
     : _id = json['id'],
       cacheId = json['cacheId'],

@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,7 +6,6 @@ import 'package:idea_cache/component/sidenavigationbar.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
 import 'package:idea_cache/page/emptypage.dart';
-import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
 
@@ -122,17 +120,6 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    // Widget pageWidget = ICOverview(onSetPage: (int index) {
-    //                   setState(() {
-    //                     _selectedIndex = index;
-    //                   });
-    //                   widget.onPageChanged(
-    //                     ICCacheView(
-    //                       cacheid: _userCaches[_selectedIndex - 1].id,
-    //                       reloadCaches: _loadCaches,
-    //                     ),
-    //                   );
-    //                 };
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,

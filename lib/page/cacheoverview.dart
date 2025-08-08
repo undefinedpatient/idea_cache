@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/filehandler.dart';
 
@@ -21,7 +22,6 @@ class ICCacheOverview extends StatefulWidget {
 
 class _ICCacheOverviewState extends State<ICCacheOverview> {
   bool isScrollVertical = true;
-  double itemScaleFactor = 1.0;
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
@@ -78,52 +78,23 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
           VerticalDivider(),
-          Row(
-            children: [
-              Text("View"),
-              DropdownButton(
-                autofocus: false,
-                padding: EdgeInsets.all(4),
-                value: isScrollVertical,
-                items: [
-                  DropdownMenuItem(value: false, child: Text("Horizontal")),
-                  DropdownMenuItem(value: true, child: Text("Vertical")),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    if (value == null) {
-                      isScrollVertical = false;
-                    } else {
-                      isScrollVertical = value;
-                    }
-                  });
-                },
-              ),
+          DropdownButton(
+            autofocus: false,
+            padding: EdgeInsets.all(4),
+            value: isScrollVertical,
+            items: [
+              DropdownMenuItem(value: false, child: Text("Horizontal")),
+              DropdownMenuItem(value: true, child: Text("Vertical")),
             ],
-          ),
-          VerticalDivider(),
-          Row(
-            children: [
-              Text("View"),
-              DropdownButton(
-                autofocus: false,
-                padding: EdgeInsets.all(4),
-                value: itemScaleFactor,
-                items: [
-                  DropdownMenuItem(value: 1.0, child: Text("1x")),
-                  DropdownMenuItem(value: 2.0, child: Text("2x")),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    if (value == null) {
-                      itemScaleFactor = 1.0;
-                    } else {
-                      itemScaleFactor = value;
-                    }
-                  });
-                },
-              ),
-            ],
+            onChanged: (value) {
+              setState(() {
+                if (value == null) {
+                  isScrollVertical = false;
+                } else {
+                  isScrollVertical = value;
+                }
+              });
+            },
           ),
         ],
       ),
@@ -175,28 +146,33 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
               ),
             ),
             Expanded(
-              child: GridView.extent(
-                maxCrossAxisExtent: (isScrollVertical == true)
-                    ? itemScaleFactor * 360
-                    : itemScaleFactor * 160,
+              child: GridView.count(
+                crossAxisCount: 1,
                 scrollDirection: (isScrollVertical == true)
                     ? Axis.vertical
                     : Axis.horizontal,
-                childAspectRatio: (isScrollVertical == true) ? 3 : 1 / 2,
+                childAspectRatio: (isScrollVertical == true) ? 7 : 1,
                 children: _cacheBlocks
                     .asMap()
                     .entries
                     .map(
-                      (entry) => Card(
-                        elevation: 2,
-                        clipBehavior: Clip.hardEdge,
-                        child: ListTile(
-                          leading: Icon(Icons.square_outlined),
-                          title: Text(entry.value.name),
-                          onTap: () {
-                            widget.setPage(entry.key);
-                          },
+                      (entry) => ICBlockCard(
+                        key: Key(
+                          entry.value.id +
+                              entry.value.name +
+                              entry.value.statusId,
                         ),
+                        block: entry.value,
+                        onTap: () {
+                          widget.setPage(entry.key);
+                        },
+                        direction: (isScrollVertical == true)
+                            ? Axis.horizontal
+                            : Axis.vertical,
+                        onBlockUpdated: () async {
+                          await _loadBlocks();
+                          await _filterBlocks();
+                        },
                       ),
                     )
                     .toList(),

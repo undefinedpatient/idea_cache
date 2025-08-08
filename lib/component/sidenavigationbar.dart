@@ -7,8 +7,6 @@ import 'package:idea_cache/component/cachelisttile.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/page/cacheview.dart';
-import 'package:idea_cache/page/emptypage.dart';
-import 'package:idea_cache/page/managestatusview.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'package:idea_cache/page/settingpage.dart';
 import 'package:provider/provider.dart';
@@ -16,10 +14,9 @@ import 'package:provider/provider.dart';
 class ICSideNavBar extends StatefulWidget {
   final void Function(Widget) onPageChanged;
   const ICSideNavBar({
-    Key? key,
+    super.key,
     required void Function(Widget widget) onPageChanged,
-  }) : onPageChanged = onPageChanged,
-       super(key: key);
+  }) : onPageChanged = onPageChanged;
   @override
   State<StatefulWidget> createState() {
     return _ICSideNavBarState();
@@ -29,7 +26,6 @@ class ICSideNavBar extends StatefulWidget {
 class _ICSideNavBarState extends State<ICSideNavBar> {
   int _selectedIndex = 0;
   List<Cache> _userCaches = [];
-  OverlayEntry? manageStatusOverlay;
   Future<void> _loadCaches() async {
     _userCaches = List.empty();
     final caches = await FileHandler.readCaches();
@@ -38,36 +34,11 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
     });
   }
 
-  void _toggleManageStatusView(BuildContext context) {
-    if (manageStatusOverlay != null) {
-      manageStatusOverlay?.remove();
-      manageStatusOverlay?.dispose();
-      manageStatusOverlay = null;
-      return;
-    }
-    manageStatusOverlay = OverlayEntry(
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setOverlayState) {
-            return GestureDetector(
-              onTap: () {
-                manageStatusOverlay?.remove();
-                manageStatusOverlay?.dispose();
-                manageStatusOverlay = null;
-              },
-              child: ICManageStatus(),
-            );
-          },
-        );
-      },
-    );
-    Overlay.of(context).insert(manageStatusOverlay!);
-  }
-
   @override
   void initState() {
     super.initState();
     _loadCaches();
+    // Load ICOverview as default
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onPageChanged(
         ICOverview(
@@ -85,6 +56,11 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
         ),
       );
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ICSideNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -144,9 +120,17 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
               child: ReorderableListView(
                 buildDefaultDragHandles: false,
                 onReorder: (int oldIndex, int newIndex) async {
-                  log("$oldIndex $newIndex");
                   await FileHandler.reorderCaches(oldIndex, newIndex);
                   await _loadCaches();
+                  setState(() {
+                    _selectedIndex = newIndex;
+                  });
+                  widget.onPageChanged(
+                    ICCacheView(
+                      cacheid: _userCaches[_selectedIndex - 1].id,
+                      reloadCaches: _loadCaches,
+                    ),
+                  );
                 },
 
                 children: _userCaches.asMap().entries.map((entry) {
@@ -168,6 +152,7 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
                             ),
                           );
                           appState.setContentEditedState(false);
+
                           return;
                         }
                         setState(() {
@@ -182,6 +167,12 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
                       },
                       onEditName: () async {
                         await _loadCaches();
+                        widget.onPageChanged(
+                          ICCacheView(
+                            cacheid: _userCaches[entry.key].id,
+                            reloadCaches: _loadCaches,
+                          ),
+                        );
                       },
                       selected: _selectedIndex == index + 1,
                     ),
@@ -197,30 +188,6 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
                 Cache newCache = Cache(name: "Untitled");
                 await FileHandler.appendCache(newCache);
                 await _loadCaches();
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                _selectedIndex == _userCaches.length + 1
-                    ? Icons.straighten
-                    : Icons.straighten,
-              ),
-              title: Text('Manage Status'),
-              selected: _selectedIndex == _userCaches.length + 1,
-              onTap: () {
-                if (appState.isContentEdited) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Warning: Content Not Saved"),
-                      duration: Durations.extralong3,
-                    ),
-                  );
-                  // set the edited state such that user can ignore the warning
-                  appState.setContentEditedState(false);
-
-                  return;
-                }
-                _toggleManageStatusView(context);
               },
             ),
             ListTile(
@@ -300,7 +267,6 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
               child: ReorderableListView(
                 buildDefaultDragHandles: false,
                 onReorder: (int oldIndex, int newIndex) async {
-                  log("$oldIndex $newIndex");
                   await FileHandler.reorderCaches(oldIndex, newIndex);
                   await _loadCaches();
                 },

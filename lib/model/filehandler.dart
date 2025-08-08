@@ -78,13 +78,41 @@ class FileHandler {
         }
       }
     }
-
     List<ICBlock> existingBlocks = await readBlocks();
     existingBlocks.add(block);
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
         existingBlocks.map((value) => value.toJson()).toList(),
+      ),
+    );
+  }
+
+  static Future<File> appendStatus(ICStatus status) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.status,
+    );
+    // If the new block name is already in form abc.001, strip away the .001 first
+    status.statusName = status.statusName.split('.')[0];
+    List<ICStatus>? statuses = await readStatus();
+    if (statuses.isNotEmpty) {
+      int occurrence = 0;
+      for (int i = 0; i < statuses.length; i++) {
+        String oldName = status.statusName;
+        if (statuses[i].statusName == status.statusName) {
+          occurrence++;
+          status.statusName =
+              "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+        }
+      }
+    }
+
+    List<ICStatus> existingStatuses = await readStatus();
+    existingStatuses.add(status);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+    return await file.writeAsString(
+      jsonEncoder.convert(
+        existingStatuses.map((value) => value.toJson()).toList(),
       ),
     );
   }
@@ -114,22 +142,6 @@ class FileHandler {
         }
       }
     }
-    // int occurrence = 1;
-    // // Case 0: If no duplicate name is found, then continues
-    // if (await findCacheByName(cache.name) != null) {
-    //   if ((await findCacheById(cache.id))!.name == cache.name) {
-    //     // Case 1: If the duplicated name cache is equal to the original one, pass
-    //     // E.g.: Renaming "abc" to "abc" should not change the name to "abc.001"
-    //   } else {
-    //     // Case 2: The duplicated name is due to other cache name
-    //     while (await findCacheByName(cache.name) != null) {
-    //       String oldName = cache.name;
-    //       cache.name =
-    //           "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
-    //       occurrence++;
-    //     }
-    //   }
-    // }
 
     List<Cache> existingCaches = await readCaches();
     // Replacing Cache
@@ -185,6 +197,45 @@ class FileHandler {
     return await file.writeAsString(
       jsonEncoder.convert(
         existingBlock.map((value) => value.toJson()).toList(),
+      ),
+    );
+  }
+
+  static Future<File> updateStatus(ICStatus status) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.status,
+    );
+    final ICStatus? oldCache = await findStatusById(status.id);
+    if (oldCache == null) {
+      return appendStatus(status);
+    }
+    List<ICStatus>? statuses = await readStatus();
+    statuses.removeWhere((item) => item.id == status.id);
+    if (statuses.isNotEmpty) {
+      int occurrence = 0;
+      for (int i = 0; i < statuses.length; i++) {
+        String oldName = status.statusName;
+        if (statuses[i].statusName == status.statusName) {
+          occurrence++;
+          status.statusName =
+              "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+        }
+      }
+    }
+
+    List<ICStatus> existingStatuses = await readStatus();
+    // Replacing Cache
+    for (int i = 0; i < existingStatuses.length; i++) {
+      if (existingStatuses[i].id == status.id) {
+        existingStatuses[i] = status;
+        break;
+      }
+    }
+
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+    return await file.writeAsString(
+      jsonEncoder.convert(
+        existingStatuses.map((value) => value.toJson()).toList(),
       ),
     );
   }
@@ -278,7 +329,7 @@ class FileHandler {
     );
   }
 
-  static Future<File> deleteBlocksById(blockId) async {
+  static Future<File> deleteBlocksById(String blockId) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
@@ -300,6 +351,35 @@ class FileHandler {
     );
   }
 
+  static Future<File> deleteStatusById(String statusId) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.status,
+    );
+    final ICStatus? status = await findStatusById(statusId);
+    List<ICStatus> existingStatuses = await readStatus();
+    List<ICBlock> relevantBlocks = await readBlocks();
+    if (status == null) {
+      return file;
+    }
+
+    for (int i = 0; i < existingStatuses.length; i++) {
+      if (existingStatuses[i].id == statusId) {
+        existingStatuses.removeAt(i);
+        break;
+      }
+    }
+    // If any block still have the status in them, remove their status too
+    for (int i = 0; i < relevantBlocks.length; i++) {
+      if (relevantBlocks[i].statusId == statusId) {
+        relevantBlocks[i].statusId = "";
+        await updateBlock(relevantBlocks[i]);
+      }
+    }
+    return file.writeAsString(
+      jsonEncode(existingStatuses.map((value) => value.toJson()).toList()),
+    );
+  }
+
   /*
   Find the Cache by cachename
   */
@@ -308,6 +388,26 @@ class FileHandler {
     for (int i = 0; i < caches.length; i++) {
       if (caches[i].name == cachename) {
         return caches[i];
+      }
+    }
+    return null;
+  }
+
+  static Future<ICStatus?> findStatusByName(String statusname) async {
+    List<ICStatus>? statuses = await readStatus();
+    for (int i = 0; i < statuses.length; i++) {
+      if (statuses[i].statusName == statusname) {
+        return statuses[i];
+      }
+    }
+    return null;
+  }
+
+  static Future<ICStatus?> findStatusById(String statusId) async {
+    List<ICStatus>? statuses = await readStatus();
+    for (int i = 0; i < statuses.length; i++) {
+      if (statuses[i].id == statusId) {
+        return statuses[i];
       }
     }
     return null;
@@ -344,6 +444,24 @@ class FileHandler {
       orderedblocks.add(unorderedBlocks[indexOfTargetBlock]);
     }
     return orderedblocks;
+  }
+
+  static Future<List<ICStatus>> readAvailableStatusByCacheId(
+    String cacheId,
+  ) async {
+    List<ICStatus>? statuses = List.empty(growable: true);
+    List<ICStatus>? readStatuses = await readStatus();
+    Cache? cache = await findCacheById(cacheId);
+    if (cache == null) {
+      throw Exception("findBlocksByCacheId: cache is null!");
+    }
+    // Filtering
+    for (int i = 0; i < readStatuses.length; i++) {
+      if (readStatuses[i].cacheId == cacheId || readStatuses[i].cacheId == "") {
+        statuses.add(readStatuses[i]);
+      }
+    }
+    return statuses;
   }
 
   static Future<Cache?> findCacheById(String cacheId) async {
