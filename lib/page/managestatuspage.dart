@@ -217,8 +217,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                               ),
                                               SizedBox(height: 8),
                                               if (Platform.isAndroid ||
-                                                  Platform.isIOS ||
-                                                  Platform.isWindows)
+                                                  Platform.isIOS)
                                                 Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,

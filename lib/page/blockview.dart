@@ -101,8 +101,7 @@ class _ICBlockView extends State<ICBlockView> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(4),
+          Material(
             color: Theme.of(context).colorScheme.surfaceContainerLow,
             child: Column(
               children: [
@@ -110,23 +109,21 @@ class _ICBlockView extends State<ICBlockView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
-                      child: Row(
-                        children: [
-                          Text("Advanced Tool Bar"),
-                          Transform.scale(
-                            scale: 0.7,
-                            child: Switch(
-                              value: isAdvancedToolBarOn,
-
-                              onChanged: (value) {
-                                setState(() {
-                                  isAdvancedToolBarOn = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
+                      padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
+                      child: SizedBox(
+                        width: 190,
+                        child: ListTile(
+                          selectedTileColor: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
+                          selected: isAdvancedToolBarOn,
+                          onTap: () {
+                            setState(() {
+                              isAdvancedToolBarOn = !isAdvancedToolBarOn;
+                            });
+                          },
+                          title: Text("Advanced Tool Bar"),
+                        ),
                       ),
                     ),
                     Container(
