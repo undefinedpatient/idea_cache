@@ -332,7 +332,176 @@ class _ICMainView extends State<ICMainView> {
         ),
       );
     } else {
-      return ICEmptyPage();
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        appBar: AppBar(
+          title: RichText(
+            text: TextSpan(
+              text: "IdeaCache ",
+              style: Theme.of(context).textTheme.headlineMedium,
+              children: <TextSpan>[
+                TextSpan(
+                  text: " v1.3.0",
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ],
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+        ),
+        drawer: SafeArea(
+          child: Drawer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DrawerHeader(
+                  child: Text(
+                    "Cache Menu",
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceTint,
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(
+                    (_selectedIndex == 0)
+                        ? Icons.dashboard
+                        : Icons.dashboard_outlined,
+                  ),
+                  title: Text("Overview"),
+                  selected: _selectedIndex == 0,
+                  onTap: () {
+                    if (appState.isContentEdited) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Warning: Content Not Saved"),
+                          duration: Durations.extralong3,
+                        ),
+                      );
+                      appState.setContentEditedState(false);
+                      return;
+                    }
+                    setState(() {
+                      _selectedIndex = 0;
+                    });
+                  },
+                ),
+                Expanded(
+                  child: ReorderableListView(
+                    onReorder: (int oldIndex, int newIndex) async {
+                      _userCaches.insert(
+                        (oldIndex < newIndex) ? newIndex - 1 : newIndex,
+                        _userCaches.removeAt(oldIndex),
+                      );
+                      setState(() {});
+                      await FileHandler.reorderCaches(oldIndex, newIndex);
+                      await _loadCaches();
+                    },
+
+                    children: _userCaches.asMap().entries.map((entry) {
+                      final int index = entry.key;
+                      final String title = entry.value.name;
+                      final String id = entry.value.id;
+                      return ReorderableDelayedDragStartListener(
+                        key: ValueKey(id),
+                        index: index,
+                        child: ICCacheListTile(
+                          title: title,
+                          cacheid: id,
+                          onTap: () {
+                            if (appState.isContentEdited) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Warning: Content Not Saved"),
+                                  duration: Durations.extralong3,
+                                ),
+                              );
+                              appState.setContentEditedState(false);
+                              return;
+                            }
+                            setState(() {
+                              _selectedIndex = index + 1;
+                            });
+                          },
+                          onEditName: () async {
+                            await _loadCaches();
+                          },
+                          selected: _selectedIndex == index + 1,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.add),
+                  title: Text('Add Cache'),
+                  selected: false,
+                  onTap: () async {
+                    Cache newCache = Cache(name: "Untitled");
+                    await FileHandler.appendCache(newCache);
+                    await _loadCaches();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    _selectedIndex == _userCaches.length + 1
+                        ? Icons.rule_outlined
+                        : Icons.rule_outlined,
+                  ),
+                  title: Text('Manage Statuses'),
+                  selected: _selectedIndex == _userCaches.length + 1,
+                  onTap: () {
+                    if (appState.isContentEdited) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Warning: Content Not Saved"),
+                          duration: Durations.extralong3,
+                        ),
+                      );
+                      // set the edited state such that user can ignore the warning
+                      appState.setContentEditedState(false);
+                      return;
+                    }
+                    setState(() {
+                      _selectedIndex = _userCaches.length + 1;
+                    });
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    _selectedIndex == _userCaches.length + 2
+                        ? Icons.settings
+                        : Icons.settings_outlined,
+                  ),
+                  title: Text('Settings'),
+                  selected: _selectedIndex == _userCaches.length + 2,
+                  onTap: () {
+                    if (appState.isContentEdited) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Warning: Content Not Saved"),
+                          duration: Durations.extralong3,
+                        ),
+                      );
+                      // set the edited state such that user can ignore the warning
+                      appState.setContentEditedState(false);
+                      return;
+                    }
+                    setState(() {
+                      _selectedIndex = _userCaches.length + 2;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: pageWidget,
+      );
     }
   }
 }
