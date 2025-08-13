@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
@@ -336,51 +335,36 @@ class _ICCacheView extends State<ICCacheView> {
                   child: SizedBox(width: 120, child: Text("Overview")),
                 ),
                 Expanded(
-                  child: ReorderableListView(
-                    buildDefaultDragHandles: false,
+                  child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: _userBlocks.asMap().entries.map((
                       MapEntry<int, ICBlock> entry,
                     ) {
-                      return ReorderableDelayedDragStartListener(
-                        index: entry.key,
-                        key: ValueKey(entry.value.id),
-                        child: ICBlockListTile(
-                          name: entry.value.name,
-                          blockid: entry.value.id,
-                          onTap: () {
-                            if (appState.isContentEdited) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Warning: Content Not Saved"),
-                                  duration: Durations.extralong3,
-                                ),
-                              );
-                              // set the edited state such that user can ignore the warning
-                              appState.setContentEditedState(false);
-                              return;
-                            }
-                            setState(() {
-                              _selectedIndex = entry.key;
-                            });
-                          },
-                          onEditName: () async {
-                            await _loadBlocks();
-                          },
-                          isSelected: _selectedIndex == entry.key,
-                        ),
+                      return ICBlockListTile(
+                        name: entry.value.name,
+                        blockid: entry.value.id,
+                        onTap: () {
+                          if (appState.isContentEdited) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Warning: Content Not Saved"),
+                                duration: Durations.extralong3,
+                              ),
+                            );
+                            // set the edited state such that user can ignore the warning
+                            appState.setContentEditedState(false);
+                            return;
+                          }
+                          setState(() {
+                            _selectedIndex = entry.key;
+                          });
+                        },
+                        onEditName: () async {
+                          await _loadBlocks();
+                        },
+                        isSelected: _selectedIndex == entry.key,
                       );
                     }).toList(),
-                    onReorder: (int oldIndex, int newIndex) async {
-                      setState(() {
-                        if (oldIndex < newIndex) {
-                          newIndex -= 1;
-                        }
-                        final ICBlock item = _userBlocks.removeAt(oldIndex);
-                        _userBlocks.insert(newIndex, item);
-                      });
-                      await reorderBlock(oldIndex, newIndex);
-                    },
                   ),
                 ),
                 Tooltip(

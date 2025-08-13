@@ -1,11 +1,13 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/preview.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:idea_cache/page/managestatuspage.dart';
+import 'package:provider/provider.dart';
 
 // The Status will be following colorScheme.surfaceDim if it is an empty status
 class ICBlockCard extends StatefulWidget {
@@ -71,6 +73,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
 
   @override
   Widget build(BuildContext context) {
+    ICAppState appState = context.watch<ICAppState>();
     // when list view use this
     // ListTile(
     //             onTap: widget.onTap,
@@ -104,6 +107,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                           ).colorScheme.onSurface.withAlpha(50),
                         ),
                       ),
+                      trailing: PopupMenuButton(itemBuilder: (context) => []),
                       onTap: widget.onTap,
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,24 +246,27 @@ class _ICBlockCardState extends State<ICBlockCard> {
                   fit: FlexFit.tight,
                   flex: 2,
                   child: ClipRRect(
-                    child: ListTile(
-                      tileColor: (status != null)
-                          ? Color(status!.colorCode).withAlpha(100)
-                          : Theme.of(context).colorScheme.surfaceDim,
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Dialog(
-                              child: ICPreview(
-                                blockId: widget.block.id,
-                                nagivateToPageCallback: widget.onTap,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      title: (status != null) ? Text("") : Text(""),
+                    child: Tooltip(
+                      message: (appState.toolTipsEnabled) ? "Preview" : "",
+                      child: ListTile(
+                        tileColor: (status != null)
+                            ? Color(status!.colorCode).withAlpha(100)
+                            : Theme.of(context).colorScheme.surfaceDim,
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                child: ICPreview(
+                                  blockId: widget.block.id,
+                                  nagivateToPageCallback: widget.onTap,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        title: (status != null) ? Text("") : Text(""),
+                      ),
                     ),
                   ),
                 ),

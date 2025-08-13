@@ -116,7 +116,11 @@ class _ICBlockListTile extends State<ICBlockListTile> {
                 )
               : GestureDetector(
                   onSecondaryTap: _toggleEditMode,
-                  child: Text(widget._name),
+                  child: Text(
+                    widget._name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
         ),
       ),
