@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -23,9 +25,12 @@ class ICApp extends StatelessWidget {
   const ICApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ICAppState(),
-      child: Consumer<ICAppState>(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ICSettingsModel()),
+        ChangeNotifierProvider(create: (context) => ICCacheModel()),
+      ],
+      child: Consumer<ICSettingsModel>(
         builder: (context, value, child) {
           return MaterialApp(
             home: ICMainView(),
@@ -66,7 +71,7 @@ class ICApp extends StatelessWidget {
   }
 }
 
-class ICAppState extends ChangeNotifier {
+class ICSettingsModel extends ChangeNotifier {
   // User Settings
   ThemeMode thememode = ThemeMode.light;
   String font = 'FiraCode Nerd Font';
@@ -75,7 +80,7 @@ class ICAppState extends ChangeNotifier {
   // App States
   bool isContentEdited = false;
 
-  ICAppState() {
+  ICSettingsModel() {
     FileHandler.loadSetting().then((Setting setting) {
       changeBrightness(setting.thememode);
       changeFontFamily(setting.fontfamily);
@@ -104,6 +109,25 @@ class ICAppState extends ChangeNotifier {
 
   void changeTooltipsEnabled(bool enable) {
     toolTipsEnabled = enable;
+    notifyListeners();
+  }
+}
+
+class ICCacheModel extends ChangeNotifier {
+  final List<Cache> _caches = [];
+  UnmodifiableListView<Cache> get caches => UnmodifiableListView(_caches);
+
+  Future<void> loadFromFile() async {
+    FileHandler.readCaches().then((caches) {
+      for (Cache item in caches) {
+        _caches.add(item);
+      }
+    });
+    notifyListeners();
+  }
+
+  void loadFromFileSync() async {
+    _caches.addAll(await FileHandler.readCaches());
     notifyListeners();
   }
 }
@@ -144,7 +168,7 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    ICAppState appState = context.watch<ICAppState>();
+    ICSettingsModel appState = context.watch<ICSettingsModel>();
     // log("build", name: runtimeType.toString());
     Widget pageWidget = ICEmptyPage();
     if (_selectedIndex == 0) {
@@ -362,51 +386,57 @@ class _ICMainView extends State<ICMainView> {
                     });
                   },
                 ),
-                Expanded(
-                  child: ReorderableListView(
-                    onReorder: (int oldIndex, int newIndex) async {
-                      _userCaches.insert(
-                        (oldIndex < newIndex) ? newIndex - 1 : newIndex,
-                        _userCaches.removeAt(oldIndex),
-                      );
-                      setState(() {});
-                      await FileHandler.reorderCaches(oldIndex, newIndex);
-                      await _loadCaches();
-                    },
+                Builder(
+                  builder: (context) {
+                    return Expanded(
+                      child: ReorderableListView(
+                        onReorder: (int oldIndex, int newIndex) async {
+                          _userCaches.insert(
+                            (oldIndex < newIndex) ? newIndex - 1 : newIndex,
+                            _userCaches.removeAt(oldIndex),
+                          );
+                          setState(() {});
+                          await FileHandler.reorderCaches(oldIndex, newIndex);
+                          await _loadCaches();
+                        },
 
-                    children: _userCaches.asMap().entries.map((entry) {
-                      final int index = entry.key;
-                      final String title = entry.value.name;
-                      final String id = entry.value.id;
-                      return ReorderableDelayedDragStartListener(
-                        key: ValueKey(id),
-                        index: index,
-                        child: ICCacheListTile(
-                          title: title,
-                          cacheid: id,
-                          onTap: () {
-                            if (appState.isContentEdited) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Warning: Content Not Saved"),
-                                  duration: Durations.extralong3,
-                                ),
-                              );
-                              appState.setContentEditedState(false);
-                              return;
-                            }
-                            setState(() {
-                              _selectedIndex = index + 1;
-                            });
-                          },
-                          onEditName: () async {
-                            await _loadCaches();
-                          },
-                          selected: _selectedIndex == index + 1,
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                        children: _userCaches.asMap().entries.map((entry) {
+                          final int index = entry.key;
+                          final String title = entry.value.name;
+                          final String id = entry.value.id;
+                          return ReorderableDelayedDragStartListener(
+                            key: ValueKey(id),
+                            index: index,
+                            child: ICCacheListTile(
+                              title: title,
+                              cacheid: id,
+                              onTap: () {
+                                if (appState.isContentEdited) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Warning: Content Not Saved",
+                                      ),
+                                      duration: Durations.extralong3,
+                                    ),
+                                  );
+                                  appState.setContentEditedState(false);
+                                  return;
+                                }
+                                setState(() {
+                                  _selectedIndex = index + 1;
+                                });
+                              },
+                              onEditName: () async {
+                                await _loadCaches();
+                              },
+                              selected: _selectedIndex == index + 1,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.add),

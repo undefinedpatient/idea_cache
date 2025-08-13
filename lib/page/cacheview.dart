@@ -34,7 +34,7 @@ class _ICCacheView extends State<ICCacheView> {
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
-  List<ICBlock> _userBlocks = [];
+  List<ICBlock> userBlocks = [];
   int _selectedIndex = -1;
   OverlayEntry? entryImportOverlay;
   final FocusNode _focusNode = FocusNode();
@@ -44,7 +44,7 @@ class _ICCacheView extends State<ICCacheView> {
       widget.cacheid,
     );
     setState(() {
-      _userBlocks = blocks;
+      userBlocks = blocks;
     });
   }
 
@@ -53,14 +53,6 @@ class _ICCacheView extends State<ICCacheView> {
     setState(() {
       userCache = cache;
     });
-  }
-
-  Future<void> reorderBlock(int from, int to) async {
-    if (userCache == null) {
-      return;
-    }
-    userCache!.reorderBlockId(from, to);
-    FileHandler.updateCache(userCache!);
   }
 
   Future<void> _deleteCache(BuildContext context) async {
@@ -78,7 +70,7 @@ class _ICCacheView extends State<ICCacheView> {
 
   Future<void> _deleteBlock(BuildContext context) async {
     Navigator.pop(context);
-    ICBlock oldBlock = _userBlocks[_selectedIndex];
+    ICBlock oldBlock = userBlocks[_selectedIndex];
     userCache!.removeBlockId(oldBlock.id);
     await FileHandler.updateCache(userCache!);
     await FileHandler.deleteBlocksById(oldBlock.id);
@@ -89,8 +81,8 @@ class _ICCacheView extends State<ICCacheView> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
     await _loadBlocks();
-    if (_selectedIndex >= _userBlocks.length) {
-      _selectedIndex = _userBlocks.length - 1;
+    if (_selectedIndex >= userBlocks.length) {
+      _selectedIndex = userBlocks.length - 1;
       // Hard Limiting the _selectedIndex
       if (_selectedIndex == -1) {
         _selectedIndex = 0;
@@ -125,7 +117,7 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   Widget build(BuildContext context) {
-    ICAppState appState = context.watch<ICAppState>();
+    ICSettingsModel appState = context.watch<ICSettingsModel>();
     if (userCache == null) {
       return ICEmptyPage();
     }
@@ -139,9 +131,13 @@ class _ICCacheView extends State<ICCacheView> {
             _selectedIndex = index;
           });
         },
+        onEdit: () async {
+          await _loadBlocks();
+          await _loadCache();
+        },
       );
-    } else if (_userBlocks.isNotEmpty) {
-      pageWidget = ICBlockView(blockid: _userBlocks[_selectedIndex].id);
+    } else if (userBlocks.isNotEmpty) {
+      pageWidget = ICBlockView(blockid: userBlocks[_selectedIndex].id);
     }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -337,7 +333,7 @@ class _ICCacheView extends State<ICCacheView> {
                 Expanded(
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    children: _userBlocks.asMap().entries.map((
+                    children: userBlocks.asMap().entries.map((
                       MapEntry<int, ICBlock> entry,
                     ) {
                       return ICBlockListTile(

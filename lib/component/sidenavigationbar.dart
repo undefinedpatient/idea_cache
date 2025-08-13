@@ -69,7 +69,7 @@ class _ICSideNavBarState extends State<ICSideNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    ICAppState appState = context.watch<ICAppState>();
+    ICSettingsModel appState = context.watch<ICSettingsModel>();
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return SizedBox(
         width: 180,

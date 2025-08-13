@@ -53,7 +53,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
 
   @override
   Widget build(BuildContext context) {
-    ICAppState appState = context.watch<ICAppState>();
+    ICSettingsModel appState = context.watch<ICSettingsModel>();
     String userSelectedCacheId = "";
     return Container(
       height: 600,
@@ -107,7 +107,12 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ReorderableDragStartListener(
-                          child: Icon(Icons.drag_handle),
+                          child: Icon(
+                            Icons.drag_handle,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withAlpha(50),
+                          ),
                           index: entry.key,
                         ),
                         Tooltip(

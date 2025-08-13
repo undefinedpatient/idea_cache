@@ -87,7 +87,7 @@ class _ICBlockView extends State<ICBlockView> {
 
   @override
   Widget build(BuildContext context) {
-    ICAppState appState = context.watch<ICAppState>();
+    ICSettingsModel appState = context.watch<ICSettingsModel>();
     _controller.document.changes.listen((event) {
       appState.setContentEditedState(true);
       setState(() {}); //Trigger Rebuild

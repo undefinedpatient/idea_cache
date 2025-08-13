@@ -31,6 +31,9 @@ class ICBlockCard extends StatefulWidget {
 
 class _ICBlockCardState extends State<ICBlockCard> {
   ICStatus? status;
+  TextEditingController _textEditingController = TextEditingController(
+    text: "",
+  );
   List<ICStatus> statuses = List.empty(growable: true);
   OverlayEntry? manageStatusOverlay;
   Future<void> _loadCurrentBlockStatus() async {
@@ -73,7 +76,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
 
   @override
   Widget build(BuildContext context) {
-    ICAppState appState = context.watch<ICAppState>();
+    ICSettingsModel appState = context.watch<ICSettingsModel>();
     // when list view use this
     // ListTile(
     //             onTap: widget.onTap,
@@ -107,7 +110,69 @@ class _ICBlockCardState extends State<ICBlockCard> {
                           ).colorScheme.onSurface.withAlpha(50),
                         ),
                       ),
-                      trailing: PopupMenuButton(itemBuilder: (context) => []),
+                      trailing: PopupMenuButton(
+                        tooltip: "",
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  // _textEditingController.text = userCache!.name;
+                                  return Dialog(
+                                    child: Container(
+                                      width: 240,
+                                      padding: EdgeInsets.all(16),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        spacing: 8,
+                                        children: [
+                                          TextField(
+                                            controller: _textEditingController,
+                                            decoration: InputDecoration(
+                                              labelText: "Edit Block Name",
+                                            ),
+                                            onSubmitted: (value) async {
+                                              widget.block.name = value;
+                                              await FileHandler.updateBlock(
+                                                widget.block,
+                                              );
+                                              await widget.updateCallBack
+                                                  ?.call();
+
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          TextButton(
+                                            onPressed: () async {
+                                              widget.block.name =
+                                                  _textEditingController.text;
+                                              await FileHandler.updateBlock(
+                                                widget.block,
+                                              );
+                                              await widget.updateCallBack
+                                                  ?.call();
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Save"),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child: Row(
+                              spacing: 8,
+                              children: [
+                                Icon(Icons.edit_outlined, size: 16),
+                                Text("Rename"),
+                              ],
+                            ),
+                          ),
+                        ].toList(),
+                      ),
                       onTap: widget.onTap,
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

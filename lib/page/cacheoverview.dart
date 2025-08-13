@@ -10,12 +10,13 @@ import 'package:idea_cache/model/filehandler.dart';
 class ICCacheOverview extends StatefulWidget {
   final String cacheid;
   final Function(int) setPage;
+  final Future<void> Function() onEdit;
   const ICCacheOverview({
     super.key,
-    required String cacheid,
-    required Function(int) setPage,
-  }) : cacheid = cacheid,
-       setPage = setPage;
+    required this.cacheid,
+    required this.setPage,
+    required this.onEdit,
+  });
   @override
   State<StatefulWidget> createState() {
     return _ICCacheOverviewState();
@@ -195,15 +196,17 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
               child: ReorderableListView(
                 proxyDecorator: proxyDecorator,
                 padding: EdgeInsets.all(0),
-                onReorder: (oldIndex, newIndex) {
+                onReorder: (oldIndex, newIndex) async {
                   if (oldIndex < newIndex) {
-                    newIndex -= 1;
+                    newIndex--;
                   }
-                  ICBlock temp = _cacheBlocks[oldIndex];
-                  _cacheBlocks.removeAt(oldIndex);
-                  _cacheBlocks.insert(newIndex, temp);
-                  _reorderBlock(oldIndex, newIndex);
-                  setState(() {}); //Local refresh the page
+                  //Local refresh the page
+                  _cacheBlocks.insert(
+                    newIndex,
+                    _cacheBlocks.removeAt(oldIndex),
+                  );
+                  setState(() {});
+                  await _reorderBlock(oldIndex, newIndex);
                 },
                 buildDefaultDragHandles: false,
                 scrollDirection: (isScrollVertical == true)
@@ -220,6 +223,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                     updateCallBack: () async {
                       await _loadBlocksUnconditional();
                       await _filterBlocks();
+                      await widget.onEdit();
                     },
                     direction: (isScrollVertical == true)
                         ? Axis.horizontal

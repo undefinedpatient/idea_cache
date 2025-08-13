@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/filehandler.dart';
@@ -34,7 +33,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final appState = context.read<ICAppState>();
+      final appState = context.read<ICSettingsModel>();
       setState(() {
         _themeMode = appState.thememode;
         _font = appState.font;
@@ -46,7 +45,7 @@ class _ICSettingPageState extends State<ICSettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    ICAppState appState = context.watch<ICAppState>();
+    ICSettingsModel appState = context.watch<ICSettingsModel>();
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(
