@@ -34,7 +34,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.light,
-                contrastLevel: 1,
+                contrastLevel: 0.5,
               ),
 
               textTheme: Typography.blackCupertino.apply(
@@ -46,7 +46,7 @@ class ICApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Color(value.colorcode),
                 brightness: Brightness.dark,
-                contrastLevel: 1,
+                contrastLevel: 0.5,
               ),
               textTheme: Typography.whiteCupertino.apply(
                 fontFamily: value.font,
@@ -355,15 +355,15 @@ class _ICMainView extends State<ICMainView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceTint,
+                  ),
                   child: Text(
                     "Cache Menu",
                     style: TextStyle(
                       fontSize: 24,
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceTint,
                   ),
                 ),
                 ListTile(

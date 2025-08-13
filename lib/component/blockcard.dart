@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/fileHandler.dart';
@@ -8,9 +7,11 @@ class ICBlockCard extends StatefulWidget {
   final Function() onTap;
   final Axis direction;
   final Function()? onBlockUpdated;
+  final int index;
   final ICBlock block;
   const ICBlockCard({
     super.key,
+    required this.index,
     required this.block,
     required this.onTap,
     this.direction = Axis.horizontal,
@@ -78,7 +79,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
           width: (widget.direction == Axis.horizontal) ? 360 : 200,
           child: Card(
             elevation: 2,
-            clipBehavior: Clip.hardEdge,
+            clipBehavior: Clip.antiAlias,
             child: Flex(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -89,6 +90,10 @@ class _ICBlockCardState extends State<ICBlockCard> {
                   flex: 3,
                   child: ClipRRect(
                     child: ListTile(
+                      leading: ReorderableDragStartListener(
+                        index: widget.index,
+                        child: Icon(Icons.reorder),
+                      ),
                       onTap: widget.onTap,
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

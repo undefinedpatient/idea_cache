@@ -1,7 +1,10 @@
+import 'dart:developer';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 
 class ICCacheOverview extends StatefulWidget {
@@ -50,6 +53,15 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
     }
   }
 
+  Future<void> _reorderBlock(int from, int to) async {
+    Cache? userCache = await FileHandler.findCacheById(widget.cacheid);
+    if (userCache == null) {
+      return;
+    }
+    userCache.reorderBlockId(from, to);
+    FileHandler.updateCache(userCache);
+  }
+
   Future<void> _filterBlocks() async {
     List<ICBlock> filteredBlocks = List<ICBlock>.of(_cacheBlocks);
     for (int i = 0; i < filteredBlocks.length; i++) {
@@ -67,6 +79,23 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
     });
   }
 
+  Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        final double animValue = Curves.easeInOut.transform(animation.value);
+        final double elevation = lerpDouble(0, 6, animValue)!;
+        return Material(
+          elevation: elevation,
+          color: Colors.transparent,
+          shadowColor: Colors.black.withAlpha(0),
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +105,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   @override
   void didUpdateWidget(covariant ICCacheOverview oldWidget) {
     super.didUpdateWidget(oldWidget);
+    log("called");
     _loadBlocks();
     _filterBlocks();
   }
@@ -165,13 +195,27 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
               ),
             ),
             Expanded(
-              child: ListView(
+              child: ReorderableListView(
+                proxyDecorator: proxyDecorator,
+                padding: EdgeInsets.all(0),
+                onReorder: (oldIndex, newIndex) {
+                  if (oldIndex < newIndex) {
+                    newIndex -= 1;
+                  }
+                  ICBlock temp = _cacheBlocks[oldIndex];
+                  _cacheBlocks.removeAt(oldIndex);
+                  _cacheBlocks.insert(newIndex, temp);
+                  _reorderBlock(oldIndex, newIndex);
+                  setState(() {}); //Local refresh the page
+                },
+                buildDefaultDragHandles: false,
                 scrollDirection: (isScrollVertical == true)
                     ? Axis.vertical
                     : Axis.horizontal,
                 children: _cacheBlocks.asMap().entries.map((entry) {
                   return ICBlockCard(
                     key: ObjectKey(entry.value),
+                    index: entry.key,
                     block: entry.value,
                     onTap: () {
                       widget.setPage(entry.key);
