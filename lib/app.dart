@@ -1,9 +1,11 @@
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/cachelisttile.dart';
+import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
@@ -29,6 +31,7 @@ class ICApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => ICSettingsModel()),
         ChangeNotifierProvider(create: (context) => ICCacheModel()),
+        ChangeNotifierProvider(create: (context) => ICBlockModel()),
       ],
       child: Consumer<ICSettingsModel>(
         builder: (context, value, child) {
@@ -116,18 +119,67 @@ class ICSettingsModel extends ChangeNotifier {
 class ICCacheModel extends ChangeNotifier {
   final List<Cache> _caches = [];
   UnmodifiableListView<Cache> get caches => UnmodifiableListView(_caches);
-
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
   Future<void> loadFromFile() async {
+    log("loadFromFile");
+    _isLoading = true;
+    notifyListeners();
+    _caches.clear();
     FileHandler.readCaches().then((caches) {
       for (Cache item in caches) {
         _caches.add(item);
       }
     });
+    _isLoading = false;
     notifyListeners();
   }
 
   void loadFromFileSync() async {
+    log("loadFromFileSync");
+    _isLoading = true;
+    notifyListeners();
+    _caches.clear();
     _caches.addAll(await FileHandler.readCaches());
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> reorderCache(int from, int to) async {
+    log("Reordering");
+    if (from < to) {
+      to--;
+    }
+    FileHandler.reorderCaches(from, to);
+    _caches.insert(to, _caches.removeAt(from));
+    notifyListeners();
+  }
+}
+
+class ICBlockModel extends ChangeNotifier {
+  final List<ICBlock> _blocks = [];
+  UnmodifiableListView<ICBlock> get blocks => UnmodifiableListView(_blocks);
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  Future<void> loadFromFile() async {
+    _isLoading = true;
+    notifyListeners();
+    _blocks.clear();
+    FileHandler.readBlocks().then((blockes) {
+      for (ICBlock item in blockes) {
+        _blocks.add(item);
+      }
+    });
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void loadFromFileSync() async {
+    _isLoading = true;
+    notifyListeners();
+    _blocks.clear();
+    _blocks.addAll(await FileHandler.readBlocks());
+    _isLoading = false;
     notifyListeners();
   }
 }
@@ -157,7 +209,17 @@ class _ICMainView extends State<ICMainView> {
   @override
   void initState() {
     super.initState();
-    _loadCaches();
+    // _loadCaches();
+    Future.microtask(
+      () => {
+        Provider.of<ICCacheModel>(context, listen: false).loadFromFileSync(),
+      },
+    );
+    Future.microtask(
+      () => {
+        Provider.of<ICBlockModel>(context, listen: false).loadFromFileSync(),
+      },
+    );
   }
 
   @override
@@ -237,52 +299,59 @@ class _ICMainView extends State<ICMainView> {
                       });
                     },
                   ),
-                  Expanded(
-                    child: ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      onReorder: (int oldIndex, int newIndex) async {
-                        _userCaches.insert(
-                          (oldIndex < newIndex) ? newIndex - 1 : newIndex,
-                          _userCaches.removeAt(oldIndex),
-                        );
-                        setState(() {});
-                        await FileHandler.reorderCaches(oldIndex, newIndex);
-                        await _loadCaches();
-                      },
 
-                      children: _userCaches.asMap().entries.map((entry) {
-                        final int index = entry.key;
-                        final String title = entry.value.name;
-                        final String id = entry.value.id;
-                        return ReorderableDelayedDragStartListener(
-                          key: ValueKey(id),
-                          index: index,
-                          child: ICCacheListTile(
-                            title: title,
-                            cacheid: id,
-                            onTap: () {
-                              if (appState.isContentEdited) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Warning: Content Not Saved"),
-                                    duration: Durations.extralong3,
-                                  ),
-                                );
-                                appState.setContentEditedState(false);
-                                return;
-                              }
-                              setState(() {
-                                _selectedIndex = index + 1;
-                              });
-                            },
-                            onEditName: () async {
-                              await _loadCaches();
-                            },
-                            selected: _selectedIndex == index + 1,
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                  Consumer<ICCacheModel>(
+                    builder: (consumerContext, model, child) {
+                      return (model.isLoading)
+                          ? LinearProgressIndicator()
+                          : Expanded(
+                              child: ReorderableListView(
+                                buildDefaultDragHandles: false,
+                                onReorder: (int oldIndex, int newIndex) async {
+                                  model.reorderCache(oldIndex, newIndex);
+                                },
+
+                                children: model.caches.asMap().entries.map((
+                                  entry,
+                                ) {
+                                  final int index = entry.key;
+                                  final String title = entry.value.name;
+                                  final String id = entry.value.id;
+                                  return ReorderableDelayedDragStartListener(
+                                    key: ValueKey(id),
+                                    index: index,
+                                    child: ICCacheListTile(
+                                      title: title,
+                                      cacheid: id,
+                                      onTap: () {
+                                        if (appState.isContentEdited) {
+                                          ScaffoldMessenger.of(
+                                            consumerContext,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "Warning: Content Not Saved",
+                                              ),
+                                              duration: Durations.extralong3,
+                                            ),
+                                          );
+                                          appState.setContentEditedState(false);
+                                          return;
+                                        }
+                                        setState(() {
+                                          _selectedIndex = index + 1;
+                                        });
+                                      },
+                                      onEditName: () async {
+                                        model.loadFromFileSync();
+                                      },
+                                      selected: _selectedIndex == index + 1,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            );
+                    },
                   ),
                   ListTile(
                     leading: Icon(Icons.add),
