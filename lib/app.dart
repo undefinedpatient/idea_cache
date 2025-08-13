@@ -7,7 +7,6 @@ import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
 import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/emptypage.dart';
-import 'package:idea_cache/page/managestatuspage.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 
@@ -161,8 +160,6 @@ class _ICMainView extends State<ICMainView> {
         cacheid: _userCaches[_selectedIndex - 1].id,
         reloadCaches: _loadCaches,
       );
-    } else if (_selectedIndex == _userCaches.length + 1) {
-      pageWidget = ICManageStatusPage();
     } else {
       pageWidget = ICSettingPage();
     }
@@ -177,7 +174,7 @@ class _ICMainView extends State<ICMainView> {
               style: Theme.of(context).textTheme.headlineMedium,
               children: <TextSpan>[
                 TextSpan(
-                  text: " v1.3.0",
+                  text: " v1.3.1",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ],
@@ -271,31 +268,6 @@ class _ICMainView extends State<ICMainView> {
                       Cache newCache = Cache(name: "Untitled");
                       await FileHandler.appendCache(newCache);
                       await _loadCaches();
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      _selectedIndex == _userCaches.length + 1
-                          ? Icons.rule_outlined
-                          : Icons.rule_outlined,
-                    ),
-                    title: Text('Manage Statuses'),
-                    selected: _selectedIndex == _userCaches.length + 1,
-                    onTap: () {
-                      if (appState.isContentEdited) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Warning: Content Not Saved"),
-                            duration: Durations.extralong3,
-                          ),
-                        );
-                        // set the edited state such that user can ignore the warning
-                        appState.setContentEditedState(false);
-                        return;
-                      }
-                      setState(() {
-                        _selectedIndex = _userCaches.length + 1;
-                      });
                     },
                   ),
                   ListTile(
@@ -449,10 +421,10 @@ class _ICMainView extends State<ICMainView> {
                 ListTile(
                   leading: Icon(
                     _selectedIndex == _userCaches.length + 1
-                        ? Icons.rule_outlined
-                        : Icons.rule_outlined,
+                        ? Icons.settings
+                        : Icons.settings_outlined,
                   ),
-                  title: Text('Manage Statuses'),
+                  title: Text('Settings'),
                   selected: _selectedIndex == _userCaches.length + 1,
                   onTap: () {
                     if (appState.isContentEdited) {
@@ -468,31 +440,6 @@ class _ICMainView extends State<ICMainView> {
                     }
                     setState(() {
                       _selectedIndex = _userCaches.length + 1;
-                    });
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    _selectedIndex == _userCaches.length + 2
-                        ? Icons.settings
-                        : Icons.settings_outlined,
-                  ),
-                  title: Text('Settings'),
-                  selected: _selectedIndex == _userCaches.length + 2,
-                  onTap: () {
-                    if (appState.isContentEdited) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Warning: Content Not Saved"),
-                          duration: Durations.extralong3,
-                        ),
-                      );
-                      // set the edited state such that user can ignore the warning
-                      appState.setContentEditedState(false);
-                      return;
-                    }
-                    setState(() {
-                      _selectedIndex = _userCaches.length + 2;
                     });
                   },
                 ),

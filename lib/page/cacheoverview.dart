@@ -220,7 +220,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                     onTap: () {
                       widget.setPage(entry.key);
                     },
-                    onBlockUpdated: () async {
+                    updateCallBack: () async {
                       await _loadBlocksUnconditional();
                       await _filterBlocks();
                     },

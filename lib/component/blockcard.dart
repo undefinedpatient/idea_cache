@@ -1,12 +1,17 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:idea_cache/component/preview.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/status.dart';
+import 'package:idea_cache/page/managestatuspage.dart';
 
+// The Status will be following colorScheme.surfaceDim if it is an empty status
 class ICBlockCard extends StatefulWidget {
   final Function() onTap;
   final Axis direction;
-  final Function()? onBlockUpdated;
+  final Function()? updateCallBack;
   final int index;
   final ICBlock block;
   const ICBlockCard({
@@ -15,7 +20,7 @@ class ICBlockCard extends StatefulWidget {
     required this.block,
     required this.onTap,
     this.direction = Axis.horizontal,
-    this.onBlockUpdated,
+    this.updateCallBack,
   });
 
   @override
@@ -92,7 +97,12 @@ class _ICBlockCardState extends State<ICBlockCard> {
                     child: ListTile(
                       leading: ReorderableDragStartListener(
                         index: widget.index,
-                        child: Icon(Icons.reorder),
+                        child: Icon(
+                          Icons.reorder,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withAlpha(50),
+                        ),
                       ),
                       onTap: widget.onTap,
                       title: Column(
@@ -101,7 +111,11 @@ class _ICBlockCardState extends State<ICBlockCard> {
                         mainAxisSize: MainAxisSize.min,
                         spacing: 8,
                         children: [
-                          Text(widget.block.name),
+                          Text(
+                            widget.block.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           PopupMenuButton(
                             tooltip: "",
                             menuPadding: EdgeInsets.all(0),
@@ -138,7 +152,48 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                       await FileHandler.updateBlock(block);
                                       await _loadCurrentBlockStatus();
                                     },
-                                    child: Text("Empty Status"),
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.surfaceDim,
+                                          size: 16,
+                                        ),
+                                        Text("Empty Status"),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    onTap: () async {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Dialog(
+                                            child: ICManageStatusPage(
+                                              updateCallback: () {
+                                                widget.updateCallBack?.call();
+                                              },
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Icon(
+                                          Icons.edit,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                          size: 16,
+                                        ),
+                                        Text("Edit Status"),
+                                      ],
+                                    ),
                                   ),
                                 ])
                                 .toList(),
@@ -191,7 +246,16 @@ class _ICBlockCardState extends State<ICBlockCard> {
                       tileColor: (status != null)
                           ? Color(status!.colorCode).withAlpha(100)
                           : Theme.of(context).colorScheme.surfaceDim,
-                      onTap: widget.onTap,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              child: ICPreview(blockId: widget.block.id),
+                            );
+                          },
+                        );
+                      },
                       title: (status != null) ? Text("") : Text(""),
                     ),
                   ),
