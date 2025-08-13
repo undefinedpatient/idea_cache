@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -6,8 +7,13 @@ import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 
 class ICPreview extends StatelessWidget {
-  ICPreview({super.key, required this.blockId});
+  ICPreview({
+    super.key,
+    required this.blockId,
+    required this.nagivateToPageCallback,
+  });
   final String blockId;
+  final void Function() nagivateToPageCallback;
   final QuillController _quillController = QuillController.basic();
   Future<void> loadBlockContent() async {
     ICBlock? block = await FileHandler.findBlockById(blockId);
@@ -34,6 +40,14 @@ class ICPreview extends StatelessWidget {
               Text("Preview", textScaler: TextScaler.linear(2)),
               Divider(),
               Expanded(child: QuillEditor.basic(controller: _quillController)),
+              Divider(),
+              TextButton(
+                onPressed: () {
+                  nagivateToPageCallback();
+                  Navigator.pop(context);
+                },
+                child: Text("Go To"),
+              ),
             ],
           ),
         );

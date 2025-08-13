@@ -105,7 +105,6 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   @override
   void didUpdateWidget(covariant ICCacheOverview oldWidget) {
     super.didUpdateWidget(oldWidget);
-    log("called");
     _loadBlocks();
     _filterBlocks();
   }
@@ -118,8 +117,6 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(

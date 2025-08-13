@@ -251,7 +251,10 @@ class _ICBlockCardState extends State<ICBlockCard> {
                           context: context,
                           builder: (BuildContext context) {
                             return Dialog(
-                              child: ICPreview(blockId: widget.block.id),
+                              child: ICPreview(
+                                blockId: widget.block.id,
+                                nagivateToPageCallback: widget.onTap,
+                              ),
                             );
                           },
                         );
