@@ -31,6 +31,7 @@ class ICBlockCard extends StatefulWidget {
 
 class _ICBlockCardState extends State<ICBlockCard> {
   ICStatus? status;
+  FocusNode _focusNode = FocusNode();
   TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
@@ -83,8 +84,8 @@ class _ICBlockCardState extends State<ICBlockCard> {
     //             leading: Icon(Icons.square_outlined),
     //             title: Text(widget.block.name),
     //           ),
-    return LayoutBuilder(
-      builder: (context, contraint) {
+    return Consumer<ICBlockModel>(
+      builder: (context, model, child) {
         return SizedBox(
           height: (widget.direction == Axis.horizontal) ? 90 : 160,
           width: (widget.direction == Axis.horizontal) ? 360 : 200,
@@ -134,11 +135,12 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                             ),
                                             onSubmitted: (value) async {
                                               widget.block.name = value;
-                                              await FileHandler.updateBlock(
-                                                widget.block,
-                                              );
-                                              await widget.updateCallBack
-                                                  ?.call();
+                                              // await FileHandler.updateBlock(
+                                              //   widget.block,
+                                              // );
+                                              // await widget.updateCallBack
+                                              //     ?.call();
+                                              model.updateBlock(widget.block);
 
                                               Navigator.pop(context);
                                             },
@@ -168,6 +170,92 @@ class _ICBlockCardState extends State<ICBlockCard> {
                               children: [
                                 Icon(Icons.edit_outlined, size: 16),
                                 Text("Rename"),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  // _textEditingController.text = userCache!.name;
+                                  return KeyboardListener(
+                                    focusNode: _focusNode,
+                                    autofocus: true,
+                                    onKeyEvent: (KeyEvent keyEvent) {
+                                      if (keyEvent.logicalKey.keyLabel == "Y" ||
+                                          keyEvent.logicalKey.keyLabel ==
+                                              "Enter") {
+                                        model.deleteBlockById(widget.block);
+                                        Navigator.pop(context);
+                                      }
+                                      if (keyEvent.logicalKey.keyLabel == "N") {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Dialog(
+                                      shape: BeveledRectangleBorder(),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Column(
+                                          spacing: 8,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Text(
+                                              "Confirm Block Deletion?",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium!
+                                                  .copyWith(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).colorScheme.secondary,
+                                                  ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    model.deleteBlockById(
+                                                      widget.block,
+                                                    );
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text(
+                                                    "Delete (Y)",
+                                                    style: TextStyle(
+                                                      color: Colors.redAccent,
+                                                    ),
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text(
+                                                    "Close (n)",
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child: Row(
+                              spacing: 8,
+                              children: [
+                                Icon(Icons.delete_outline, size: 16),
+                                Text("Delete"),
                               ],
                             ),
                           ),

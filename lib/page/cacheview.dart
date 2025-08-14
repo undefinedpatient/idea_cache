@@ -13,16 +13,15 @@ import 'package:provider/provider.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
   final String cacheid;
-  final Function() reloadCaches;
   final double tabHeight;
+  final void Function() onPageDeleted;
 
   const ICCacheView({
     super.key,
     required this.cacheid,
-    required Function() reloadCaches,
+    required this.onPageDeleted,
     double? tabHeight,
-  }) : reloadCaches = reloadCaches,
-       tabHeight = (tabHeight != null) ? tabHeight : 42;
+  }) : tabHeight = (tabHeight != null) ? tabHeight : 42;
 
   @override
   State<ICCacheView> createState() {
@@ -31,11 +30,12 @@ class ICCacheView extends StatefulWidget {
 }
 
 class _ICCacheView extends State<ICCacheView> {
-  Cache? userCache = Cache(name: "loading");
+  Cache localCache = Cache(name: "loading");
+  List<ICBlock> localBlocks = [];
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
-  List<ICBlock> userBlocks = [];
+
   int _selectedIndex = -1;
   OverlayEntry? entryImportOverlay;
   final FocusNode _focusNode = FocusNode();
@@ -45,35 +45,25 @@ class _ICCacheView extends State<ICCacheView> {
       widget.cacheid,
     );
     setState(() {
-      userBlocks = blocks;
+      localBlocks = blocks;
     });
   }
 
   Future<void> _loadCache() async {
     Cache? cache = await FileHandler.findCacheById(widget.cacheid);
+    if (cache == null) {
+      return;
+    }
     setState(() {
-      userCache = cache;
+      localCache;
     });
-  }
-
-  Future<void> _deleteCache(BuildContext context) async {
-    Navigator.pop(context);
-    final SnackBar snackBar = SnackBar(
-      content: Text("Cache ${userCache!.name} Deleted!"),
-      duration: Durations.extralong3,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-    await FileHandler.deleteCacheById(userCache!.id);
-
-    await widget.reloadCaches();
   }
 
   Future<void> _deleteBlock(BuildContext context) async {
     Navigator.pop(context);
-    ICBlock oldBlock = userBlocks[_selectedIndex];
-    userCache!.removeBlockId(oldBlock.id);
-    await FileHandler.updateCache(userCache!);
+    ICBlock oldBlock = localBlocks[_selectedIndex];
+    localCache.removeBlockId(oldBlock.id);
+    await FileHandler.updateCache(localCache!);
     await FileHandler.deleteBlocksById(oldBlock.id);
 
     final SnackBar snackBar = SnackBar(
@@ -82,8 +72,8 @@ class _ICCacheView extends State<ICCacheView> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
     await _loadBlocks();
-    if (_selectedIndex >= userBlocks.length) {
-      _selectedIndex = userBlocks.length - 1;
+    if (_selectedIndex >= localBlocks.length) {
+      _selectedIndex = localBlocks.length - 1;
       // Hard Limiting the _selectedIndex
       if (_selectedIndex == -1) {
         _selectedIndex = 0;
@@ -94,8 +84,6 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   void initState() {
     super.initState();
-    _loadBlocks();
-    _loadCache();
   }
 
   @override
@@ -104,9 +92,6 @@ class _ICCacheView extends State<ICCacheView> {
     setState(() {
       _selectedIndex = -1;
     });
-
-    _loadCache();
-    _loadBlocks();
   }
 
   @override
@@ -119,9 +104,6 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   Widget build(BuildContext context) {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
-    if (userCache == null) {
-      return ICEmptyPage();
-    }
     Widget pageWidget = ICEmptyPage();
     // -1 means that user is in Overview Page
     if (_selectedIndex == -1) {
@@ -137,8 +119,8 @@ class _ICCacheView extends State<ICCacheView> {
           await _loadCache();
         },
       );
-    } else if (userBlocks.isNotEmpty) {
-      pageWidget = ICBlockView(blockid: userBlocks[_selectedIndex].id);
+    } else if (localBlocks.isNotEmpty) {
+      pageWidget = ICBlockView(blockid: localBlocks[_selectedIndex].id);
     }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -146,7 +128,7 @@ class _ICCacheView extends State<ICCacheView> {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         title: Consumer<ICCacheModel>(
           builder: (context, model, child) {
-            Cache localCache = model.caches.firstWhere(
+            localCache = model.caches.firstWhere(
               (item) => item.id == widget.cacheid,
             );
             return Row(
@@ -164,7 +146,7 @@ class _ICCacheView extends State<ICCacheView> {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            _textEditingController.text = userCache!.name;
+                            _textEditingController.text = localCache.name;
                             return Dialog(
                               child: Container(
                                 width: 240,
@@ -211,88 +193,106 @@ class _ICCacheView extends State<ICCacheView> {
         actions: [
           Tooltip(
             message: (appState.setting.toolTipsEnabled) ? "Pin Cache" : "",
-            child: IconButton(
-              onPressed: () async {
-                setState(() {
-                  userCache?.priority = 1 - userCache!.priority;
-                });
-
-                await FileHandler.updateCache(userCache!);
-                _loadCache();
+            child: Consumer<ICCacheModel>(
+              builder: (context, model, child) {
+                return (model.isLoading)
+                    ? LinearProgressIndicator()
+                    : IconButton(
+                        onPressed: () async {
+                          setState(() {
+                            localCache.priority = 1 - localCache.priority;
+                          });
+                          model.updateCache(localCache);
+                        },
+                        icon: Icon(
+                          (localCache.priority == 0)
+                              ? Icons.push_pin_outlined
+                              : Icons.push_pin,
+                        ),
+                      );
               },
-              icon: Icon(
-                (userCache?.priority == 0)
-                    ? Icons.push_pin_outlined
-                    : Icons.push_pin,
-              ),
             ),
           ),
           Tooltip(
             message: (appState.setting.toolTipsEnabled) ? "Delete Cache" : "",
-            child: IconButton(
-              onPressed: () async {
-                await showDialog<String>(
-                  context: context,
-                  builder: (BuildContext context) => KeyboardListener(
-                    focusNode: _focusNode,
-                    autofocus: true,
-                    onKeyEvent: (KeyEvent event) async {
-                      if (event.logicalKey.keyLabel == 'Y' ||
-                          event.logicalKey.keyLabel == "Enter") {
-                        await _deleteCache(context);
-                      }
-                      if (event.logicalKey.keyLabel == 'N') {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Dialog(
-                      shape: BeveledRectangleBorder(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          spacing: 8,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              "Confirm Cache Deletion?",
-                              style: Theme.of(context).textTheme.bodyMedium!
-                                  .copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.secondary,
-                                  ),
-                            ),
-                            Row(
+            child: Consumer<ICCacheModel>(
+              builder: (context, model, child) {
+                return IconButton(
+                  onPressed: () async {
+                    await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => KeyboardListener(
+                        focusNode: _focusNode,
+                        autofocus: true,
+                        onKeyEvent: (KeyEvent event) async {
+                          if (event.logicalKey.keyLabel == 'Y' ||
+                              event.logicalKey.keyLabel == "Enter") {
+                            widget.onPageDeleted();
+                            localCache = Cache(name: "Loading");
+
+                            model.deleteCacheById(widget.cacheid);
+                            Navigator.pop(context);
+                          }
+                          if (event.logicalKey.keyLabel == 'N') {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Dialog(
+                          shape: BeveledRectangleBorder(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              spacing: 8,
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextButton(
-                                  onPressed: () async {
-                                    await _deleteCache(context);
-                                  },
-                                  child: const Text(
-                                    "Delete (Y)",
-                                    style: TextStyle(color: Colors.redAccent),
-                                  ),
+                              children: <Widget>[
+                                Text(
+                                  "Confirm Cache Deletion?",
+                                  style: Theme.of(context).textTheme.bodyMedium!
+                                      .copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.secondary,
+                                      ),
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text("Close (n)"),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        widget.onPageDeleted();
+                                        localCache = Cache(name: "Loading");
+
+                                        model.deleteCacheById(widget.cacheid);
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text(
+                                        "Delete (Y)",
+                                        style: TextStyle(
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("Close (n)"),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
+
+                  icon: Icon(Icons.delete_outline),
                 );
               },
-
-              icon: Icon(Icons.delete_outline),
             ),
           ),
         ],
@@ -334,59 +334,64 @@ class _ICCacheView extends State<ICCacheView> {
                         ? Icons.description
                         : Icons.description_outlined,
                   ),
-                  child: SizedBox(width: 120, child: Text("Overview")),
+                  child: SizedBox(width: 90, child: Text("Overview")),
                 ),
-                Expanded(
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: userBlocks.asMap().entries.map((
-                      MapEntry<int, ICBlock> entry,
-                    ) {
-                      return ICBlockListTile(
-                        name: entry.value.name,
-                        blockid: entry.value.id,
-                        onTap: () {
-                          if (appState.isContentEdited) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Warning: Content Not Saved"),
-                                duration: Durations.extralong3,
-                              ),
-                            );
-                            // set the edited state such that user can ignore the warning
-                            appState.setContentEditedState(false);
-                            return;
-                          }
-                          setState(() {
-                            _selectedIndex = entry.key;
-                          });
-                        },
-                        onEditName: () async {
-                          await _loadBlocks();
-                        },
-                        isSelected: _selectedIndex == entry.key,
-                      );
-                    }).toList(),
-                  ),
+                Consumer<ICBlockModel>(
+                  builder: (context, model, child) {
+                    return Expanded(
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: model.cacheBlocksMap[widget.cacheid]!
+                            .asMap()
+                            .entries
+                            .map((MapEntry<int, ICBlock> entry) {
+                              return ICBlockListTile(
+                                name: entry.value.name,
+                                blockid: entry.value.id,
+                                onTap: () {
+                                  if (appState.isContentEdited) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "Warning: Content Not Saved",
+                                        ),
+                                        duration: Durations.extralong3,
+                                      ),
+                                    );
+                                    // set the edited state such that user can ignore the warning
+                                    appState.setContentEditedState(false);
+                                    return;
+                                  }
+                                  setState(() {
+                                    _selectedIndex = entry.key;
+                                  });
+                                },
+                                onEditName: () async {
+                                  await _loadBlocks();
+                                },
+                                isSelected: _selectedIndex == entry.key,
+                              );
+                            })
+                            .toList(),
+                      ),
+                    );
+                  },
                 ),
-                Tooltip(
-                  message: (appState.setting.toolTipsEnabled)
-                      ? "Add Block"
-                      : "",
-                  child: MenuItemButton(
-                    requestFocusOnHover: false,
-                    onPressed: () async {
-                      ICBlock block = ICBlock(
-                        cacheid: widget.cacheid,
-                        name: "Untitled",
-                      );
-                      await FileHandler.appendBlock(block);
-                      userCache!.addBlockId(block.id);
-                      await FileHandler.updateCache(userCache!);
-                      await _loadBlocks();
-                    },
-                    child: Icon(Icons.add),
-                  ),
+                Consumer<ICBlockModel>(
+                  builder: (context, model, child) {
+                    return Tooltip(
+                      message: (appState.setting.toolTipsEnabled)
+                          ? "Add Block"
+                          : "",
+                      child: MenuItemButton(
+                        requestFocusOnHover: false,
+                        onPressed: () async {
+                          model.createBlock(widget.cacheid);
+                        },
+                        child: Icon(Icons.add),
+                      ),
+                    );
+                  },
                 ),
                 // Delete Block Button can only Appear when user is viewing a block
                 if (_selectedIndex != -1)

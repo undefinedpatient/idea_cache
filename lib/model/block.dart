@@ -1,4 +1,3 @@
-
 import 'package:uuid/uuid.dart';
 
 class ICBlock {
@@ -8,9 +7,8 @@ class ICBlock {
   String statusId;
   // Unique within the cache
   String name;
-  ICBlock({required String cacheid, required this.name})
+  ICBlock({required this.cacheId, required this.name})
     : _id = Uuid().v4(),
-      cacheId = cacheid,
       content = "",
       statusId = "";
   ICBlock.fromJson(Map<String, dynamic> json)

@@ -66,6 +66,7 @@ class FileHandler {
     // If the new block name is already in form abc.001, strip away the .001 first
     block.name = block.name.split('.')[0];
     List<ICBlock>? blocks = await findBlocksByCacheId(block.cacheId);
+
     if (blocks.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < blocks.length; i++) {
@@ -361,8 +362,11 @@ class FileHandler {
     }
     //Delete all the cacheBlock related
     deleteBlocksByCacheId(cacheId);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncode(existingCaches.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(
+        existingCaches.map((value) => value.toJson()).toList(),
+      ),
     );
   }
 
@@ -377,8 +381,9 @@ class FileHandler {
         newBlocks.add(existingBlocks[i]);
       }
     }
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncode(newBlocks.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(newBlocks.map((value) => value.toJson()).toList()),
     );
   }
 
@@ -398,9 +403,11 @@ class FileHandler {
         break;
       }
     }
-
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncode(existingBlocks.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(
+        existingBlocks.map((value) => value.toJson()).toList(),
+      ),
     );
   }
 
@@ -477,18 +484,23 @@ class FileHandler {
   }
 
   static Future<List<ICBlock>> findBlocksByCacheId(String cacheId) async {
+    Cache? cache = await findCacheById(cacheId);
     List<ICBlock>? unorderedBlocks = List.empty(growable: true);
     List<ICBlock>? orderedblocks = List.empty(growable: true);
     List<ICBlock>? readblocks = await readBlocks();
-    Cache? cache = await findCacheById(cacheId);
+
     if (cache == null) {
-      throw Exception("findBlocksByCacheId: cache is null!");
+      throw Exception("findBlocksByCacheId: cache is null");
     }
     for (int i = 0; i < readblocks.length; i++) {
       if (readblocks[i].cacheId == cacheId) {
         unorderedBlocks.add(readblocks[i]);
       }
     }
+    log("\nUnorderedBlock:");
+    unorderedBlocks.forEach((block) {
+      log(block.id);
+    });
     for (int i = 0; i < cache.blockIds.length; i++) {
       int indexOfTargetBlock = unorderedBlocks
           .map((block) => block.id)
@@ -496,6 +508,10 @@ class FileHandler {
           .indexOf(cache.blockIds[i]);
       orderedblocks.add(unorderedBlocks[indexOfTargetBlock]);
     }
+    log("\nOrderedBlock:");
+    orderedblocks.forEach((block) {
+      log(block.id);
+    });
     return orderedblocks;
   }
 

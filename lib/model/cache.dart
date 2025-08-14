@@ -75,7 +75,7 @@ class Cache {
     return List.unmodifiable(_blockIds);
   }
 
-  List<String> reorderBlockId(int from, int to) {
+  List<String> swapBlockId(int from, int to) {
     if (to > _blockIds.length - 1) {
       throw Exception("Index Error: Trying to access out of range");
     }

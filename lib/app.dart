@@ -102,26 +102,32 @@ class ICSettingsModel extends ChangeNotifier {
   }
 
   void setContentEditedState(bool isEdited) {
-    this.isContentEdited = isEdited;
+    isContentEdited = isEdited;
+    notifyListeners();
   }
 
   void changeBrightness(ThemeMode thememode) {
-    this.setting.themeMode = thememode;
-    notifyListeners();
+    setting.themeMode = thememode;
+    saveSetting(setting);
   }
 
   void changeFontFamily(String fontFamily) {
-    this.setting.fontFamily = fontFamily;
-    notifyListeners();
+    setting.fontFamily = fontFamily;
+    saveSetting(setting);
   }
 
   void changeColorCode(int code) {
-    this.setting.colorCode = code;
-    notifyListeners();
+    setting.colorCode = code;
+    saveSetting(setting);
   }
 
   void changeTooltipsEnabled(bool enable) {
-    this.setting.toolTipsEnabled = enable;
+    setting.toolTipsEnabled = enable;
+    saveSetting(setting);
+  }
+
+  Future<void> saveSetting(Setting setting) async {
+    await FileHandler.saveSetting(setting);
     notifyListeners();
   }
 }
@@ -153,36 +159,112 @@ class ICCacheModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createCache() async {
+  Future<Cache> createCache() async {
     Cache cache = Cache(name: "Untitled");
     await FileHandler.appendCache(cache);
+    _caches.add(cache);
     notifyListeners();
+    return cache;
   }
 
   Future<void> updateCache(Cache cache) async {
-    log("Called");
     await FileHandler.updateCache(cache);
     int targetReplaceIndex = _caches.indexWhere((item) => item.id == cache.id);
     _caches[targetReplaceIndex] = cache;
+    notifyListeners();
+  }
+
+  Future<void> deleteCacheById(String id) async {
+    await FileHandler.deleteCacheById(id);
+    _caches.removeWhere((caches) => caches.id == id);
     notifyListeners();
   }
 }
 
 class ICBlockModel extends ChangeNotifier {
   final List<ICBlock> _blocks = [];
+
+  final Map<String, List<ICBlock>> _cacheBlocksMap = {};
   UnmodifiableListView<ICBlock> get blocks => UnmodifiableListView(_blocks);
+  UnmodifiableMapView<String, List<ICBlock>> get cacheBlocksMap =>
+      UnmodifiableMapView(_cacheBlocksMap);
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   Future<void> loadFromFile() async {
     _isLoading = true;
     notifyListeners();
+
     _blocks.clear();
-    FileHandler.readBlocks().then((blockes) {
-      for (ICBlock item in blockes) {
-        _blocks.add(item);
-      }
-    });
+    _cacheBlocksMap.clear();
+    _blocks.addAll(await FileHandler.readBlocks());
+
+    List<Cache> caches = await FileHandler.readCaches();
+    for (int i = 0; i < caches.length; i++) {
+      _cacheBlocksMap.addAll({
+        caches[i].id: await FileHandler.findBlocksByCacheId(caches[i].id),
+      });
+    }
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> updateBlockMapByCacheId(String cacheId) async {
+    _cacheBlocksMap[cacheId] = await FileHandler.findBlocksByCacheId(cacheId);
+    notifyListeners();
+  }
+
+  Future<void> createBlock(String cacheId) async {
+    ICBlock block = ICBlock(cacheId: cacheId, name: "Untitled");
+    Cache? parentCache = await FileHandler.findCacheById(cacheId);
+    if (parentCache == null) {
+      throw Exception("createBlock: parentCache cannot be found");
+    }
+
+    parentCache.addBlockId(block.id);
+    await FileHandler.appendBlock(block);
+    await FileHandler.updateCache(parentCache);
+    await updateBlockMapByCacheId(cacheId);
+    notifyListeners();
+  }
+
+  Future<void> reorderBlockByCacheId(String cacheId, int from, int to) async {
+    if (from < to) {
+      to--;
+    }
+    // Update the local Storge First since it cost less time
+    cacheBlocksMap[cacheId]!.insert(
+      to,
+      cacheBlocksMap[cacheId]!.removeAt(from),
+    );
+    notifyListeners();
+
+    // Then save it to the storage
+    Cache? parentCache = await FileHandler.findCacheById(cacheId);
+    if (parentCache == null) {
+      throw Exception("reorderBlockByCacheId: parentCache not found!");
+    }
+
+    parentCache.swapBlockId(from, to);
+    await FileHandler.updateCache(parentCache);
+
+    notifyListeners();
+  }
+
+  Future<void> updateBlock(ICBlock block) async {
+    await FileHandler.updateBlock(block);
+    await updateBlockMapByCacheId(block.cacheId);
+    notifyListeners();
+  }
+
+  Future<void> deleteBlockById(ICBlock block) async {
+    await FileHandler.deleteBlocksById(block.id);
+    Cache? parentCache = await FileHandler.findCacheById(block.cacheId);
+    if (parentCache == null) {
+      throw Exception("reorderBlockByCacheId: parentCache not found!");
+    }
+    parentCache.removeBlockId(block.id);
+    await FileHandler.updateCache(parentCache);
+    await updateBlockMapByCacheId(block.cacheId);
     notifyListeners();
   }
 }
@@ -197,18 +279,6 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-  List<Cache> _userCaches = [];
-  OverlayEntry? addCacheOverlayEntry;
-  OverlayEntry? overlayEntryImport;
-  Widget? pageWidget;
-
-  Future<void> _loadCaches() async {
-    _userCaches = List.empty();
-    final caches = await FileHandler.readCaches();
-    setState(() {
-      _userCaches = caches;
-    });
-  }
 
   @override
   void initState() {
@@ -233,14 +303,30 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
+    Widget? pageWidget;
     ICSettingsModel appState = context.watch<ICSettingsModel>();
-    pageWidget ??= ICOverview(
-      onSetPage: (int index) {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-    );
+    ICCacheModel cacheModel = context.read<ICCacheModel>();
+    if (_selectedIndex == 0) {
+      pageWidget = ICOverview(
+        onSetPage: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      );
+    } else if (_selectedIndex > cacheModel.caches.length + 1) {
+      pageWidget = ICSettingPage();
+    } else {
+      pageWidget = ICCacheView(
+        cacheid: cacheModel._caches[_selectedIndex - 1].id,
+        onPageDeleted: () {
+          log("Called");
+          setState(() {
+            _selectedIndex = 0;
+          });
+        },
+      );
+    }
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
@@ -310,6 +396,11 @@ class _ICMainView extends State<ICMainView> {
                                 buildDefaultDragHandles: false,
                                 onReorder: (int oldIndex, int newIndex) async {
                                   await model.reorderCache(oldIndex, newIndex);
+                                  setState(() {
+                                    _selectedIndex = (oldIndex < newIndex)
+                                        ? newIndex
+                                        : newIndex + 1;
+                                  });
                                 },
 
                                 children: model.caches.asMap().entries.map((
@@ -325,7 +416,6 @@ class _ICMainView extends State<ICMainView> {
                                       title: title,
                                       cacheid: id,
                                       onTap: () {
-                                        log(id);
                                         if (appState.isContentEdited) {
                                           ScaffoldMessenger.of(
                                             consumerContext,
@@ -342,12 +432,6 @@ class _ICMainView extends State<ICMainView> {
                                         }
                                         setState(() {
                                           _selectedIndex = index + 1;
-                                          pageWidget = ICCacheView(
-                                            cacheid: model
-                                                .caches[_selectedIndex - 1]
-                                                .id,
-                                            reloadCaches: _loadCaches,
-                                          );
                                         });
                                       },
                                       onEditName: () async {
@@ -359,14 +443,19 @@ class _ICMainView extends State<ICMainView> {
                                 }).toList(),
                               ),
                             ),
-                            ListTile(
-                              leading: Icon(Icons.add),
-                              title: Text('Add Cache'),
-                              selected: false,
-                              onTap: () async {
-                                Cache newCache = Cache(name: "Untitled");
-                                await FileHandler.appendCache(newCache);
-                                await _loadCaches();
+                            Consumer<ICBlockModel>(
+                              builder: (context, blockModel, child) {
+                                return ListTile(
+                                  leading: Icon(Icons.add),
+                                  title: Text('Add Cache'),
+                                  selected: false,
+                                  onTap: () async {
+                                    Cache cache = await model.createCache();
+                                    blockModel.updateBlockMapByCacheId(
+                                      cache.id,
+                                    );
+                                  },
+                                );
                               },
                             ),
                             ListTile(
@@ -426,138 +515,7 @@ class _ICMainView extends State<ICMainView> {
           ),
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
-        drawer: SafeArea(
-          child: Drawer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceTint,
-                  ),
-                  child: Text(
-                    "Cache Menu",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(
-                    (_selectedIndex == 0)
-                        ? Icons.dashboard
-                        : Icons.dashboard_outlined,
-                  ),
-                  title: Text("Overview"),
-                  selected: _selectedIndex == 0,
-                  onTap: () {
-                    if (appState.isContentEdited) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Warning: Content Not Saved"),
-                          duration: Durations.extralong3,
-                        ),
-                      );
-                      appState.setContentEditedState(false);
-                      return;
-                    }
-                    setState(() {
-                      _selectedIndex = 0;
-                    });
-                  },
-                ),
-                Builder(
-                  builder: (context) {
-                    return Expanded(
-                      child: ReorderableListView(
-                        onReorder: (int oldIndex, int newIndex) async {
-                          _userCaches.insert(
-                            (oldIndex < newIndex) ? newIndex - 1 : newIndex,
-                            _userCaches.removeAt(oldIndex),
-                          );
-                          setState(() {});
-                          await FileHandler.reorderCaches(oldIndex, newIndex);
-                          await _loadCaches();
-                        },
-
-                        children: _userCaches.asMap().entries.map((entry) {
-                          final int index = entry.key;
-                          final String title = entry.value.name;
-                          final String id = entry.value.id;
-                          return ReorderableDelayedDragStartListener(
-                            key: ValueKey(id),
-                            index: index,
-                            child: ICCacheListTile(
-                              title: title,
-                              cacheid: id,
-                              onTap: () {
-                                if (appState.isContentEdited) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        "Warning: Content Not Saved",
-                                      ),
-                                      duration: Durations.extralong3,
-                                    ),
-                                  );
-                                  appState.setContentEditedState(false);
-                                  return;
-                                }
-                                setState(() {
-                                  _selectedIndex = index + 1;
-                                });
-                              },
-                              onEditName: () async {
-                                await _loadCaches();
-                              },
-                              selected: _selectedIndex == index + 1,
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.add),
-                  title: Text('Add Cache'),
-                  selected: false,
-                  onTap: () async {
-                    Cache newCache = Cache(name: "Untitled");
-                    await FileHandler.appendCache(newCache);
-                    await _loadCaches();
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    _selectedIndex == _userCaches.length + 1
-                        ? Icons.settings
-                        : Icons.settings_outlined,
-                  ),
-                  title: Text('Settings'),
-                  selected: _selectedIndex == _userCaches.length + 1,
-                  onTap: () {
-                    if (appState.isContentEdited) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Warning: Content Not Saved"),
-                          duration: Durations.extralong3,
-                        ),
-                      );
-                      // set the edited state such that user can ignore the warning
-                      appState.setContentEditedState(false);
-                      return;
-                    }
-                    setState(() {
-                      _selectedIndex = _userCaches.length + 1;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
+        drawer: SafeArea(child: Drawer()),
         body: pageWidget,
       );
     }

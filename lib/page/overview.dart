@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/cachecard.dart';
 import 'package:idea_cache/model/cache.dart';
-import 'package:idea_cache/model/fileHandler.dart';
 import 'package:provider/provider.dart';
 
 class ICOverview extends StatefulWidget {
   final void Function(int) onSetPage;
-  const ICOverview({super.key, required void Function(int) onSetPage})
-    : onSetPage = onSetPage;
+  const ICOverview({super.key, required this.onSetPage});
   @override
   State<StatefulWidget> createState() {
     return _ICOverview();
@@ -25,9 +23,6 @@ class _ICOverview extends State<ICOverview> {
   @override
   void initState() {
     super.initState();
-    // Future.microtask(() {
-    //   Provider.of<ICCacheModel>(context, listen: false).loadFromFileSync();
-    // });
   }
 
   @override
@@ -116,7 +111,7 @@ class _ICOverview extends State<ICOverview> {
                     trailing: [],
                     onChanged: (value) async {
                       setState(() {
-                        _textEditingController.text = value;
+                        // _textEditingController.text = value;
                       });
                     },
                   ),
@@ -182,39 +177,46 @@ class _ICOverview extends State<ICOverview> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: (isScrollVertical == true)
-                        ? (width / 360).floor()
-                        : (height / 240).floor(),
-                    scrollDirection: (isScrollVertical == true)
-                        ? Axis.vertical
-                        : Axis.horizontal,
+                Builder(
+                  builder: (context) {
+                    return Expanded(
+                      child: GridView.count(
+                        crossAxisCount: (isScrollVertical == true)
+                            ? (width / 360).floor()
+                            : (height / 240).floor(),
+                        scrollDirection: (isScrollVertical == true)
+                            ? Axis.vertical
+                            : Axis.horizontal,
 
-                    childAspectRatio: (isScrollVertical == true) ? 3 : 1 / 2,
-                    shrinkWrap: true,
-                    children: model.caches
-                        // Only take whose not pinned
-                        .where((Cache cache) => cache.priority == 0)
-                        .where(
-                          (Cache cache) => cache.name.toLowerCase().contains(
-                            _textEditingController.text.toLowerCase(),
-                          ),
-                        )
-                        .toList()
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                          return ICCacheCard(
-                            name: entry.value.name,
-                            numOfBlocks: entry.value.blockIds.length,
-                            onSetPage: () {
-                              widget.onSetPage(entry.key + 1);
-                            },
-                          );
-                        })
-                        .toList(),
-                  ),
+                        childAspectRatio: (isScrollVertical == true)
+                            ? 3
+                            : 1 / 2,
+                        shrinkWrap: true,
+                        children: model.caches
+                            // Only take whose not pinned
+                            .where((Cache cache) => cache.priority == 0)
+                            .where(
+                              (Cache cache) =>
+                                  cache.name.toLowerCase().contains(
+                                    _textEditingController.text.toLowerCase(),
+                                  ),
+                            )
+                            .toList()
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                              return ICCacheCard(
+                                name: entry.value.name,
+                                numOfBlocks: entry.value.blockIds.length,
+                                onSetPage: () {
+                                  widget.onSetPage(entry.key + 1);
+                                },
+                              );
+                            })
+                            .toList(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

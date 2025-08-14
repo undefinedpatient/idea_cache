@@ -2,10 +2,12 @@ import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
+import 'package:provider/provider.dart';
 
 class ICCacheOverview extends StatefulWidget {
   final String cacheid;
@@ -28,43 +30,16 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
-  List<ICBlock> _cacheBlocks = List.empty(growable: true);
+  List<ICBlock> _localBlocks = List.empty(growable: true);
   Future<void> _loadBlocksUnconditional() async {
     List<ICBlock> temp = await FileHandler.findBlocksByCacheId(widget.cacheid);
     setState(() {
-      _cacheBlocks = temp;
+      _localBlocks = temp;
     });
   }
 
-  Future<void> _loadBlocks() async {
-    List<ICBlock> temp = await FileHandler.findBlocksByCacheId(widget.cacheid);
-    if (temp.length != _cacheBlocks.length) {
-      setState(() {
-        _cacheBlocks = temp;
-      });
-      return;
-    }
-    for (int i = 0; i < temp.length; i++) {
-      if (_cacheBlocks[i] != temp[i]) {
-        setState(() {
-          _cacheBlocks = temp;
-        });
-        return;
-      }
-    }
-  }
-
-  Future<void> _reorderBlock(int from, int to) async {
-    Cache? userCache = await FileHandler.findCacheById(widget.cacheid);
-    if (userCache == null) {
-      return;
-    }
-    userCache.reorderBlockId(from, to);
-    FileHandler.updateCache(userCache);
-  }
-
   Future<void> _filterBlocks() async {
-    List<ICBlock> filteredBlocks = List<ICBlock>.of(_cacheBlocks);
+    List<ICBlock> filteredBlocks = List<ICBlock>.of(_localBlocks);
     for (int i = 0; i < filteredBlocks.length; i++) {
       if (filteredBlocks[i].name.toLowerCase().contains(
         _textEditingController.text.toLowerCase(),
@@ -76,7 +51,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
       }
     }
     setState(() {
-      _cacheBlocks = filteredBlocks;
+      _localBlocks = filteredBlocks;
     });
   }
 
@@ -100,19 +75,28 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   @override
   void initState() {
     super.initState();
-    _loadBlocks();
+    Future.microtask(() {
+      setState(() {
+        _localBlocks =
+            Provider.of<ICBlockModel>(
+              context,
+              listen: false,
+            ).cacheBlocksMap[widget.cacheid] ??
+            [];
+      });
+    });
   }
 
   @override
   void didUpdateWidget(covariant ICCacheOverview oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _loadBlocks();
     _filterBlocks();
   }
 
   @override
   void dispose() {
     _textEditingController.dispose();
+
     super.dispose();
   }
 
@@ -181,82 +165,58 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                 ),
                 trailing: [],
                 onChanged: (value) async {
-                  await _loadBlocks();
-                  await _filterBlocks();
-                },
-              ),
-            ),
-            Card(
-              elevation: 2,
-              child: ListTile(
-                title: Text("You have ${_cacheBlocks.length} blocks!"),
-              ),
-            ),
-            Expanded(
-              child: ReorderableListView(
-                proxyDecorator: proxyDecorator,
-                padding: EdgeInsets.all(0),
-                onReorder: (oldIndex, newIndex) async {
-                  if (oldIndex < newIndex) {
-                    newIndex--;
-                  }
-                  //Local refresh the page
-                  _cacheBlocks.insert(
-                    newIndex,
-                    _cacheBlocks.removeAt(oldIndex),
-                  );
                   setState(() {});
-                  await _reorderBlock(oldIndex, newIndex);
+                  // _textEditingController.text = value;
                 },
-                buildDefaultDragHandles: false,
-                scrollDirection: (isScrollVertical == true)
-                    ? Axis.vertical
-                    : Axis.horizontal,
-                children: _cacheBlocks.asMap().entries.map((entry) {
-                  return ICBlockCard(
-                    key: ObjectKey(entry.value),
-                    index: entry.key,
-                    block: entry.value,
-                    onTap: () {
-                      widget.setPage(entry.key);
-                    },
-                    updateCallBack: () async {
-                      await _loadBlocksUnconditional();
-                      await _filterBlocks();
-                      await widget.onEdit();
-                    },
-                    direction: (isScrollVertical == true)
-                        ? Axis.horizontal
-                        : Axis.vertical,
-                  );
-                }).toList(),
               ),
-              // child: GridView.count(
-              //   crossAxisCount: (isScrollVertical == true)
-              //       ? (width / 360).floor()
-              //       : (height / 240).floor(),
-              //   scrollDirection: (isScrollVertical == true)
-              //       ? Axis.vertical
-              //       : Axis.horizontal,
-
-              //   childAspectRatio: (isScrollVertical == true) ? 3 : 1 / 2,
-              //   children: _cacheBlocks.asMap().entries.map((entry) {
-              //     return ICBlockCard(
-              //       key: ObjectKey(entry.value),
-              //       block: entry.value,
-              //       onTap: () {
-              //         widget.setPage(entry.key);
-              //       },
-              //       direction: (isScrollVertical == true)
-              //           ? Axis.horizontal
-              //           : Axis.vertical,
-              //       onBlockUpdated: () async {
-              //         await _loadBlocksUnconditional();
-              //         await _filterBlocks();
-              //       },
-              //     );
-              //   }).toList(),
-              // ),
+            ),
+            Consumer<ICBlockModel>(
+              builder: (context, model, child) {
+                return Expanded(
+                  child: ReorderableListView(
+                    proxyDecorator: proxyDecorator,
+                    padding: EdgeInsets.all(0),
+                    onReorder: (oldIndex, newIndex) async {
+                      await model.reorderBlockByCacheId(
+                        widget.cacheid,
+                        oldIndex,
+                        newIndex,
+                      );
+                    },
+                    buildDefaultDragHandles: false,
+                    scrollDirection: (isScrollVertical == true)
+                        ? Axis.vertical
+                        : Axis.horizontal,
+                    children: model.cacheBlocksMap[widget.cacheid]!
+                        .asMap()
+                        .entries
+                        .where(
+                          (entry) => entry.value.name.toLowerCase().contains(
+                            _textEditingController.text.toLowerCase(),
+                          ),
+                        )
+                        .map((entry) {
+                          return ICBlockCard(
+                            key: ObjectKey(entry.value),
+                            index: entry.key,
+                            block: entry.value,
+                            onTap: () {
+                              widget.setPage(entry.key);
+                            },
+                            updateCallBack: () async {
+                              await _loadBlocksUnconditional();
+                              await _filterBlocks();
+                              await widget.onEdit();
+                            },
+                            direction: (isScrollVertical == true)
+                                ? Axis.horizontal
+                                : Axis.vertical,
+                          );
+                        })
+                        .toList(),
+                  ),
+                );
+              },
             ),
           ],
         ),
