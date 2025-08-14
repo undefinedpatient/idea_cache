@@ -387,7 +387,7 @@ class _ICMainView extends State<ICMainView> {
           });
         },
       );
-    } else if (_selectedIndex > cacheModel.caches.length + 1) {
+    } else if (_selectedIndex > cacheModel.caches.length) {
       pageWidget = ICSettingPage();
     } else {
       pageWidget = ICCacheView(

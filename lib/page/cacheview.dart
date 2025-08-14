@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
@@ -38,46 +40,46 @@ class _ICCacheView extends State<ICCacheView> {
   OverlayEntry? entryImportOverlay;
   final FocusNode _focusNode = FocusNode();
 
-  Future<void> _loadBlocks() async {
-    List<ICBlock> blocks = await FileHandler.findBlocksByCacheId(
-      widget.cacheid,
-    );
-    setState(() {
-      localBlocks = blocks;
-    });
-  }
+  // Future<void> _loadBlocks() async {
+  //   List<ICBlock> blocks = await FileHandler.findBlocksByCacheId(
+  //     widget.cacheid,
+  //   );
+  //   setState(() {
+  //     localBlocks = blocks;
+  //   });
+  // }
 
-  Future<void> _loadCache() async {
-    Cache? cache = await FileHandler.findCacheById(widget.cacheid);
-    if (cache == null) {
-      return;
-    }
-    setState(() {
-      localCache;
-    });
-  }
+  // Future<void> _loadCache() async {
+  //   Cache? cache = await FileHandler.findCacheById(widget.cacheid);
+  //   if (cache == null) {
+  //     return;
+  //   }
+  //   setState(() {
+  //     localCache;
+  //   });
+  // }
 
-  Future<void> _deleteBlock(BuildContext context) async {
-    Navigator.pop(context);
-    ICBlock oldBlock = localBlocks[_selectedIndex];
-    localCache.removeBlockId(oldBlock.id);
-    await FileHandler.updateCache(localCache);
-    await FileHandler.deleteBlocksById(oldBlock.id);
+  // Future<void> _deleteBlock(BuildContext context) async {
+  //   Navigator.pop(context);
+  //   ICBlock oldBlock = localBlocks[_selectedIndex];
+  //   localCache.removeBlockId(oldBlock.id);
+  //   await FileHandler.updateCache(localCache);
+  //   await FileHandler.deleteBlocksById(oldBlock.id);
 
-    final SnackBar snackBar = SnackBar(
-      content: Text("Block ${oldBlock.name} Deleted!"),
-      duration: Durations.extralong3,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    await _loadBlocks();
-    if (_selectedIndex >= localBlocks.length) {
-      _selectedIndex = localBlocks.length - 1;
-      // Hard Limiting the _selectedIndex
-      if (_selectedIndex == -1) {
-        _selectedIndex = 0;
-      }
-    }
-  }
+  //   final SnackBar snackBar = SnackBar(
+  //     content: Text("Block ${oldBlock.name} Deleted!"),
+  //     duration: Durations.extralong3,
+  //   );
+  //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  //   await _loadBlocks();
+  //   if (_selectedIndex >= localBlocks.length) {
+  //     _selectedIndex = localBlocks.length - 1;
+  //     // Hard Limiting the _selectedIndex
+  //     if (_selectedIndex == -1) {
+  //       _selectedIndex = 0;
+  //     }
+  //   }
+  // }
 
   @override
   void initState() {
@@ -113,8 +115,8 @@ class _ICCacheView extends State<ICCacheView> {
           });
         },
         onEdit: () async {
-          await _loadBlocks();
-          await _loadCache();
+          // await _loadBlocks();
+          // await _loadCache();
         },
       );
     } else if (localBlocks.isNotEmpty) {
@@ -340,13 +342,16 @@ class _ICCacheView extends State<ICCacheView> {
                         model.cacheBlocksMap[widget.cacheid] ?? [];
                     return Expanded(
                       child: ListView(
+                        addAutomaticKeepAlives: false,
                         scrollDirection: Axis.horizontal,
                         children: localBlocks.asMap().entries.map((
                           MapEntry<int, ICBlock> entry,
                         ) {
                           return ICBlockListTile(
-                            name: entry.value.name,
-                            blockid: entry.value.id,
+                            key: ValueKey(entry.key),
+                            // name: entry.value.name,
+                            block: entry.value,
+                            // blockid: entry.value.id,
                             onTap: () {
                               if (appState.isContentEdited) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -363,9 +368,9 @@ class _ICCacheView extends State<ICCacheView> {
                                 _selectedIndex = entry.key;
                               });
                             },
-                            onEditName: () async {
-                              await _loadBlocks();
-                            },
+                            // onEditName: () async {
+                            // await _loadBlocks();
+                            // },
                             isSelected: _selectedIndex == entry.key,
                           );
                         }).toList(),
@@ -389,83 +394,6 @@ class _ICCacheView extends State<ICCacheView> {
                     );
                   },
                 ),
-                // Delete Block Button can only Appear when user is viewing a block
-                if (_selectedIndex != -1)
-                  Tooltip(
-                    message: (appState.setting.toolTipsEnabled)
-                        ? "Delete Block"
-                        : "",
-                    child: MenuItemButton(
-                      requestFocusOnHover: false,
-                      onPressed: () async {
-                        await showDialog<String>(
-                          context: context,
-                          builder: (BuildContext context) => KeyboardListener(
-                            focusNode: _focusNode,
-                            autofocus: true,
-                            onKeyEvent: (KeyEvent keyEvent) {
-                              if (keyEvent.logicalKey.keyLabel == "Y" ||
-                                  keyEvent.logicalKey.keyLabel == "Enter") {
-                                _deleteBlock(context);
-                              }
-                              if (keyEvent.logicalKey.keyLabel == "N") {
-                                Navigator.pop(context);
-                              }
-                            },
-                            child: Dialog(
-                              shape: BeveledRectangleBorder(),
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  spacing: 8,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Text(
-                                      "Confirm Block Deletion?",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium!
-                                          .copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.secondary,
-                                          ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TextButton(
-                                          onPressed: () async {
-                                            await _deleteBlock(context);
-                                          },
-                                          child: const Text(
-                                            "Delete (Y)",
-                                            style: TextStyle(
-                                              color: Colors.redAccent,
-                                            ),
-                                          ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("Close (n)"),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      leadingIcon: Icon(Icons.delete_outlined),
-                    ),
-                  ),
               ],
             ),
           ),

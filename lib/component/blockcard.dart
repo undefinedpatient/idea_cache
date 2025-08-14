@@ -144,7 +144,6 @@ class _ICBlockCardState extends State<ICBlockCard> {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  // _textEditingController.text = userCache!.name;
                                   return KeyboardListener(
                                     focusNode: _focusNode,
                                     autofocus: true,
@@ -153,6 +152,15 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                           keyEvent.logicalKey.keyLabel ==
                                               "Enter") {
                                         model.deleteBlockById(widget.block);
+                                        final SnackBar snackBar = SnackBar(
+                                          content: Text(
+                                            "Block ${widget.block.name} Deleted!",
+                                          ),
+                                          duration: Durations.extralong3,
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(snackBar);
                                         Navigator.pop(context);
                                       }
                                       if (keyEvent.logicalKey.keyLabel == "N") {
@@ -190,6 +198,17 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                                     model.deleteBlockById(
                                                       widget.block,
                                                     );
+                                                    final SnackBar
+                                                    snackBar = SnackBar(
+                                                      content: Text(
+                                                        "Block ${widget.block.name} Deleted!",
+                                                      ),
+                                                      duration:
+                                                          Durations.extralong3,
+                                                    );
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(snackBar);
                                                     Navigator.pop(context);
                                                   },
                                                   child: const Text(
