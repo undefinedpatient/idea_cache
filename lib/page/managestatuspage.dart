@@ -3,14 +3,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
-import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:provider/provider.dart';
 
 class ICManageStatusPage extends StatefulWidget {
   final void Function()? updateCallback;
-  const ICManageStatusPage({super.key, this.updateCallback});
+  final ICBlock? calleeBlock;
+  const ICManageStatusPage({super.key, this.updateCallback, this.calleeBlock});
 
   @override
   State<StatefulWidget> createState() {
@@ -22,28 +23,14 @@ class _ICManageStatus extends State<ICManageStatusPage> {
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
-  List<Cache> _caches = List.empty(growable: true);
-  List<ICStatus> statuses = List.empty(growable: true);
   OverlayEntry? colorPickerOverlay;
-  Future<void> _readStatuses() async {
-    List<ICStatus> readStatuses = await FileHandler.readStatus();
-    setState(() {
-      statuses = readStatuses;
-    });
-  }
-
-  Future<void> _readCaches() async {
-    List<Cache> readCaches = await FileHandler.readCaches();
-    setState(() {
-      _caches = readCaches;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _readStatuses();
-    _readCaches();
+    Future.microtask(() {
+      Provider.of<ICStatusModel>(context, listen: false).loadFromFile();
+    });
   }
 
   @override
@@ -53,215 +40,225 @@ class _ICManageStatus extends State<ICManageStatusPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<Color> colors = [
+      Colors.black,
+      Colors.grey,
+      Colors.red,
+      Colors.green,
+      Colors.blue,
+      Colors.cyanAccent,
+      Colors.yellow,
+      Colors.purple,
+      Colors.orange,
+    ];
     ICSettingsModel appState = context.watch<ICSettingsModel>();
     String userSelectedCacheId = "";
-    return Container(
-      height: 600,
-      width: 480,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-        appBar: AppBar(
-          title: Text("Statuses Manager"),
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-          actions: [
-            Tooltip(
-              message: (appState.setting.toolTipsEnabled)
-                  ? "Create Status"
-                  : "",
-              child: IconButton(
-                onPressed: () async {
-                  ICStatus status = ICStatus(statusName: "UnnamedStatus");
-
-                  await FileHandler.appendStatus(status);
-                  await _readStatuses();
-                  widget.updateCallback?.call();
-                },
-                icon: Icon(Icons.add),
-              ),
+    return Consumer3<ICStatusModel, ICBlockModel, ICCacheModel>(
+      builder: (context, statusModel, blockModel, cacheModel, child) {
+        return Container(
+          height: 600,
+          width: 480,
+          child: Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+            appBar: AppBar(
+              title: Text("Statuses Manager"),
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+              actions: [
+                Tooltip(
+                  message: (appState.setting.toolTipsEnabled)
+                      ? "Create Status"
+                      : "",
+                  child: IconButton(
+                    onPressed: () async {
+                      statusModel.createStatus();
+                    },
+                    icon: Icon(Icons.add),
+                  ),
+                ),
+              ],
+              actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
             ),
-          ],
-          actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-        ),
-        body: Column(
-          spacing: 16,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ReorderableListView(
-                buildDefaultDragHandles: false,
-                children: statuses.asMap().entries.map((entry) {
-                  List<Color> colors = [
-                    Colors.black,
-                    Colors.grey,
-                    Colors.red,
-                    Colors.green,
-                    Colors.blue,
-                    Colors.cyanAccent,
-                    Colors.yellow,
-                    Colors.purple,
-                    Colors.orange,
-                  ];
-                  return ListTile(
-                    hoverColor: Theme.of(context).focusColor,
-                    key: ValueKey(entry.value.id),
-                    leading: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ReorderableDragStartListener(
-                          child: Icon(
-                            Icons.drag_handle,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withAlpha(50),
-                          ),
-                          index: entry.key,
-                        ),
-                        Tooltip(
-                          message: (appState.setting.toolTipsEnabled)
-                              ? "Change Status Color"
-                              : "",
-                          child: PopupMenuButton(
-                            onOpened: () {
-                              log("dsa");
-                            },
-                            icon: Icon(
-                              Icons.circle,
-                              color: Color(entry.value.colorCode),
+            body: Column(
+              spacing: 16,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ReorderableListView(
+                    buildDefaultDragHandles: false,
+                    children: statusModel.statuses.asMap().entries.map((entry) {
+                      return ListTile(
+                        hoverColor: Theme.of(context).focusColor,
+                        key: ValueKey(entry.value.id),
+                        leading: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ReorderableDragStartListener(
+                              index: entry.key,
+                              child: Icon(
+                                Icons.drag_handle,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withAlpha(50),
+                              ),
                             ),
-                            itemBuilder: (BuildContext context) {
-                              return colors
-                                  .map(
-                                    (color) => PopupMenuItem(
-                                      onTap: () async {
-                                        ICStatus status = entry.value;
-                                        status.colorCode = color.toARGB32();
-                                        await FileHandler.updateStatus(status);
-                                        widget.updateCallback?.call();
-                                        await _readStatuses();
-                                        await _readCaches();
-                                        setState(() {});
-                                      },
-                                      child: Icon(Icons.circle, color: color),
-                                    ),
-                                  )
-                                  .toList();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    title: Text(
-                      entry.value.statusName,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (Platform.isWindows ||
-                            Platform.isLinux ||
-                            Platform.isMacOS)
-                          Tooltip(
-                            message: (appState.setting.toolTipsEnabled)
-                                ? "Change the Visibility of this Status"
-                                : "",
-                            child: DropdownButton(
-                              autofocus: false,
-                              value: entry.value.cacheId,
-                              items: _caches
-                                  .map(
-                                    (cache) => DropdownMenuItem(
-                                      value: cache.id,
-                                      child: Text(cache.name),
-                                    ),
-                                  )
-                                  .followedBy([
-                                    DropdownMenuItem(
-                                      value: "",
-                                      child: Text("Global Status"),
-                                    ),
-                                  ])
-                                  .toList(),
-                              onChanged: (value) async {
-                                ICStatus newStatus = entry.value;
-                                newStatus.cacheId = value ?? "";
-                                await FileHandler.updateStatus(newStatus);
-                                widget.updateCallback?.call();
-
-                                await _readStatuses();
-                              },
+                            Tooltip(
+                              message: (appState.setting.toolTipsEnabled)
+                                  ? "Change Status Color"
+                                  : "",
+                              child: PopupMenuButton(
+                                onOpened: () {
+                                  log("dsa");
+                                },
+                                icon: Icon(
+                                  Icons.circle,
+                                  color: Color(entry.value.colorCode),
+                                ),
+                                itemBuilder: (BuildContext context) {
+                                  return colors
+                                      .map(
+                                        (color) => PopupMenuItem(
+                                          onTap: () async {
+                                            ICStatus status = entry.value;
+                                            status.colorCode = color.toARGB32();
+                                            await FileHandler.updateStatus(
+                                              status,
+                                            );
+                                            widget.updateCallback?.call();
+                                            setState(() {});
+                                          },
+                                          child: Icon(
+                                            Icons.circle,
+                                            color: color,
+                                          ),
+                                        ),
+                                      )
+                                      .toList();
+                                },
+                              ),
                             ),
-                          ),
-                        Tooltip(
-                          message: (appState.setting.toolTipsEnabled)
-                              ? "Change Status Name"
-                              : "",
-                          child: IconButton(
-                            onPressed: () {
-                              _textEditingController.text =
-                                  entry.value.statusName;
-                              setState(() {
-                                userSelectedCacheId = entry.value.cacheId;
-                              });
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return StatefulBuilder(
-                                    builder: (context, setDialogState) {
-                                      return Dialog(
-                                        child: Container(
-                                          width: 240,
-                                          padding: EdgeInsets.all(16),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            spacing: 8,
-                                            children: [
-                                              TextField(
-                                                controller:
-                                                    _textEditingController,
-                                                decoration: InputDecoration(
-                                                  labelText: "Edit Status Name",
-                                                ),
-                                                onSubmitted: (value) async {
-                                                  entry.value.statusName =
-                                                      value;
-                                                  await FileHandler.updateStatus(
-                                                    entry.value,
-                                                  );
-                                                  widget.updateCallback?.call();
-                                                  await _readStatuses();
-                                                  Navigator.pop(context);
-                                                },
-                                              ),
-                                              SizedBox(height: 8),
-                                              if (Platform.isAndroid ||
-                                                  Platform.isIOS)
-                                                Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text("Visibility: "),
-                                                    Tooltip(
-                                                      message:
-                                                          (appState
-                                                              .setting
-                                                              .toolTipsEnabled)
-                                                          ? "Change the Visibility of this Status"
-                                                          : "",
-                                                      // It is saved on confirm, different from desktop
-                                                      child: DropdownButton(
-                                                        isDense: true,
-                                                        autofocus: false,
-                                                        value:
-                                                            userSelectedCacheId,
-                                                        items: _caches
-                                                            .map(
-                                                              (cache) =>
-                                                                  DropdownMenuItem(
+                          ],
+                        ),
+                        title: Text(
+                          entry.value.statusName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (Platform.isWindows ||
+                                Platform.isLinux ||
+                                Platform.isMacOS)
+                              Tooltip(
+                                message: (appState.setting.toolTipsEnabled)
+                                    ? "Change the Visibility of this Status"
+                                    : "",
+                                child: DropdownButton(
+                                  autofocus: false,
+                                  value: entry.value.cacheId,
+                                  items: cacheModel.caches
+                                      .map(
+                                        (cache) => DropdownMenuItem(
+                                          value: cache.id,
+                                          child: Text(cache.name),
+                                        ),
+                                      )
+                                      .followedBy([
+                                        DropdownMenuItem(
+                                          value: "",
+                                          child: Text("Global Status"),
+                                        ),
+                                      ])
+                                      .toList(),
+                                  onChanged: (value) async {
+                                    ICStatus newStatus = entry.value;
+                                    newStatus.cacheId = value ?? "";
+                                    await statusModel.updateStatus(newStatus);
+                                    if (widget.calleeBlock != null) {
+                                      await blockModel
+                                          .updateLocalBlockMapByCacheId(
+                                            widget.calleeBlock!.cacheId,
+                                          );
+                                    }
+                                    widget.updateCallback?.call();
+                                  },
+                                ),
+                              ),
+                            Tooltip(
+                              message: (appState.setting.toolTipsEnabled)
+                                  ? "Change Status Name"
+                                  : "",
+                              child: IconButton(
+                                onPressed: () {
+                                  _textEditingController.text =
+                                      entry.value.statusName;
+                                  setState(() {
+                                    userSelectedCacheId = entry.value.cacheId;
+                                  });
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: (context, setDialogState) {
+                                          return Dialog(
+                                            child: Container(
+                                              width: 240,
+                                              padding: EdgeInsets.all(16),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                spacing: 8,
+                                                children: [
+                                                  TextField(
+                                                    controller:
+                                                        _textEditingController,
+                                                    decoration: InputDecoration(
+                                                      labelText:
+                                                          "Edit Status Name",
+                                                    ),
+                                                    onSubmitted: (value) async {
+                                                      ICStatus status =
+                                                          entry.value;
+                                                      status.statusName = value;
+                                                      statusModel.updateStatus(
+                                                        status,
+                                                      );
+                                                      widget.updateCallback
+                                                          ?.call();
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  if (Platform.isAndroid ||
+                                                      Platform.isIOS)
+                                                    Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text("Visibility: "),
+                                                        Tooltip(
+                                                          message:
+                                                              (appState
+                                                                  .setting
+                                                                  .toolTipsEnabled)
+                                                              ? "Change the Visibility of this Status"
+                                                              : "",
+                                                          // It is saved on confirm, different from desktop
+                                                          child: DropdownButton(
+                                                            isDense: true,
+                                                            autofocus: false,
+                                                            value:
+                                                                userSelectedCacheId,
+                                                            items: cacheModel
+                                                                .caches
+                                                                .map(
+                                                                  (
+                                                                    cache,
+                                                                  ) => DropdownMenuItem(
                                                                     value: cache
                                                                         .id,
                                                                     child: Text(
@@ -269,91 +266,81 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                                                           .name,
                                                                     ),
                                                                   ),
-                                                            )
-                                                            .followedBy([
-                                                              DropdownMenuItem(
-                                                                value: "",
-                                                                child: Text(
-                                                                  "Global Status",
-                                                                ),
-                                                              ),
-                                                            ])
-                                                            .toList(),
-                                                        onChanged: (value) async {
-                                                          setDialogState(() {
-                                                            userSelectedCacheId =
-                                                                value ?? "";
-                                                          });
-                                                        },
-                                                      ),
+                                                                )
+                                                                .followedBy([
+                                                                  DropdownMenuItem(
+                                                                    value: "",
+                                                                    child: Text(
+                                                                      "Global Status",
+                                                                    ),
+                                                                  ),
+                                                                ])
+                                                                .toList(),
+                                                            onChanged: (value) async {
+                                                              setDialogState(() {
+                                                                userSelectedCacheId =
+                                                                    value ?? "";
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ],
-                                                ),
-                                              TextButton(
-                                                onPressed: () async {
-                                                  entry.value.statusName =
-                                                      _textEditingController
-                                                          .text;
-                                                  entry.value.cacheId =
-                                                      userSelectedCacheId;
-                                                  await FileHandler.updateStatus(
-                                                    entry.value,
-                                                  );
-                                                  widget.updateCallback?.call();
-                                                  await _readStatuses();
+                                                  TextButton(
+                                                    onPressed: () async {
+                                                      ICStatus status =
+                                                          entry.value;
+                                                      status.statusName =
+                                                          _textEditingController
+                                                              .text;
+                                                      statusModel.updateStatus(
+                                                        status,
+                                                      );
+                                                      widget.updateCallback
+                                                          ?.call();
 
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text("Save"),
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Text("Save"),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
-                                        ),
+                                            ),
+                                          );
+                                        },
                                       );
                                     },
                                   );
                                 },
-                              );
-                            },
-                            icon: Icon(Icons.edit_outlined),
-                          ),
+                                icon: Icon(Icons.edit_outlined),
+                              ),
+                            ),
+                            Tooltip(
+                              message: (appState.setting.toolTipsEnabled)
+                                  ? "Delete Status"
+                                  : "",
+                              child: IconButton(
+                                onPressed: () async {
+                                  statusModel.deleteStatusById(entry.value.id);
+                                  widget.updateCallback?.call();
+                                },
+                                icon: Icon(Icons.delete_outline),
+                              ),
+                            ),
+                          ],
                         ),
-                        Tooltip(
-                          message: (appState.setting.toolTipsEnabled)
-                              ? "Delete Status"
-                              : "",
-                          child: IconButton(
-                            onPressed: () async {
-                              await FileHandler.deleteStatusById(
-                                entry.value.id,
-                              );
-                              widget.updateCallback?.call();
-                              await _readStatuses();
-                            },
-                            icon: Icon(Icons.delete_outline),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onReorder: (int oldIndex, int newIndex) async {
-                  // Local update
-                  statuses.insert(
-                    (oldIndex < newIndex) ? newIndex - 1 : newIndex,
-                    statuses.removeAt(oldIndex),
-                  );
-                  setState(() {});
-
-                  // Reorder in file
-                  await FileHandler.reorderStatuses(oldIndex, newIndex);
-                  _readStatuses();
-                },
-              ),
+                      );
+                    }).toList(),
+                    onReorder: (int oldIndex, int newIndex) async {
+                      statusModel.reorderStatus(oldIndex, newIndex);
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

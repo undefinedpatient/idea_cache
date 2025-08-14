@@ -9,8 +9,8 @@ import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/setting.dart';
+import 'package:idea_cache/model/status.dart';
 import 'package:idea_cache/page/cacheview.dart';
-import 'package:idea_cache/page/emptypage.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 
@@ -32,6 +32,7 @@ class ICApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ICSettingsModel()),
         ChangeNotifierProvider(create: (context) => ICCacheModel()),
         ChangeNotifierProvider(create: (context) => ICBlockModel()),
+        ChangeNotifierProvider(create: (context) => ICStatusModel()),
       ],
       child: Consumer<ICSettingsModel>(
         builder: (context, model, child) {
@@ -182,10 +183,10 @@ class ICCacheModel extends ChangeNotifier {
 }
 
 class ICBlockModel extends ChangeNotifier {
-  final List<ICBlock> _blocks = [];
+  // final List<ICBlock> _blocks = [];
 
   final Map<String, List<ICBlock>> _cacheBlocksMap = {};
-  UnmodifiableListView<ICBlock> get blocks => UnmodifiableListView(_blocks);
+  // UnmodifiableListView<ICBlock> get blocks => UnmodifiableListView(_blocks);
   UnmodifiableMapView<String, List<ICBlock>> get cacheBlocksMap =>
       UnmodifiableMapView(_cacheBlocksMap);
   bool _isLoading = false;
@@ -194,21 +195,22 @@ class ICBlockModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _blocks.clear();
+    // _blocks.clear();
     _cacheBlocksMap.clear();
-    _blocks.addAll(await FileHandler.readBlocks());
-
+    // _blocks.addAll(await FileHandler.readBlocks());
+    log("Update Completed");
     List<Cache> caches = await FileHandler.readCaches();
     for (int i = 0; i < caches.length; i++) {
       _cacheBlocksMap.addAll({
         caches[i].id: await FileHandler.findBlocksByCacheId(caches[i].id),
       });
     }
+    log("Update Completed1");
     _isLoading = false;
     notifyListeners();
   }
 
-  Future<void> updateBlockMapByCacheId(String cacheId) async {
+  Future<void> updateLocalBlockMapByCacheId(String cacheId) async {
     _cacheBlocksMap[cacheId] = await FileHandler.findBlocksByCacheId(cacheId);
     notifyListeners();
   }
@@ -223,7 +225,7 @@ class ICBlockModel extends ChangeNotifier {
     parentCache.addBlockId(block.id);
     await FileHandler.appendBlock(block);
     await FileHandler.updateCache(parentCache);
-    await updateBlockMapByCacheId(cacheId);
+    await updateLocalBlockMapByCacheId(cacheId);
     notifyListeners();
   }
 
@@ -252,7 +254,7 @@ class ICBlockModel extends ChangeNotifier {
 
   Future<void> updateBlock(ICBlock block) async {
     await FileHandler.updateBlock(block);
-    await updateBlockMapByCacheId(block.cacheId);
+    await updateLocalBlockMapByCacheId(block.cacheId);
     notifyListeners();
   }
 
@@ -264,8 +266,76 @@ class ICBlockModel extends ChangeNotifier {
     }
     parentCache.removeBlockId(block.id);
     await FileHandler.updateCache(parentCache);
-    await updateBlockMapByCacheId(block.cacheId);
+    await updateLocalBlockMapByCacheId(block.cacheId);
     notifyListeners();
+  }
+}
+
+class ICStatusModel extends ChangeNotifier {
+  final List<ICStatus> _statuses = [];
+  UnmodifiableListView<ICStatus> get statuses =>
+      UnmodifiableListView(_statuses);
+  Future<void> loadFromFile() async {
+    _statuses.clear();
+    _statuses.addAll(await FileHandler.readStatus());
+    notifyListeners();
+  }
+
+  Future<void> createStatus() async {
+    ICStatus status = ICStatus(statusName: "UnnamedStatus");
+    FileHandler.appendStatus(status);
+    _statuses.add(status);
+    notifyListeners();
+  }
+
+  Future<void> reorderStatus(int from, int to) async {
+    if (from < to) {
+      to--;
+    }
+    _statuses.insert(to, _statuses.removeAt(from));
+    notifyListeners();
+    await FileHandler.reorderStatuses(from, to);
+    notifyListeners();
+  }
+
+  Future<void> updateStatus(ICStatus status) async {
+    int targetReplaceIndex = statuses.indexWhere(
+      (item) => item.id == status.id,
+    );
+    _statuses[targetReplaceIndex] = status;
+    await FileHandler.updateStatus(status);
+    notifyListeners();
+  }
+
+  Future<void> deleteStatusById(String statusId) async {
+    _statuses.removeWhere((status) => status.id == statusId);
+    FileHandler.deleteStatusById(statusId);
+    notifyListeners();
+  }
+
+  ICStatus? findStatusByBlock(ICBlock block) {
+    if (block.statusId == "") {
+      return null;
+    }
+    for (int i = 0; i < statuses.length; i++) {
+      if (statuses[i].id == block.statusId &&
+          (statuses[i].cacheId == block.cacheId ||
+              statuses[i].cacheId.isEmpty)) {
+        return statuses[i];
+      }
+    }
+    return null;
+  }
+
+  List<ICStatus> findAvailableByCacheId(String cacheId) {
+    List<ICStatus>? availableStatuses = List.empty(growable: true);
+    // Filtering
+    for (int i = 0; i < _statuses.length; i++) {
+      if (_statuses[i].cacheId == cacheId || _statuses[i].cacheId == "") {
+        availableStatuses.add(_statuses[i]);
+      }
+    }
+    return availableStatuses;
   }
 }
 
@@ -294,6 +364,9 @@ class _ICMainView extends State<ICMainView> {
     Future.microtask(
       () => {Provider.of<ICBlockModel>(context, listen: false).loadFromFile()},
     );
+    Future.microtask(
+      () => {Provider.of<ICStatusModel>(context, listen: false).loadFromFile()},
+    );
   }
 
   @override
@@ -320,7 +393,6 @@ class _ICMainView extends State<ICMainView> {
       pageWidget = ICCacheView(
         cacheid: cacheModel._caches[_selectedIndex - 1].id,
         onPageDeleted: () {
-          log("Called");
           setState(() {
             _selectedIndex = 0;
           });
@@ -451,7 +523,7 @@ class _ICMainView extends State<ICMainView> {
                                   selected: false,
                                   onTap: () async {
                                     Cache cache = await model.createCache();
-                                    blockModel.updateBlockMapByCacheId(
+                                    blockModel.updateLocalBlockMapByCacheId(
                                       cache.id,
                                     );
                                   },

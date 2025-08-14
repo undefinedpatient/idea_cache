@@ -1,11 +1,9 @@
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
-import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:provider/provider.dart';
 
@@ -172,6 +170,8 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
             ),
             Consumer<ICBlockModel>(
               builder: (context, model, child) {
+                List<ICBlock> localBlocks =
+                    model.cacheBlocksMap[widget.cacheid] ?? [];
                 return Expanded(
                   child: ReorderableListView(
                     proxyDecorator: proxyDecorator,
@@ -187,7 +187,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                     scrollDirection: (isScrollVertical == true)
                         ? Axis.vertical
                         : Axis.horizontal,
-                    children: model.cacheBlocksMap[widget.cacheid]!
+                    children: localBlocks
                         .asMap()
                         .entries
                         .where(

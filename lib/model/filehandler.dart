@@ -226,6 +226,7 @@ class FileHandler {
           if (newStatus.cacheId != "" &&
               oldStatus.cacheId == "" &&
               blocks[i].cacheId != newStatus.cacheId) {
+            // log("Case 0 !\n\n");
             blocks[i].statusId = "";
             await updateBlock(blocks[i]);
             continue;
@@ -234,10 +235,12 @@ class FileHandler {
           if (newStatus.cacheId != "" &&
               oldStatus.cacheId != "" &&
               blocks[i].cacheId != newStatus.cacheId) {
+            // log("Case 1 !\n\n");
             blocks[i].statusId = "";
             await updateBlock(blocks[i]);
             continue;
           }
+          // log("Case 2 ?\n\n");
         }
       }
     }
@@ -497,10 +500,6 @@ class FileHandler {
         unorderedBlocks.add(readblocks[i]);
       }
     }
-    log("\nUnorderedBlock:");
-    unorderedBlocks.forEach((block) {
-      log(block.id);
-    });
     for (int i = 0; i < cache.blockIds.length; i++) {
       int indexOfTargetBlock = unorderedBlocks
           .map((block) => block.id)
@@ -508,29 +507,7 @@ class FileHandler {
           .indexOf(cache.blockIds[i]);
       orderedblocks.add(unorderedBlocks[indexOfTargetBlock]);
     }
-    log("\nOrderedBlock:");
-    orderedblocks.forEach((block) {
-      log(block.id);
-    });
     return orderedblocks;
-  }
-
-  static Future<List<ICStatus>> readAvailableStatusByCacheId(
-    String cacheId,
-  ) async {
-    List<ICStatus>? statuses = List.empty(growable: true);
-    List<ICStatus>? readStatuses = await readStatus();
-    Cache? cache = await findCacheById(cacheId);
-    if (cache == null) {
-      throw Exception("findBlocksByCacheId: cache is null!");
-    }
-    // Filtering
-    for (int i = 0; i < readStatuses.length; i++) {
-      if (readStatuses[i].cacheId == cacheId || readStatuses[i].cacheId == "") {
-        statuses.add(readStatuses[i]);
-      }
-    }
-    return statuses;
   }
 
   static Future<Cache?> findCacheById(String cacheId) async {

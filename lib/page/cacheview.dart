@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
@@ -63,7 +61,7 @@ class _ICCacheView extends State<ICCacheView> {
     Navigator.pop(context);
     ICBlock oldBlock = localBlocks[_selectedIndex];
     localCache.removeBlockId(oldBlock.id);
-    await FileHandler.updateCache(localCache!);
+    await FileHandler.updateCache(localCache);
     await FileHandler.deleteBlocksById(oldBlock.id);
 
     final SnackBar snackBar = SnackBar(
@@ -338,41 +336,39 @@ class _ICCacheView extends State<ICCacheView> {
                 ),
                 Consumer<ICBlockModel>(
                   builder: (context, model, child) {
+                    List<ICBlock> localBlocks =
+                        model.cacheBlocksMap[widget.cacheid] ?? [];
                     return Expanded(
                       child: ListView(
                         scrollDirection: Axis.horizontal,
-                        children: model.cacheBlocksMap[widget.cacheid]!
-                            .asMap()
-                            .entries
-                            .map((MapEntry<int, ICBlock> entry) {
-                              return ICBlockListTile(
-                                name: entry.value.name,
-                                blockid: entry.value.id,
-                                onTap: () {
-                                  if (appState.isContentEdited) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "Warning: Content Not Saved",
-                                        ),
-                                        duration: Durations.extralong3,
-                                      ),
-                                    );
-                                    // set the edited state such that user can ignore the warning
-                                    appState.setContentEditedState(false);
-                                    return;
-                                  }
-                                  setState(() {
-                                    _selectedIndex = entry.key;
-                                  });
-                                },
-                                onEditName: () async {
-                                  await _loadBlocks();
-                                },
-                                isSelected: _selectedIndex == entry.key,
-                              );
-                            })
-                            .toList(),
+                        children: localBlocks.asMap().entries.map((
+                          MapEntry<int, ICBlock> entry,
+                        ) {
+                          return ICBlockListTile(
+                            name: entry.value.name,
+                            blockid: entry.value.id,
+                            onTap: () {
+                              if (appState.isContentEdited) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Warning: Content Not Saved"),
+                                    duration: Durations.extralong3,
+                                  ),
+                                );
+                                // set the edited state such that user can ignore the warning
+                                appState.setContentEditedState(false);
+                                return;
+                              }
+                              setState(() {
+                                _selectedIndex = entry.key;
+                              });
+                            },
+                            onEditName: () async {
+                              await _loadBlocks();
+                            },
+                            isSelected: _selectedIndex == entry.key,
+                          );
+                        }).toList(),
                       ),
                     );
                   },
