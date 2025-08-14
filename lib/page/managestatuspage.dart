@@ -65,7 +65,9 @@ class _ICManageStatus extends State<ICManageStatusPage> {
           backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           actions: [
             Tooltip(
-              message: (appState.toolTipsEnabled) ? "Create Status" : "",
+              message: (appState.setting.toolTipsEnabled)
+                  ? "Create Status"
+                  : "",
               child: IconButton(
                 onPressed: () async {
                   ICStatus status = ICStatus(statusName: "UnnamedStatus");
@@ -116,7 +118,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                           index: entry.key,
                         ),
                         Tooltip(
-                          message: (appState.toolTipsEnabled)
+                          message: (appState.setting.toolTipsEnabled)
                               ? "Change Status Color"
                               : "",
                           child: PopupMenuButton(
@@ -160,7 +162,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                             Platform.isLinux ||
                             Platform.isMacOS)
                           Tooltip(
-                            message: (appState.toolTipsEnabled)
+                            message: (appState.setting.toolTipsEnabled)
                                 ? "Change the Visibility of this Status"
                                 : "",
                             child: DropdownButton(
@@ -191,7 +193,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                             ),
                           ),
                         Tooltip(
-                          message: (appState.toolTipsEnabled)
+                          message: (appState.setting.toolTipsEnabled)
                               ? "Change Status Name"
                               : "",
                           child: IconButton(
@@ -246,6 +248,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                                     Tooltip(
                                                       message:
                                                           (appState
+                                                              .setting
                                                               .toolTipsEnabled)
                                                           ? "Change the Visibility of this Status"
                                                           : "",
@@ -316,7 +319,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                           ),
                         ),
                         Tooltip(
-                          message: (appState.toolTipsEnabled)
+                          message: (appState.setting.toolTipsEnabled)
                               ? "Delete Status"
                               : "",
                           child: IconButton(

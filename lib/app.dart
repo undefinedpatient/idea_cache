@@ -34,33 +34,33 @@ class ICApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ICBlockModel()),
       ],
       child: Consumer<ICSettingsModel>(
-        builder: (context, value, child) {
+        builder: (context, model, child) {
           return MaterialApp(
             home: ICMainView(),
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Color(value.colorcode),
+                seedColor: Color(model.setting.colorCode),
                 brightness: Brightness.light,
                 contrastLevel: 0.5,
               ),
 
               textTheme: Typography.blackCupertino.apply(
-                fontFamily: value.font,
+                fontFamily: model.setting.fontFamily,
                 displayColor: Colors.black,
               ),
             ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Color(value.colorcode),
+                seedColor: Color(model.setting.colorCode),
                 brightness: Brightness.dark,
                 contrastLevel: 0.5,
               ),
               textTheme: Typography.whiteCupertino.apply(
-                fontFamily: value.font,
+                fontFamily: model.setting.fontFamily,
                 displayColor: Colors.white,
               ),
             ),
-            themeMode: value.thememode,
+            themeMode: model.setting.themeMode,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
@@ -75,43 +75,53 @@ class ICApp extends StatelessWidget {
 }
 
 class ICSettingsModel extends ChangeNotifier {
-  // User Settings
-  ThemeMode thememode = ThemeMode.light;
-  String font = 'FiraCode Nerd Font';
-  int colorcode = Colors.purple.toARGB32();
-  bool toolTipsEnabled = true;
+  Setting setting = Setting();
+  bool isLoading = false;
   // App States
   bool isContentEdited = false;
 
   ICSettingsModel() {
     FileHandler.loadSetting().then((Setting setting) {
-      changeBrightness(setting.thememode);
-      changeFontFamily(setting.fontfamily);
-      changeColorCode(setting.colorcode);
+      changeBrightness(setting.themeMode);
+      changeFontFamily(setting.fontFamily);
+      changeColorCode(setting.colorCode);
       changeTooltipsEnabled(setting.toolTipsEnabled);
     });
   }
+  Future<void> loadFromFile() async {
+    isLoading = true;
+    notifyListeners();
+    await FileHandler.loadSetting().then((Setting setting) {
+      this.setting.themeMode = setting.themeMode;
+      this.setting.fontFamily = setting.fontFamily;
+      this.setting.colorCode = setting.colorCode;
+      this.setting.toolTipsEnabled = setting.toolTipsEnabled;
+    });
+    isLoading = false;
+    notifyListeners();
+  }
+
   void setContentEditedState(bool isEdited) {
-    isContentEdited = isEdited;
+    this.isContentEdited = isEdited;
   }
 
   void changeBrightness(ThemeMode thememode) {
-    this.thememode = thememode;
+    this.setting.themeMode = thememode;
     notifyListeners();
   }
 
   void changeFontFamily(String fontFamily) {
-    font = fontFamily;
+    this.setting.fontFamily = fontFamily;
     notifyListeners();
   }
 
   void changeColorCode(int code) {
-    colorcode = code;
+    this.setting.colorCode = code;
     notifyListeners();
   }
 
   void changeTooltipsEnabled(bool enable) {
-    toolTipsEnabled = enable;
+    this.setting.toolTipsEnabled = enable;
     notifyListeners();
   }
 }
@@ -122,11 +132,10 @@ class ICCacheModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   Future<void> loadFromFile() async {
-    log("loadFromFile");
     _isLoading = true;
     notifyListeners();
     _caches.clear();
-    FileHandler.readCaches().then((caches) {
+    await FileHandler.readCaches().then((caches) {
       for (Cache item in caches) {
         _caches.add(item);
       }
@@ -135,23 +144,18 @@ class ICCacheModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void loadFromFileSync() async {
-    log("loadFromFileSync");
-    _isLoading = true;
-    notifyListeners();
-    _caches.clear();
-    _caches.addAll(await FileHandler.readCaches());
-    _isLoading = false;
-    notifyListeners();
-  }
-
   Future<void> reorderCache(int from, int to) async {
-    log("Reordering");
     if (from < to) {
       to--;
     }
     FileHandler.reorderCaches(from, to);
     _caches.insert(to, _caches.removeAt(from));
+    notifyListeners();
+  }
+
+  Future<void> createCache() async {
+    Cache cache = Cache(name: "Untitled");
+    await FileHandler.appendCache(cache);
     notifyListeners();
   }
 }
@@ -173,15 +177,6 @@ class ICBlockModel extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
-
-  void loadFromFileSync() async {
-    _isLoading = true;
-    notifyListeners();
-    _blocks.clear();
-    _blocks.addAll(await FileHandler.readBlocks());
-    _isLoading = false;
-    notifyListeners();
-  }
 }
 
 class ICMainView extends StatefulWidget {
@@ -197,6 +192,7 @@ class _ICMainView extends State<ICMainView> {
   List<Cache> _userCaches = [];
   OverlayEntry? addCacheOverlayEntry;
   OverlayEntry? overlayEntryImport;
+  Widget? pageWidget;
 
   Future<void> _loadCaches() async {
     _userCaches = List.empty();
@@ -209,46 +205,29 @@ class _ICMainView extends State<ICMainView> {
   @override
   void initState() {
     super.initState();
-    // _loadCaches();
     Future.microtask(
       () => {
-        Provider.of<ICCacheModel>(context, listen: false).loadFromFileSync(),
+        Provider.of<ICSettingsModel>(context, listen: false).loadFromFile(),
       },
     );
     Future.microtask(
-      () => {
-        Provider.of<ICBlockModel>(context, listen: false).loadFromFileSync(),
-      },
+      () => {Provider.of<ICCacheModel>(context, listen: false).loadFromFile()},
+    );
+    Future.microtask(
+      () => {Provider.of<ICBlockModel>(context, listen: false).loadFromFile()},
     );
   }
 
   @override
   void dispose() {
-    // overlayEntryExport?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext buildContext) {
+    log("built with selectedIndex:${_selectedIndex}");
     ICSettingsModel appState = context.watch<ICSettingsModel>();
-    // log("build", name: runtimeType.toString());
-    Widget pageWidget = ICEmptyPage();
-    if (_selectedIndex == 0) {
-      pageWidget = ICOverview(
-        onSetPage: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      );
-    } else if (_selectedIndex > 0 && _selectedIndex < _userCaches.length + 1) {
-      pageWidget = ICCacheView(
-        cacheid: _userCaches[_selectedIndex - 1].id,
-        reloadCaches: _loadCaches,
-      );
-    } else {
-      pageWidget = ICSettingPage();
-    }
+    this.pageWidget ??= ICEmptyPage();
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
@@ -272,43 +251,52 @@ class _ICMainView extends State<ICMainView> {
           children: [
             SizedBox(
               width: 180,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ListTile(
-                    leading: Icon(
-                      (_selectedIndex == 0)
-                          ? Icons.dashboard
-                          : Icons.dashboard_outlined,
-                    ),
-                    title: Text("Overview"),
-                    selected: _selectedIndex == 0,
-                    onTap: () {
-                      if (appState.isContentEdited) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Warning: Content Not Saved"),
-                            duration: Durations.extralong3,
-                          ),
-                        );
-                        appState.setContentEditedState(false);
-                        return;
-                      }
-                      setState(() {
-                        _selectedIndex = 0;
-                      });
-                    },
-                  ),
-
-                  Consumer<ICCacheModel>(
-                    builder: (consumerContext, model, child) {
-                      return (model.isLoading)
-                          ? LinearProgressIndicator()
-                          : Expanded(
+              child: Consumer<ICCacheModel>(
+                builder: (consumerContext, model, child) {
+                  return (model.isLoading)
+                      ? LinearProgressIndicator()
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ListTile(
+                              leading: Icon(
+                                (_selectedIndex == 0)
+                                    ? Icons.dashboard
+                                    : Icons.dashboard_outlined,
+                              ),
+                              title: Text("Overview"),
+                              selected: _selectedIndex == 0,
+                              onTap: () {
+                                if (appState.isContentEdited) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Warning: Content Not Saved",
+                                      ),
+                                      duration: Durations.extralong3,
+                                    ),
+                                  );
+                                  appState.setContentEditedState(false);
+                                  return;
+                                }
+                                setState(() {
+                                  _selectedIndex = 0;
+                                  pageWidget = ICOverview(
+                                    onSetPage: (int index) {
+                                      setState(() {
+                                        _selectedIndex = index;
+                                      });
+                                    },
+                                  );
+                                });
+                              },
+                            ),
+                            Expanded(
                               child: ReorderableListView(
+                                shrinkWrap: true,
                                 buildDefaultDragHandles: false,
                                 onReorder: (int oldIndex, int newIndex) async {
-                                  model.reorderCache(oldIndex, newIndex);
+                                  await model.reorderCache(oldIndex, newIndex);
                                 },
 
                                 children: model.caches.asMap().entries.map((
@@ -324,6 +312,7 @@ class _ICMainView extends State<ICMainView> {
                                       title: title,
                                       cacheid: id,
                                       onTap: () {
+                                        log(id);
                                         if (appState.isContentEdited) {
                                           ScaffoldMessenger.of(
                                             consumerContext,
@@ -340,59 +329,69 @@ class _ICMainView extends State<ICMainView> {
                                         }
                                         setState(() {
                                           _selectedIndex = index + 1;
+                                          pageWidget = ICCacheView(
+                                            cacheid: model
+                                                .caches[_selectedIndex - 1]
+                                                .id,
+                                            reloadCaches: _loadCaches,
+                                          );
                                         });
                                       },
                                       onEditName: () async {
-                                        model.loadFromFileSync();
+                                        model.loadFromFile();
                                       },
                                       selected: _selectedIndex == index + 1,
                                     ),
                                   );
                                 }).toList(),
                               ),
-                            );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.add),
-                    title: Text('Add Cache'),
-                    selected: false,
-                    onTap: () async {
-                      Cache newCache = Cache(name: "Untitled");
-                      await FileHandler.appendCache(newCache);
-                      await _loadCaches();
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      _selectedIndex == _userCaches.length + 2
-                          ? Icons.settings
-                          : Icons.settings_outlined,
-                    ),
-                    title: Text('Settings'),
-                    selected: _selectedIndex == _userCaches.length + 2,
-                    onTap: () {
-                      if (appState.isContentEdited) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Warning: Content Not Saved"),
-                            duration: Durations.extralong3,
-                          ),
+                            ),
+                            ListTile(
+                              leading: Icon(Icons.add),
+                              title: Text('Add Cache'),
+                              selected: false,
+                              onTap: () async {
+                                Cache newCache = Cache(name: "Untitled");
+                                await FileHandler.appendCache(newCache);
+                                await _loadCaches();
+                              },
+                            ),
+                            ListTile(
+                              leading: Icon(
+                                _selectedIndex == model.caches.length + 1
+                                    ? Icons.settings
+                                    : Icons.settings_outlined,
+                              ),
+                              title: Text('Settings'),
+                              selected:
+                                  _selectedIndex == model.caches.length + 1,
+                              onTap: () {
+                                if (appState.isContentEdited) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Warning: Content Not Saved",
+                                      ),
+                                      duration: Durations.extralong3,
+                                    ),
+                                  );
+                                  // set the edited state such that user can ignore the warning
+                                  appState.setContentEditedState(false);
+                                  return;
+                                }
+                                setState(() {
+                                  _selectedIndex = model.caches.length + 1;
+                                  pageWidget = ICSettingPage();
+                                });
+                              },
+                            ),
+                          ],
                         );
-                        // set the edited state such that user can ignore the warning
-                        appState.setContentEditedState(false);
-                        return;
-                      }
-                      setState(() {
-                        _selectedIndex = _userCaches.length + 2;
-                      });
-                    },
-                  ),
-                ],
+                },
               ),
             ),
             const VerticalDivider(thickness: 2, width: 2),
-            Expanded(child: pageWidget),
+            Expanded(child: pageWidget!),
           ],
         ),
       );

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
@@ -93,6 +95,7 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   void initState() {
     super.initState();
+    
     _loadBlocks();
     _loadCache();
   }
@@ -117,6 +120,7 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   Widget build(BuildContext context) {
+    log("hello");
     ICSettingsModel appState = context.watch<ICSettingsModel>();
     if (userCache == null) {
       return ICEmptyPage();
@@ -150,7 +154,7 @@ class _ICCacheView extends State<ICCacheView> {
             Text(userCache!.name),
             if (MediaQuery.of(context).size.width > 520)
               Tooltip(
-                message: (appState.toolTipsEnabled) ? "Rename Cache" : "",
+                message: (appState.setting.toolTipsEnabled) ? "Rename Cache" : "",
                 child: IconButton(
                   onPressed: () {
                     showDialog(
@@ -204,7 +208,7 @@ class _ICCacheView extends State<ICCacheView> {
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         actions: [
           Tooltip(
-            message: (appState.toolTipsEnabled) ? "Pin Cache" : "",
+            message: (appState.setting.toolTipsEnabled) ? "Pin Cache" : "",
             child: IconButton(
               onPressed: () async {
                 setState(() {
@@ -222,7 +226,7 @@ class _ICCacheView extends State<ICCacheView> {
             ),
           ),
           Tooltip(
-            message: (appState.toolTipsEnabled) ? "Delete Cache" : "",
+            message: (appState.setting.toolTipsEnabled) ? "Delete Cache" : "",
             child: IconButton(
               onPressed: () async {
                 await showDialog<String>(
@@ -364,7 +368,7 @@ class _ICCacheView extends State<ICCacheView> {
                   ),
                 ),
                 Tooltip(
-                  message: (appState.toolTipsEnabled) ? "Add Block" : "",
+                  message: (appState.setting.toolTipsEnabled) ? "Add Block" : "",
                   child: MenuItemButton(
                     requestFocusOnHover: false,
                     onPressed: () async {
@@ -383,7 +387,7 @@ class _ICCacheView extends State<ICCacheView> {
                 // Delete Block Button can only Appear when user is viewing a block
                 if (_selectedIndex != -1)
                   Tooltip(
-                    message: (appState.toolTipsEnabled) ? "Delete Block" : "",
+                    message: (appState.setting.toolTipsEnabled) ? "Delete Block" : "",
                     child: MenuItemButton(
                       requestFocusOnHover: false,
                       onPressed: () async {

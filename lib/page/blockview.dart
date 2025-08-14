@@ -168,7 +168,7 @@ class _ICBlockView extends State<ICBlockView> {
                   config: QuillSimpleToolbarConfig(
                     buttonOptions: QuillSimpleToolbarButtonOptions(
                       fontFamily: QuillToolbarFontFamilyButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Font Family"
                             : "",
                         items: _fontFamilies,
@@ -183,94 +183,116 @@ class _ICBlockView extends State<ICBlockView> {
                             ),
                           ),
                       redoHistory: QuillToolbarHistoryButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Redo" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Redo"
+                            : "",
                       ),
                       undoHistory: QuillToolbarHistoryButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Undo" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Undo"
+                            : "",
                       ),
                       bold: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Bold" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Bold"
+                            : "",
                       ),
                       italic: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Italic" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Italic"
+                            : "",
                       ),
                       underLine: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Underline" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Underline"
+                            : "",
                       ),
                       strikeThrough: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Strike Through"
                             : "",
                       ),
                       clearFormat: QuillToolbarClearFormatButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Clear Format"
                             : "",
                       ),
                       listNumbers: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Numbered List"
                             : "",
                       ),
                       listBullets: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Bulleted List"
                             : "",
                       ),
                       toggleCheckList: QuillToolbarToggleCheckListButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Toggle Check List"
                             : "",
                       ),
                       quote: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Quote" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Quote"
+                            : "",
                       ),
                       indentDecrease: QuillToolbarIndentButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Decrease Indent"
                             : "",
                       ),
                       indentIncrease: QuillToolbarIndentButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Increase Indent"
                             : "",
                       ),
                       codeBlock: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Code Block" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Code Block"
+                            : "",
                       ),
                       search: QuillToolbarSearchButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Search" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Search"
+                            : "",
                       ),
                       inlineCode: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Inline Code"
                             : "",
                       ),
                       color: QuillToolbarColorButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Text Color" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Text Color"
+                            : "",
                       ),
                       backgroundColor: QuillToolbarColorButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Background Color"
                             : "",
                       ),
 
                       subscript: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Subscript" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Subscript"
+                            : "",
                       ),
                       superscript: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.toolTipsEnabled)
+                        tooltip: (appState.setting.toolTipsEnabled)
                             ? "Superscript"
                             : "",
                       ),
                       selectHeaderStyleDropdownButton:
                           QuillToolbarSelectHeaderStyleDropdownButtonOptions(
-                            tooltip: (appState.toolTipsEnabled)
+                            tooltip: (appState.setting.toolTipsEnabled)
                                 ? "Select Header Style"
                                 : "",
                           ),
                       fontSize: QuillToolbarFontSizeButtonOptions(
-                        tooltip: (appState.toolTipsEnabled) ? "Font Size" : "",
+                        tooltip: (appState.setting.toolTipsEnabled)
+                            ? "Font Size"
+                            : "",
                         items: Map.from({
                           '16': '16',
                           '18': '18',

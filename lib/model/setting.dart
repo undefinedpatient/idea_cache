@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
 class Setting {
-  ThemeMode thememode = ThemeMode.system;
-  String fontfamily = 'FiraCode Nerd Font';
+  ThemeMode themeMode = ThemeMode.system;
+  String fontFamily = 'FiraCode Nerd Font';
   bool toolTipsEnabled = true;
-  int colorcode = const Color.fromRGBO(156, 39, 176, 1).toARGB32();
+  int colorCode = const Color.fromRGBO(156, 39, 176, 1).toARGB32();
   Setting({
     ThemeMode? thememode,
     String? fontfamily,
     int? colorcode,
     bool? toolTipsEnabled,
   }) {
-    this.thememode = (thememode != null) ? thememode : ThemeMode.system;
-    this.fontfamily = (fontfamily != null) ? fontfamily : 'FiraCode Nerd Font';
-    this.colorcode = (colorcode != null) ? colorcode : Colors.purple.toARGB32();
+    this.themeMode = (thememode != null) ? thememode : ThemeMode.system;
+    this.fontFamily = (fontfamily != null) ? fontfamily : 'FiraCode Nerd Font';
+    this.colorCode = (colorcode != null) ? colorcode : Colors.purple.toARGB32();
     this.toolTipsEnabled = (toolTipsEnabled != null) ? toolTipsEnabled : true;
   }
   Setting.fromJson(Map<String, dynamic> jsonMap) {
@@ -21,21 +21,21 @@ class Setting {
 
     switch (thememodeString) {
       case 'ThemeMode.light':
-        thememode = ThemeMode.light;
+        themeMode = ThemeMode.light;
       case 'ThemeMode.dark':
-        thememode = ThemeMode.dark;
+        themeMode = ThemeMode.dark;
       default:
-        thememode = ThemeMode.system;
+        themeMode = ThemeMode.system;
     }
-    fontfamily = jsonMap["fontfamily"];
-    colorcode = int.parse(jsonMap["colorseed"]);
+    fontFamily = jsonMap["fontfamily"];
+    colorCode = int.parse(jsonMap["colorseed"]);
     toolTipsEnabled = jsonMap["toolTipsEnabled"];
   }
   Map<String, dynamic> toJson() {
     return {
-      'thememode': thememode.toString(),
-      'fontfamily': fontfamily,
-      'colorseed': colorcode.toString(),
+      'thememode': themeMode.toString(),
+      'fontfamily': fontFamily,
+      'colorseed': colorCode.toString(),
       'toolTipsEnabled': toolTipsEnabled,
     };
   }
