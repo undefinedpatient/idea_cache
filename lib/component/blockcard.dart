@@ -309,10 +309,12 @@ class _ICBlockCardState extends State<ICBlockCard> {
                 ),
                 Flexible(
                   fit: FlexFit.tight,
-                  flex: 2,
+                  flex: 1,
                   child: ClipRRect(
                     child: Tooltip(
-                      message: (appState.setting.toolTipsEnabled) ? "Preview" : "",
+                      message: (appState.setting.toolTipsEnabled)
+                          ? "Preview"
+                          : "",
                       child: ListTile(
                         tileColor: (status != null)
                             ? Color(status!.colorCode).withAlpha(100)

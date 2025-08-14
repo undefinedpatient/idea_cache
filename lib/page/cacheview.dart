@@ -26,7 +26,6 @@ class ICCacheView extends StatefulWidget {
 
   @override
   State<ICCacheView> createState() {
-    // log("createState", name: runtimeType.toString());
     return _ICCacheView();
   }
 }
@@ -95,7 +94,6 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   void initState() {
     super.initState();
-    
     _loadBlocks();
     _loadCache();
   }
@@ -120,7 +118,6 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   Widget build(BuildContext context) {
-    log("hello");
     ICSettingsModel appState = context.watch<ICSettingsModel>();
     if (userCache == null) {
       return ICEmptyPage();
@@ -147,63 +144,68 @@ class _ICCacheView extends State<ICCacheView> {
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 8,
-          children: [
-            Text(userCache!.name),
-            if (MediaQuery.of(context).size.width > 520)
-              Tooltip(
-                message: (appState.setting.toolTipsEnabled) ? "Rename Cache" : "",
-                child: IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        _textEditingController.text = userCache!.name;
-                        return Dialog(
-                          child: Container(
-                            width: 240,
-                            padding: EdgeInsets.all(16),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 8,
-                              children: [
-                                TextField(
-                                  controller: _textEditingController,
-                                  decoration: InputDecoration(
-                                    labelText: "Edit Cache Name",
-                                  ),
-                                  onSubmitted: (value) async {
-                                    userCache!.name = value;
-                                    await FileHandler.updateCache(userCache!);
-                                    await widget.reloadCaches();
-
-                                    Navigator.pop(context);
-                                  },
+        title: Consumer<ICCacheModel>(
+          builder: (context, model, child) {
+            Cache localCache = model.caches.firstWhere(
+              (item) => item.id == widget.cacheid,
+            );
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 4,
+              children: [
+                Text(localCache.name),
+                if (MediaQuery.of(context).size.width > 520)
+                  Tooltip(
+                    message: (appState.setting.toolTipsEnabled)
+                        ? "Rename Cache"
+                        : "",
+                    child: IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            _textEditingController.text = userCache!.name;
+                            return Dialog(
+                              child: Container(
+                                width: 240,
+                                padding: EdgeInsets.all(16),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  spacing: 8,
+                                  children: [
+                                    TextField(
+                                      controller: _textEditingController,
+                                      decoration: InputDecoration(
+                                        labelText: "Edit Cache Name",
+                                      ),
+                                      onSubmitted: (value) {
+                                        localCache.name = value;
+                                        model.updateCache(localCache);
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        localCache.name =
+                                            _textEditingController.text;
+                                        model.updateCache(localCache);
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("Save"),
+                                    ),
+                                  ],
                                 ),
-                                TextButton(
-                                  onPressed: () async {
-                                    userCache!.name =
-                                        _textEditingController.text;
-                                    await FileHandler.updateCache(userCache!);
-                                    await widget.reloadCaches();
-
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Save"),
-                                ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  icon: Icon(Icons.edit_outlined),
-                ),
-              ),
-          ],
+                      icon: const Icon(Icons.edit_outlined, size: 16),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         actions: [
@@ -368,7 +370,9 @@ class _ICCacheView extends State<ICCacheView> {
                   ),
                 ),
                 Tooltip(
-                  message: (appState.setting.toolTipsEnabled) ? "Add Block" : "",
+                  message: (appState.setting.toolTipsEnabled)
+                      ? "Add Block"
+                      : "",
                   child: MenuItemButton(
                     requestFocusOnHover: false,
                     onPressed: () async {
@@ -387,7 +391,9 @@ class _ICCacheView extends State<ICCacheView> {
                 // Delete Block Button can only Appear when user is viewing a block
                 if (_selectedIndex != -1)
                   Tooltip(
-                    message: (appState.setting.toolTipsEnabled) ? "Delete Block" : "",
+                    message: (appState.setting.toolTipsEnabled)
+                        ? "Delete Block"
+                        : "",
                     child: MenuItemButton(
                       requestFocusOnHover: false,
                       onPressed: () async {

@@ -158,6 +158,14 @@ class ICCacheModel extends ChangeNotifier {
     await FileHandler.appendCache(cache);
     notifyListeners();
   }
+
+  Future<void> updateCache(Cache cache) async {
+    log("Called");
+    await FileHandler.updateCache(cache);
+    int targetReplaceIndex = _caches.indexWhere((item) => item.id == cache.id);
+    _caches[targetReplaceIndex] = cache;
+    notifyListeners();
+  }
 }
 
 class ICBlockModel extends ChangeNotifier {
@@ -225,9 +233,14 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    log("built with selectedIndex:${_selectedIndex}");
     ICSettingsModel appState = context.watch<ICSettingsModel>();
-    this.pageWidget ??= ICEmptyPage();
+    pageWidget ??= ICOverview(
+      onSetPage: (int index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+    );
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
