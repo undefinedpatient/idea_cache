@@ -9,9 +9,8 @@ import 'package:idea_cache/model/status.dart';
 import 'package:provider/provider.dart';
 
 class ICManageStatusPage extends StatefulWidget {
-  final void Function()? updateCallback;
   final ICBlock? calleeBlock;
-  const ICManageStatusPage({super.key, this.updateCallback, this.calleeBlock});
+  const ICManageStatusPage({super.key, this.calleeBlock});
 
   @override
   State<StatefulWidget> createState() {
@@ -124,7 +123,6 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                             await FileHandler.updateStatus(
                                               status,
                                             );
-                                            widget.updateCallback?.call();
                                             setState(() {});
                                           },
                                           child: Icon(
@@ -180,7 +178,6 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                             widget.calleeBlock!.cacheId,
                                           );
                                     }
-                                    widget.updateCallback?.call();
                                   },
                                 ),
                               ),
@@ -224,8 +221,6 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                                       statusModel.updateStatus(
                                                         status,
                                                       );
-                                                      widget.updateCallback
-                                                          ?.call();
                                                       Navigator.pop(context);
                                                     },
                                                   ),
@@ -296,8 +291,6 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                                       statusModel.updateStatus(
                                                         status,
                                                       );
-                                                      widget.updateCallback
-                                                          ?.call();
 
                                                       Navigator.pop(context);
                                                     },
@@ -322,7 +315,6 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                               child: IconButton(
                                 onPressed: () async {
                                   statusModel.deleteStatusById(entry.value.id);
-                                  widget.updateCallback?.call();
                                 },
                                 icon: Icon(Icons.delete_outline),
                               ),

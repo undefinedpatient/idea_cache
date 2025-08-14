@@ -31,7 +31,7 @@ class ICCacheView extends StatefulWidget {
 
 class _ICCacheView extends State<ICCacheView> {
   Cache localCache = Cache(name: "loading");
-  List<ICBlock> localBlocks = [];
+  ICBlock? activeBlock;
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
@@ -40,47 +40,6 @@ class _ICCacheView extends State<ICCacheView> {
   OverlayEntry? entryImportOverlay;
   final FocusNode _focusNode = FocusNode();
 
-  // Future<void> _loadBlocks() async {
-  //   List<ICBlock> blocks = await FileHandler.findBlocksByCacheId(
-  //     widget.cacheid,
-  //   );
-  //   setState(() {
-  //     localBlocks = blocks;
-  //   });
-  // }
-
-  // Future<void> _loadCache() async {
-  //   Cache? cache = await FileHandler.findCacheById(widget.cacheid);
-  //   if (cache == null) {
-  //     return;
-  //   }
-  //   setState(() {
-  //     localCache;
-  //   });
-  // }
-
-  // Future<void> _deleteBlock(BuildContext context) async {
-  //   Navigator.pop(context);
-  //   ICBlock oldBlock = localBlocks[_selectedIndex];
-  //   localCache.removeBlockId(oldBlock.id);
-  //   await FileHandler.updateCache(localCache);
-  //   await FileHandler.deleteBlocksById(oldBlock.id);
-
-  //   final SnackBar snackBar = SnackBar(
-  //     content: Text("Block ${oldBlock.name} Deleted!"),
-  //     duration: Durations.extralong3,
-  //   );
-  //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  //   await _loadBlocks();
-  //   if (_selectedIndex >= localBlocks.length) {
-  //     _selectedIndex = localBlocks.length - 1;
-  //     // Hard Limiting the _selectedIndex
-  //     if (_selectedIndex == -1) {
-  //       _selectedIndex = 0;
-  //     }
-  //   }
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -88,10 +47,8 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   void didUpdateWidget(covariant ICCacheView oldWidget) {
+    log("updated");
     super.didUpdateWidget(oldWidget);
-    setState(() {
-      _selectedIndex = -1;
-    });
   }
 
   @override
@@ -105,22 +62,18 @@ class _ICCacheView extends State<ICCacheView> {
   Widget build(BuildContext context) {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
     Widget pageWidget = ICEmptyPage();
-    // -1 means that user is in Overview Page
-    if (_selectedIndex == -1) {
+    if (activeBlock == null) {
       pageWidget = ICCacheOverview(
         cacheid: widget.cacheid,
-        setPage: (int index) {
+        setPage: (int index, ICBlock block) {
           setState(() {
             _selectedIndex = index;
+            activeBlock = block;
           });
         },
-        onEdit: () async {
-          // await _loadBlocks();
-          // await _loadCache();
-        },
       );
-    } else if (localBlocks.isNotEmpty) {
-      pageWidget = ICBlockView(blockid: localBlocks[_selectedIndex].id);
+    } else {
+      pageWidget = ICBlockView(block: activeBlock!);
     }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -318,6 +271,7 @@ class _ICCacheView extends State<ICCacheView> {
                       appState.setContentEditedState(false);
                       return;
                     }
+                    activeBlock = null;
                     setState(() {
                       _selectedIndex = -1;
                     });
@@ -348,11 +302,12 @@ class _ICCacheView extends State<ICCacheView> {
                           MapEntry<int, ICBlock> entry,
                         ) {
                           return ICBlockListTile(
-                            key: ValueKey(entry.key),
+                            key: ObjectKey(entry.value),
                             // name: entry.value.name,
                             block: entry.value,
                             // blockid: entry.value.id,
                             onTap: () {
+                              log(entry.value.name);
                               if (appState.isContentEdited) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -366,11 +321,9 @@ class _ICCacheView extends State<ICCacheView> {
                               }
                               setState(() {
                                 _selectedIndex = entry.key;
+                                activeBlock = localBlocks[_selectedIndex];
                               });
                             },
-                            // onEditName: () async {
-                            // await _loadBlocks();
-                            // },
                             isSelected: _selectedIndex == entry.key,
                           );
                         }).toList(),

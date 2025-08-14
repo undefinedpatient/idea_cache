@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 class ICBlockCard extends StatefulWidget {
   final Function() onTap;
   final Axis direction;
-  final Function()? updateCallBack;
   final int index;
   final ICBlock block;
   const ICBlockCard({
@@ -21,7 +20,6 @@ class ICBlockCard extends StatefulWidget {
     required this.block,
     required this.onTap,
     this.direction = Axis.horizontal,
-    this.updateCallBack,
   });
 
   @override
@@ -321,10 +319,6 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                             builder: (BuildContext context) {
                                               return Dialog(
                                                 child: ICManageStatusPage(
-                                                  updateCallback: () {
-                                                    widget.updateCallBack
-                                                        ?.call();
-                                                  },
                                                   calleeBlock: widget.block,
                                                 ),
                                               );

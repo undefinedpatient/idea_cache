@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,9 +11,8 @@ import 'package:idea_cache/page/importdocumentview.dart';
 import 'package:provider/provider.dart';
 
 class ICBlockView extends StatefulWidget {
-  final String blockid;
-  const ICBlockView({super.key, required String blockid}) : blockid = blockid;
-
+  final ICBlock block;
+  const ICBlockView({super.key, required this.block});
   @override
   State<StatefulWidget> createState() {
     return _ICBlockView();
@@ -37,12 +37,10 @@ class _ICBlockView extends State<ICBlockView> {
   };
 
   Future<void> _onSave(BuildContext context) async {
-    ICBlock? oldBlock = await FileHandler.findBlockById(widget.blockid);
-    if (oldBlock == null) {
-      throw Exception("Block is Null");
-    }
-    oldBlock.setContent(jsonEncode(_controller.document.toDelta().toJson()));
-    FileHandler.updateBlock(oldBlock);
+    widget.block.setContent(
+      jsonEncode(_controller.document.toDelta().toJson()),
+    );
+    FileHandler.updateBlock(widget.block);
     final SnackBar snackBar = SnackBar(
       content: Text("Saved!"),
       duration: Durations.long4,
@@ -51,29 +49,23 @@ class _ICBlockView extends State<ICBlockView> {
   }
 
   Future<void> _loadBlockContent() async {
-    ICBlock? block = await FileHandler.findBlockById(widget.blockid);
-    if (block == null) {
-      return;
-    }
-    if (block.content == "") {
+    if (widget.block.content == "") {
       _controller.document = Document();
       return;
     }
-    _controller.document = Document.fromJson(jsonDecode(block.content));
+    _controller.document = Document.fromJson(jsonDecode(widget.block.content));
   }
 
   @override
   void initState() {
     super.initState();
     _loadBlockContent();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {}); // Triggers rebuild after first frame
-    });
   }
 
   @override
   void didUpdateWidget(covariant ICBlockView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    log("ddd");
     _loadBlockContent();
   }
 

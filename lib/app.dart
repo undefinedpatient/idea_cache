@@ -81,14 +81,6 @@ class ICSettingsModel extends ChangeNotifier {
   // App States
   bool isContentEdited = false;
 
-  ICSettingsModel() {
-    FileHandler.loadSetting().then((Setting setting) {
-      changeBrightness(setting.themeMode);
-      changeFontFamily(setting.fontFamily);
-      changeColorCode(setting.colorCode);
-      changeTooltipsEnabled(setting.toolTipsEnabled);
-    });
-  }
   Future<void> loadFromFile() async {
     isLoading = true;
     notifyListeners();
@@ -104,7 +96,7 @@ class ICSettingsModel extends ChangeNotifier {
 
   void setContentEditedState(bool isEdited) {
     isContentEdited = isEdited;
-    notifyListeners();
+    // notifyListeners();
   }
 
   void changeBrightness(ThemeMode thememode) {
@@ -391,6 +383,7 @@ class _ICMainView extends State<ICMainView> {
       pageWidget = ICSettingPage();
     } else {
       pageWidget = ICCacheView(
+        key: ValueKey(cacheModel._caches[_selectedIndex - 1].id),
         cacheid: cacheModel._caches[_selectedIndex - 1].id,
         onPageDeleted: () {
           setState(() {

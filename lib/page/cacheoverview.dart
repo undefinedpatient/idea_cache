@@ -9,13 +9,11 @@ import 'package:provider/provider.dart';
 
 class ICCacheOverview extends StatefulWidget {
   final String cacheid;
-  final Function(int) setPage;
-  final Future<void> Function() onEdit;
+  final Function(int, ICBlock) setPage;
   const ICCacheOverview({
     super.key,
     required this.cacheid,
     required this.setPage,
-    required this.onEdit,
   });
   @override
   State<StatefulWidget> createState() {
@@ -201,12 +199,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                             index: entry.key,
                             block: entry.value,
                             onTap: () {
-                              widget.setPage(entry.key);
-                            },
-                            updateCallBack: () async {
-                              await _loadBlocksUnconditional();
-                              await _filterBlocks();
-                              await widget.onEdit();
+                              widget.setPage(entry.key, entry.value);
                             },
                             direction: (isScrollVertical == true)
                                 ? Axis.horizontal
