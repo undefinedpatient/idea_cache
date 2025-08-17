@@ -7,15 +7,19 @@ class Cache {
   final List<String> _blockIds = List.empty(growable: true);
   final List<String> _statusIds = List.empty(growable: true);
   // Priorize, current only have 0(Normal) and 1 (Pinned)
-  int priority = 0;
+  String group = "";
   String name;
   // Construct a new Cache with name
-  Cache({required this.name}) : _id = Uuid().v4(), priority = 0;
+  Cache({required this.name}) : _id = Uuid().v4(), group = "";
   // Construct a Cache from Json
   Cache.fromJson(Map<String, dynamic> json)
     : _id = json['id'],
-      name = json['name'],
-      priority = json['priority'] {
+      name = json['name'] {
+    if (json.containsKey('group')) {
+      group = json['group'];
+    } else {
+      group = "";
+    }
     for (int i = 0; i < json['blockIds'].length; i++) {
       addBlockId(json['blockIds'][i]);
     }
@@ -30,7 +34,7 @@ class Cache {
       'blockIds': _blockIds,
       'statusIds': _statusIds,
       'name': name,
-      'priority': priority,
+      'group': group,
     };
   }
 

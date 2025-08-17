@@ -88,12 +88,16 @@ class _ICCacheView extends State<ICCacheView> {
                     : IconButton(
                         onPressed: () async {
                           setState(() {
-                            localCache.priority = 1 - localCache.priority;
+                            if (localCache.group == "") {
+                              localCache.group = "pinned";
+                            } else {
+                              localCache.group = "";
+                            }
                           });
                           model.updateCache(localCache);
                         },
                         icon: Icon(
-                          (localCache.priority == 0)
+                          (localCache.group != "pinned")
                               ? Icons.push_pin_outlined
                               : Icons.push_pin,
                         ),

@@ -220,12 +220,24 @@ class _ICMainView extends State<ICMainView>
                                 shrinkWrap: true,
                                 buildDefaultDragHandles: false,
                                 onReorder: (int oldIndex, int newIndex) async {
-                                  await model.reorderCache(oldIndex, newIndex);
-                                  setState(() {
-                                    _selectedIndex = (oldIndex < newIndex)
-                                        ? newIndex
-                                        : newIndex + 1;
-                                  });
+                                  Cache fromCache = model.caches[oldIndex];
+                                  Cache toCache =
+                                      model.caches[(oldIndex < newIndex)
+                                          ? newIndex - 1
+                                          : newIndex];
+                                  await model.reorderCachesByIds(
+                                    fromCache.id,
+                                    toCache.id,
+                                  );
+                                  if (_selectedIndex > 0 &&
+                                      _selectedIndex <
+                                          model.caches.length + 1) {
+                                    setState(() {
+                                      _selectedIndex = (oldIndex < newIndex)
+                                          ? newIndex
+                                          : newIndex + 1;
+                                    });
+                                  }
                                 },
 
                                 children: model.caches.asMap().entries.map((

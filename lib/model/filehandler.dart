@@ -285,8 +285,24 @@ class FileHandler {
     }
     final Cache item = caches.removeAt(from);
     caches.insert(to, item);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncode(caches.map((cache) => cache.toJson()).toList()),
+      jsonEncoder.convert(caches.map((cache) => cache.toJson()).toList()),
+    );
+  }
+
+  static Future<File> reorderCachesByIds(String from, String to) async {
+    File file = await _localFile(
+      fileDestinationType: FileDestinationType.cache,
+    );
+    List<Cache> caches = await readCaches();
+    int fromIndex = caches.indexWhere((cache) => cache.id == from);
+    int toIndex = caches.indexWhere((cache) => cache.id == to);
+    Cache fromCache = caches.removeAt(fromIndex);
+    caches.insert(toIndex, fromCache);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+    return file.writeAsString(
+      jsonEncoder.convert(caches.map((cache) => cache.toJson()).toList()),
     );
   }
 
@@ -438,8 +454,11 @@ class FileHandler {
         await updateBlock(relevantBlocks[i]);
       }
     }
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncode(existingStatuses.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(
+        existingStatuses.map((value) => value.toJson()).toList(),
+      ),
     );
   }
 

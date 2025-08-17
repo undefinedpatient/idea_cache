@@ -1,23 +1,34 @@
 import 'dart:collection';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
 
 class ICCacheModel extends ChangeNotifier {
-  final List<Cache> _caches = [];
+  final List<Cache> _caches = []; // Unordered List
   UnmodifiableListView<Cache> get caches => UnmodifiableListView(_caches);
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   Future<void> loadFromFile() async {
     _isLoading = true;
     notifyListeners();
-    _caches.clear();
+    caches.clear();
     await FileHandler.readCaches().then((caches) {
       for (Cache item in caches) {
         _caches.add(item);
       }
     });
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> reorderCachesByIds(String from, String to) async {
+    int fromIndex = _caches.indexWhere((cache) => cache.id == from);
+    int toIndex = _caches.indexWhere((cache) => cache.id == to);
+    log("from: ${fromIndex} to: ${toIndex}");
+    Cache fromCache = _caches.removeAt(fromIndex);
+    _caches.insert(toIndex, fromCache);
+    // FileHandler.reorderCachesByIds(from, to);
     notifyListeners();
   }
 

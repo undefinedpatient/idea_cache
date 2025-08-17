@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class ICOverview extends StatefulWidget {
 }
 
 class _ICOverview extends State<ICOverview> {
-  bool isScrollVertical = true;
+  bool isScrollVertical = false;
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
@@ -57,8 +58,6 @@ class _ICOverview extends State<ICOverview> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
     return Consumer<ICCacheModel>(
       builder: (context, model, child) {
         if (model.isLoading) {
@@ -147,50 +146,17 @@ class _ICOverview extends State<ICOverview> {
                 ),
                 Divider(),
                 Text("Pinned", textScaler: TextScaler.linear(1.5)),
-                ReorderableListView(
-                  proxyDecorator: proxyDecorator,
-                  padding: EdgeInsets.all(0),
-                  onReorder: (oldIndex, newIndex) async {
-                    await model.reorderCache(oldIndex, newIndex);
-                  },
-                  shrinkWrap: true,
-                  buildDefaultDragHandles: false,
-                  scrollDirection: (isScrollVertical == true)
-                      ? Axis.vertical
-                      : Axis.horizontal,
-                  children: model.caches
-                      // Only take whose not pinned
-                      .where((Cache cache) => cache.priority == 1)
-                      .where(
-                        (Cache cache) => cache.name.toLowerCase().contains(
-                          _textEditingController.text.toLowerCase(),
-                        ),
-                      )
-                      .toList()
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                        return ICCacheCard(
-                          axis: (isScrollVertical)
-                              ? Axis.vertical
-                              : Axis.horizontal,
-                          key: ValueKey(entry.value.id),
-                          index: entry.key,
-                          cacheId: entry.value.id,
-                          onSetPage: () {
-                            widget.onSetPage(entry.key + 1);
-                          },
-                        );
-                      })
-                      .toList(),
-                ),
-                Divider(),
                 Expanded(
                   child: ReorderableListView(
                     proxyDecorator: proxyDecorator,
                     padding: EdgeInsets.all(0),
                     onReorder: (oldIndex, newIndex) async {
-                      await model.reorderCache(oldIndex, newIndex);
+                      Cache fromCache = model.caches[oldIndex];
+                      Cache toCache =
+                          model.caches[(oldIndex < newIndex)
+                              ? newIndex - 1
+                              : newIndex];
+                      await model.reorderCachesByIds(fromCache.id, toCache.id);
                     },
                     shrinkWrap: true,
                     buildDefaultDragHandles: false,
@@ -199,7 +165,68 @@ class _ICOverview extends State<ICOverview> {
                         : Axis.horizontal,
                     children: model.caches
                         // Only take whose not pinned
-                        .where((Cache cache) => cache.priority == 0)
+                        .where((Cache cache) => cache.group == "pinned")
+                        .where(
+                          (Cache cache) => cache.name.toLowerCase().contains(
+                            _textEditingController.text.toLowerCase(),
+                          ),
+                        )
+                        .toList()
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          return ICCacheCard(
+                            axis: (isScrollVertical)
+                                ? Axis.vertical
+                                : Axis.horizontal,
+                            key: ValueKey(entry.value.id),
+                            index: entry.key,
+                            cacheId: entry.value.id,
+                            onSetPage: () {
+                              widget.onSetPage(entry.key + 1);
+                            },
+                          );
+                        })
+                        .toList(),
+                  ),
+                ),
+                Divider(),
+                Expanded(
+                  child: ReorderableListView(
+                    proxyDecorator: proxyDecorator,
+                    padding: EdgeInsets.all(0),
+                    onReorder: (oldIndex, newIndex) async {
+                      log("\n");
+
+                      List<Cache> tempList = model.caches
+                          .where((cache) => cache.group == "")
+                          .toList();
+                      Cache fromCache = tempList[oldIndex];
+                      Cache toCache =
+                          tempList[(oldIndex < newIndex)
+                              ? newIndex - 1
+                              : newIndex];
+                      log("${fromCache.name}vs${toCache.name}");
+                      log(
+                        model.caches.map((cache) {
+                          return "${cache.name}";
+                        }).toString(),
+                      );
+                      log(
+                        tempList.map((cache) {
+                          return "${cache.name}";
+                        }).toString(),
+                      );
+                      await model.reorderCachesByIds(fromCache.id, toCache.id);
+                    },
+                    shrinkWrap: true,
+                    buildDefaultDragHandles: false,
+                    scrollDirection: (isScrollVertical == true)
+                        ? Axis.vertical
+                        : Axis.horizontal,
+                    children: model.caches
+                        // Only take whose not pinned
+                        .where((Cache cache) => cache.group == "")
                         .where(
                           (Cache cache) => cache.name.toLowerCase().contains(
                             _textEditingController.text.toLowerCase(),
