@@ -145,6 +145,46 @@ class _ICOverview extends State<ICOverview> {
                     ],
                   ),
                 ),
+                Divider(),
+                Text("Pinned", textScaler: TextScaler.linear(1.5)),
+                ReorderableListView(
+                  proxyDecorator: proxyDecorator,
+                  padding: EdgeInsets.all(0),
+                  onReorder: (oldIndex, newIndex) async {
+                    await model.reorderCache(oldIndex, newIndex);
+                  },
+                  shrinkWrap: true,
+                  buildDefaultDragHandles: false,
+                  scrollDirection: (isScrollVertical == true)
+                      ? Axis.vertical
+                      : Axis.horizontal,
+                  children: model.caches
+                      // Only take whose not pinned
+                      .where((Cache cache) => cache.priority == 1)
+                      .where(
+                        (Cache cache) => cache.name.toLowerCase().contains(
+                          _textEditingController.text.toLowerCase(),
+                        ),
+                      )
+                      .toList()
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                        return ICCacheCard(
+                          axis: (isScrollVertical)
+                              ? Axis.vertical
+                              : Axis.horizontal,
+                          key: ValueKey(entry.value.id),
+                          index: entry.key,
+                          cacheId: entry.value.id,
+                          onSetPage: () {
+                            widget.onSetPage(entry.key + 1);
+                          },
+                        );
+                      })
+                      .toList(),
+                ),
+                Divider(),
                 Expanded(
                   child: ReorderableListView(
                     proxyDecorator: proxyDecorator,

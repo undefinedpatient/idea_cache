@@ -149,7 +149,7 @@ class _ICMainView extends State<ICMainView>
               style: Theme.of(context).textTheme.headlineMedium,
               children: <TextSpan>[
                 TextSpan(
-                  text: " v1.3.1",
+                  text: " v1.3.2",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ],

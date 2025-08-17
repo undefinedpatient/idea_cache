@@ -25,24 +25,6 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
-  // List<ICBlock> _localBlocks = List.empty(growable: true);
-
-  // Future<void> _filterBlocks() async {
-  //   List<ICBlock> filteredBlocks = List<ICBlock>.of(_localBlocks);
-  //   for (int i = 0; i < filteredBlocks.length; i++) {
-  //     if (filteredBlocks[i].name.toLowerCase().contains(
-  //       _textEditingController.text.toLowerCase(),
-  //     )) {
-  //       continue;
-  //     } else {
-  //       filteredBlocks.removeAt(i);
-  //       i--;
-  //     }
-  //   }
-  //   setState(() {
-  //     _localBlocks = filteredBlocks;
-  //   });
-  // }
 
   Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
     return AnimatedBuilder(
@@ -64,22 +46,11 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   @override
   void initState() {
     super.initState();
-    // Future.microtask(() {
-    //   setState(() {
-    //     _localBlocks =
-    //         Provider.of<ICBlockModel>(
-    //           context,
-    //           listen: false,
-    //         ).cacheBlocksMap[widget.cacheid] ??
-    //         [];
-    //   });
-    // });
   }
 
   @override
   void didUpdateWidget(covariant ICCacheOverview oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // _filterBlocks();
   }
 
   @override
@@ -159,6 +130,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                 },
               ),
             ),
+            Divider(),
             Consumer<ICBlockModel>(
               builder: (context, model, child) {
                 List<ICBlock> localBlocks =
