@@ -15,15 +15,6 @@ class ICSettingPage extends StatefulWidget {
 
 class _ICSettingPageState extends State<ICSettingPage> {
   Setting _localSetting = Setting();
-  // Future<void> onSave() async {
-  //   await FileHandler.saveSetting(
-  //     Setting(
-  //       thememode: _themeMode,
-  //       fontfamily: _font,
-  //       colorcode: _colorSeed,
-  //       toolTipsEnabled: _tooltipsEnabled,
-  //     ),
-  //   );
 
   @override
   void initState() {

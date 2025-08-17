@@ -33,8 +33,8 @@ class _ICCacheCardState extends State<ICCacheCard> {
           (cache) => cache.id == widget.cacheId,
         );
         return SizedBox(
-          height: (widget.axis == Axis.horizontal) ? 90 : 160,
-          width: (widget.axis == Axis.horizontal) ? 360 : 200,
+          height: (widget.axis == Axis.horizontal) ? 60 : 120,
+          width: (widget.axis == Axis.horizontal) ? 200 : 200,
           child: Card(
             elevation: 2,
             clipBehavior: Clip.hardEdge,
@@ -43,7 +43,7 @@ class _ICCacheCardState extends State<ICCacheCard> {
                 index: widget.index,
                 child: Icon(
                   Icons.pages_outlined,
-                  color: Theme.of(context).colorScheme.onSurface.withAlpha(50),
+                  color: Theme.of(context).colorScheme.surfaceTint,
                 ),
               ),
               title: Text(localCache.name),

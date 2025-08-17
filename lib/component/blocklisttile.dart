@@ -48,6 +48,9 @@ class _ICBlockListTile extends State<ICBlockListTile> {
   @override
   void initState() {
     super.initState();
+    setState(() {
+      _controller.text = widget.block.name;
+    });
   }
 
   @override
@@ -99,16 +102,6 @@ class _ICBlockListTile extends State<ICBlockListTile> {
                         ICBlock? oldBlock = widget.block;
                         oldBlock.name = _inputText;
                         model.updateBlock(oldBlock);
-
-                        // After update the name might be name.001 so need to fetch again
-                        // ICBlock? updatedBlock = await FileHandler.findBlockById(
-                        //   widget._blockid,
-                        // );
-                        // setState(() {
-                        //   _inputText = updatedBlock!.name;
-                        //   _controller.text = _inputText;
-                        // });
-                        // await widget._onEditName();
                       },
                     )
                   : GestureDetector(
