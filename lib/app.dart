@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:idea_cache/component/cachelisttile.dart';
+import 'package:idea_cache/component/navigationbarbutton.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/filehandler.dart';
@@ -341,7 +341,7 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-
+  bool collapse = false;
   @override
   void initState() {
     super.initState();
@@ -414,7 +414,7 @@ class _ICMainView extends State<ICMainView> {
         body: Row(
           children: [
             SizedBox(
-              width: 180,
+              width: (collapse) ? 48 : 160,
               child: Consumer<ICCacheModel>(
                 builder: (consumerContext, model, child) {
                   return (model.isLoading)
@@ -422,14 +422,28 @@ class _ICMainView extends State<ICMainView> {
                       : Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            ListTile(
-                              leading: Icon(
+                            ICNavigationBarButton(
+                              icon: (collapse)
+                                  ? Icon(Icons.arrow_right)
+                                  : const Icon(Icons.arrow_left),
+                              title: "",
+                              collapsed: collapse,
+                              selected: _selectedIndex == -1,
+                              onTap: () {
+                                setState(() {
+                                  collapse = !collapse;
+                                });
+                              },
+                            ),
+                            ICNavigationBarButton(
+                              icon: Icon(
                                 (_selectedIndex == 0)
                                     ? Icons.dashboard
                                     : Icons.dashboard_outlined,
                               ),
-                              title: Text("Overview"),
+                              title: "Overview",
                               selected: _selectedIndex == 0,
+                              collapsed: collapse,
                               onTap: () {
                                 if (appState.isContentEdited) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -477,15 +491,20 @@ class _ICMainView extends State<ICMainView> {
                                   return ReorderableDelayedDragStartListener(
                                     key: ValueKey(id),
                                     index: index,
-                                    child: ICCacheListTile(
+                                    child: ICNavigationBarButton(
+                                      key: ValueKey(id),
                                       title: title,
+                                      icon: (_selectedIndex == index + 1)
+                                          ? Icon(Icons.pages)
+                                          : Icon(Icons.pages_outlined),
                                       cacheid: id,
+                                      collapsed: collapse,
                                       onTap: () {
                                         if (appState.isContentEdited) {
                                           ScaffoldMessenger.of(
                                             consumerContext,
                                           ).showSnackBar(
-                                            SnackBar(
+                                            const SnackBar(
                                               content: Text(
                                                 "Warning: Content Not Saved",
                                               ),
@@ -510,9 +529,10 @@ class _ICMainView extends State<ICMainView> {
                             ),
                             Consumer<ICBlockModel>(
                               builder: (context, blockModel, child) {
-                                return ListTile(
-                                  leading: Icon(Icons.add),
-                                  title: Text('Add Cache'),
+                                return ICNavigationBarButton(
+                                  icon: const Icon(Icons.add),
+                                  title: 'Add Cache',
+                                  collapsed: collapse,
                                   selected: false,
                                   onTap: () async {
                                     Cache cache = await model.createCache();
@@ -523,19 +543,20 @@ class _ICMainView extends State<ICMainView> {
                                 );
                               },
                             ),
-                            ListTile(
-                              leading: Icon(
+                            ICNavigationBarButton(
+                              icon: Icon(
                                 _selectedIndex == model.caches.length + 1
                                     ? Icons.settings
                                     : Icons.settings_outlined,
                               ),
-                              title: Text('Settings'),
+                              title: "Settings",
+                              collapsed: collapse,
                               selected:
                                   _selectedIndex == model.caches.length + 1,
                               onTap: () {
                                 if (appState.isContentEdited) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                       content: Text(
                                         "Warning: Content Not Saved",
                                       ),
