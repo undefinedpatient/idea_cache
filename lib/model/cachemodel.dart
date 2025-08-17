@@ -12,7 +12,7 @@ class ICCacheModel extends ChangeNotifier {
   Future<void> loadFromFile() async {
     _isLoading = true;
     notifyListeners();
-    caches.clear();
+    _caches.clear();
     await FileHandler.readCaches().then((caches) {
       for (Cache item in caches) {
         _caches.add(item);
@@ -25,10 +25,8 @@ class ICCacheModel extends ChangeNotifier {
   Future<void> reorderCachesByIds(String from, String to) async {
     int fromIndex = _caches.indexWhere((cache) => cache.id == from);
     int toIndex = _caches.indexWhere((cache) => cache.id == to);
-    log("from: ${fromIndex} to: ${toIndex}");
     Cache fromCache = _caches.removeAt(fromIndex);
     _caches.insert(toIndex, fromCache);
-    // FileHandler.reorderCachesByIds(from, to);
     notifyListeners();
   }
 
