@@ -1,27 +1,215 @@
 import 'package:flutter/material.dart';
+import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/cachemodel.dart';
+import 'package:provider/provider.dart';
 
-class ICCacheCard extends StatelessWidget {
-  final String name;
-  final int numOfBlocks;
+class ICCacheCard extends StatefulWidget {
+  final int index;
+  final Axis axis;
+  final String cacheId;
   final void Function() onSetPage;
-  final TextEditingController _textEditingController = TextEditingController();
-  ICCacheCard({
+
+  const ICCacheCard({
     super.key,
-    required this.name,
-    required this.numOfBlocks,
+    required this.index,
+    required this.axis,
+    required this.cacheId,
     required this.onSetPage,
   });
+
+  @override
+  State<ICCacheCard> createState() => _ICCacheCardState();
+}
+
+class _ICCacheCardState extends State<ICCacheCard> {
+  final FocusNode _focusNode = FocusNode();
+  final TextEditingController _textEditingController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      clipBehavior: Clip.hardEdge,
-      child: ListTile(
-        leading: Icon(Icons.pages_outlined),
-        title: Text(name),
-        subtitle: Text("# of Blocks: $numOfBlocks"),
-        onTap: onSetPage,
-      ),
+    return Consumer<ICCacheModel>(
+      builder: (context, model, child) {
+        Cache localCache = model.caches.firstWhere(
+          (cache) => cache.id == widget.cacheId,
+        );
+        return SizedBox(
+          height: (widget.axis == Axis.horizontal) ? 90 : 160,
+          width: (widget.axis == Axis.horizontal) ? 360 : 200,
+          child: Card(
+            elevation: 2,
+            clipBehavior: Clip.hardEdge,
+            child: ListTile(
+              leading: ReorderableDragStartListener(
+                index: widget.index,
+                child: Icon(
+                  Icons.pages_outlined,
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha(50),
+                ),
+              ),
+              title: Text(localCache.name),
+              trailing: PopupMenuButton(
+                padding: EdgeInsetsGeometry.all(0),
+                menuPadding: EdgeInsets.all(0),
+                tooltip: "",
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    onTap: () {
+                      _textEditingController.text = localCache.name;
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          // _textEditingController.text = userCache!.name;
+                          return Dialog(
+                            child: Container(
+                              width: 240,
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 8,
+                                children: [
+                                  TextField(
+                                    controller: _textEditingController,
+                                    decoration: InputDecoration(
+                                      labelText: "Edit Cache Name",
+                                    ),
+                                    onSubmitted: (value) async {
+                                      localCache.name = value;
+                                      model.updateCache(localCache);
+
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      localCache.name =
+                                          _textEditingController.text;
+                                      model.updateCache(localCache);
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text("Save"),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Icon(Icons.edit_outlined, size: 16),
+                        Text("Rename"),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return KeyboardListener(
+                            focusNode: _focusNode,
+                            autofocus: true,
+                            onKeyEvent: (KeyEvent keyEvent) {
+                              if (keyEvent.logicalKey.keyLabel == "Y" ||
+                                  keyEvent.logicalKey.keyLabel == "Enter") {
+                                model.deleteCacheById(widget.cacheId);
+                                final SnackBar snackBar = SnackBar(
+                                  content: Text(
+                                    "Block ${localCache.name} Deleted!",
+                                  ),
+                                  duration: Durations.extralong3,
+                                );
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(snackBar);
+                                Navigator.pop(context);
+                              }
+                              if (keyEvent.logicalKey.keyLabel == "N") {
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: Dialog(
+                              shape: BeveledRectangleBorder(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  spacing: 8,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                      "Confirm Cache Deletion?",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.secondary,
+                                          ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () async {
+                                            model.deleteCacheById(
+                                              widget.cacheId,
+                                            );
+                                            final SnackBar snackBar = SnackBar(
+                                              content: Text(
+                                                "Cache ${localCache.name} Deleted!",
+                                              ),
+                                              duration: Durations.extralong3,
+                                            );
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(snackBar);
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text(
+                                            "Delete (Y)",
+                                            style: TextStyle(
+                                              color: Colors.redAccent,
+                                            ),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Close (n)"),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Icon(Icons.delete_outline, size: 16),
+                        Text("Delete"),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: Text("# of Blocks: ${localCache.blockIds.length}"),
+              onTap: widget.onSetPage,
+            ),
+          ),
+        );
+      },
     );
   }
 }

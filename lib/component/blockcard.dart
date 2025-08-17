@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/preview.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/blockmodel.dart';
+import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/status.dart';
+import 'package:idea_cache/model/statusmodel.dart';
 import 'package:idea_cache/page/managestatuspage.dart';
 import 'package:provider/provider.dart';
 
@@ -50,12 +53,6 @@ class _ICBlockCardState extends State<ICBlockCard> {
   @override
   Widget build(BuildContext context) {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
-    // when list view use this
-    // ListTile(
-    //             onTap: widget.onTap,
-    //             leading: Icon(Icons.square_outlined),
-    //             title: Text(widget.block.name),
-    //           ),
     return Consumer<ICBlockModel>(
       builder: (context, model, child) {
         return SizedBox(
@@ -84,6 +81,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                         ),
                       ),
                       trailing: PopupMenuButton(
+                        menuPadding: EdgeInsets.all(0),
                         tooltip: "",
                         itemBuilder: (context) => [
                           PopupMenuItem(

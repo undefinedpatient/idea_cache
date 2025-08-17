@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/cachecard.dart';
 import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/cachemodel.dart';
 import 'package:provider/provider.dart';
 
 class ICOverview extends StatefulWidget {
@@ -19,6 +22,22 @@ class _ICOverview extends State<ICOverview> {
     text: "",
   );
   String searchString = "";
+  Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        final double animValue = Curves.easeInOut.transform(animation.value);
+        final double elevation = lerpDouble(0, 6, animValue)!;
+        return Material(
+          elevation: elevation,
+          color: Colors.transparent,
+          shadowColor: Colors.black.withAlpha(0),
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
 
   @override
   void initState() {
@@ -126,97 +145,44 @@ class _ICOverview extends State<ICOverview> {
                     ],
                   ),
                 ),
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Icon(Icons.push_pin),
-                          title: Text("Pins"),
-                        ),
-                        GridView.count(
-                          crossAxisCount:
-                              (MediaQuery.of(context).size.width > 420)
-                              ? (MediaQuery.of(context).size.width / 420)
-                                    .floor()
-                              : 1,
-                          childAspectRatio: 4,
-                          shrinkWrap: true,
-                          children: model.caches
-                              .where((Cache cache) => cache.priority == 1)
-                              .where(
-                                (Cache cache) =>
-                                    cache.name.toLowerCase().contains(
-                                      _textEditingController.text.toLowerCase(),
-                                    ),
-                              )
-                              .toList()
-                              .asMap()
-                              .entries
-                              .map(
-                                (entry) => Card(
-                                  elevation: 4,
-                                  clipBehavior: Clip.hardEdge,
-                                  child: ListTile(
-                                    leading: Icon(Icons.pages_outlined),
-                                    title: Text(entry.value.name),
-                                    subtitle: Text(
-                                      "# of Blocks: ${entry.value.blockIds.length.toString()}",
-                                    ),
-                                    onTap: () {
-                                      widget.onSetPage(entry.key + 1);
-                                    },
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ],
-                    ),
+                Expanded(
+                  child: ReorderableListView(
+                    proxyDecorator: proxyDecorator,
+                    padding: EdgeInsets.all(0),
+                    onReorder: (oldIndex, newIndex) async {
+                      await model.reorderCache(oldIndex, newIndex);
+                    },
+                    shrinkWrap: true,
+                    buildDefaultDragHandles: false,
+                    scrollDirection: (isScrollVertical == true)
+                        ? Axis.vertical
+                        : Axis.horizontal,
+                    children: model.caches
+                        // Only take whose not pinned
+                        .where((Cache cache) => cache.priority == 0)
+                        .where(
+                          (Cache cache) => cache.name.toLowerCase().contains(
+                            _textEditingController.text.toLowerCase(),
+                          ),
+                        )
+                        .toList()
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          return ICCacheCard(
+                            axis: (isScrollVertical)
+                                ? Axis.vertical
+                                : Axis.horizontal,
+                            key: ValueKey(entry.value.id),
+                            index: entry.key,
+                            cacheId: entry.value.id,
+                            onSetPage: () {
+                              widget.onSetPage(entry.key + 1);
+                            },
+                          );
+                        })
+                        .toList(),
                   ),
-                ),
-                Builder(
-                  builder: (context) {
-                    return Expanded(
-                      child: GridView.count(
-                        crossAxisCount: (isScrollVertical == true)
-                            ? (width / 360).floor()
-                            : (height / 240).floor(),
-                        scrollDirection: (isScrollVertical == true)
-                            ? Axis.vertical
-                            : Axis.horizontal,
-
-                        childAspectRatio: (isScrollVertical == true)
-                            ? 3
-                            : 1 / 2,
-                        shrinkWrap: true,
-                        children: model.caches
-                            // Only take whose not pinned
-                            .where((Cache cache) => cache.priority == 0)
-                            .where(
-                              (Cache cache) =>
-                                  cache.name.toLowerCase().contains(
-                                    _textEditingController.text.toLowerCase(),
-                                  ),
-                            )
-                            .toList()
-                            .asMap()
-                            .entries
-                            .map((entry) {
-                              return ICCacheCard(
-                                name: entry.value.name,
-                                numOfBlocks: entry.value.blockIds.length,
-                                onSetPage: () {
-                                  widget.onSetPage(entry.key + 1);
-                                },
-                              );
-                            })
-                            .toList(),
-                      ),
-                    );
-                  },
                 ),
               ],
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/setting.dart';
+import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:provider/provider.dart';
 
 class ICSettingPage extends StatefulWidget {

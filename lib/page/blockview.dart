@@ -7,6 +7,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/page/importdocumentview.dart';
 import 'package:provider/provider.dart';
 

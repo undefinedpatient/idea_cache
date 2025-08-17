@@ -1,11 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
-import 'package:idea_cache/model/filehandler.dart';
+import 'package:idea_cache/model/cachemodel.dart';
+import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/page/blockview.dart';
 import 'package:idea_cache/page/cacheoverview.dart';
 import 'package:idea_cache/page/emptypage.dart';
@@ -41,17 +42,6 @@ class _ICCacheView extends State<ICCacheView> {
   final FocusNode _focusNode = FocusNode();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant ICCacheView oldWidget) {
-    log("updated");
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
   void dispose() {
     _textEditingController.dispose();
     _focusNode.dispose();
@@ -84,62 +74,7 @@ class _ICCacheView extends State<ICCacheView> {
             localCache = model.caches.firstWhere(
               (item) => item.id == widget.cacheid,
             );
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 4,
-              children: [
-                Text(localCache.name),
-                if (MediaQuery.of(context).size.width > 520)
-                  Tooltip(
-                    message: (appState.setting.toolTipsEnabled)
-                        ? "Rename Cache"
-                        : "",
-                    child: IconButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            _textEditingController.text = localCache.name;
-                            return Dialog(
-                              child: Container(
-                                width: 240,
-                                padding: EdgeInsets.all(16),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  spacing: 8,
-                                  children: [
-                                    TextField(
-                                      controller: _textEditingController,
-                                      decoration: InputDecoration(
-                                        labelText: "Edit Cache Name",
-                                      ),
-                                      onSubmitted: (value) {
-                                        localCache.name = value;
-                                        model.updateCache(localCache);
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        localCache.name =
-                                            _textEditingController.text;
-                                        model.updateCache(localCache);
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Save"),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.edit_outlined, size: 16),
-                    ),
-                  ),
-              ],
-            );
+            return Text(localCache.name);
           },
         ),
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),

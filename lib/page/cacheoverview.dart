@@ -1,10 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
-import 'package:idea_cache/model/filehandler.dart';
+import 'package:idea_cache/model/blockmodel.dart';
 import 'package:provider/provider.dart';
 
 class ICCacheOverview extends StatefulWidget {
@@ -26,30 +25,24 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
-  List<ICBlock> _localBlocks = List.empty(growable: true);
-  Future<void> _loadBlocksUnconditional() async {
-    List<ICBlock> temp = await FileHandler.findBlocksByCacheId(widget.cacheid);
-    setState(() {
-      _localBlocks = temp;
-    });
-  }
+  // List<ICBlock> _localBlocks = List.empty(growable: true);
 
-  Future<void> _filterBlocks() async {
-    List<ICBlock> filteredBlocks = List<ICBlock>.of(_localBlocks);
-    for (int i = 0; i < filteredBlocks.length; i++) {
-      if (filteredBlocks[i].name.toLowerCase().contains(
-        _textEditingController.text.toLowerCase(),
-      )) {
-        continue;
-      } else {
-        filteredBlocks.removeAt(i);
-        i--;
-      }
-    }
-    setState(() {
-      _localBlocks = filteredBlocks;
-    });
-  }
+  // Future<void> _filterBlocks() async {
+  //   List<ICBlock> filteredBlocks = List<ICBlock>.of(_localBlocks);
+  //   for (int i = 0; i < filteredBlocks.length; i++) {
+  //     if (filteredBlocks[i].name.toLowerCase().contains(
+  //       _textEditingController.text.toLowerCase(),
+  //     )) {
+  //       continue;
+  //     } else {
+  //       filteredBlocks.removeAt(i);
+  //       i--;
+  //     }
+  //   }
+  //   setState(() {
+  //     _localBlocks = filteredBlocks;
+  //   });
+  // }
 
   Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
     return AnimatedBuilder(
@@ -71,22 +64,22 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      setState(() {
-        _localBlocks =
-            Provider.of<ICBlockModel>(
-              context,
-              listen: false,
-            ).cacheBlocksMap[widget.cacheid] ??
-            [];
-      });
-    });
+    // Future.microtask(() {
+    //   setState(() {
+    //     _localBlocks =
+    //         Provider.of<ICBlockModel>(
+    //           context,
+    //           listen: false,
+    //         ).cacheBlocksMap[widget.cacheid] ??
+    //         [];
+    //   });
+    // });
   }
 
   @override
   void didUpdateWidget(covariant ICCacheOverview oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _filterBlocks();
+    // _filterBlocks();
   }
 
   @override

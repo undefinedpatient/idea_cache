@@ -1,15 +1,15 @@
-import 'dart:collection';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/navigationbarbutton.dart';
-import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
-import 'package:idea_cache/model/filehandler.dart';
-import 'package:idea_cache/model/setting.dart';
-import 'package:idea_cache/model/status.dart';
+import 'package:idea_cache/model/cachemodel.dart';
+import 'package:idea_cache/model/settingsmodel.dart';
+import 'package:idea_cache/model/statusmodel.dart';
 import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
@@ -21,6 +21,7 @@ import 'package:provider/provider.dart';
   Background color: Theme.of(context).colorScheme.surfaceContainerHigh,
   App Bar color: Theme.of(context).colorScheme.surfaceContainer
   Card color: -
+  Selected Color: 
 */
 
 class ICApp extends StatelessWidget {
@@ -75,262 +76,6 @@ class ICApp extends StatelessWidget {
   }
 }
 
-class ICSettingsModel extends ChangeNotifier {
-  Setting setting = Setting();
-  bool isLoading = false;
-  // App States
-  bool isContentEdited = false;
-
-  Future<void> loadFromFile() async {
-    isLoading = true;
-    notifyListeners();
-    await FileHandler.loadSetting().then((Setting setting) {
-      this.setting.themeMode = setting.themeMode;
-      this.setting.fontFamily = setting.fontFamily;
-      this.setting.colorCode = setting.colorCode;
-      this.setting.toolTipsEnabled = setting.toolTipsEnabled;
-    });
-    isLoading = false;
-    notifyListeners();
-  }
-
-  void setContentEditedState(bool isEdited) {
-    isContentEdited = isEdited;
-    // notifyListeners();
-  }
-
-  void changeBrightness(ThemeMode thememode) {
-    setting.themeMode = thememode;
-    saveSetting(setting);
-  }
-
-  void changeFontFamily(String fontFamily) {
-    setting.fontFamily = fontFamily;
-    saveSetting(setting);
-  }
-
-  void changeColorCode(int code) {
-    setting.colorCode = code;
-    saveSetting(setting);
-  }
-
-  void changeTooltipsEnabled(bool enable) {
-    setting.toolTipsEnabled = enable;
-    saveSetting(setting);
-  }
-
-  Future<void> saveSetting(Setting setting) async {
-    await FileHandler.saveSetting(setting);
-    notifyListeners();
-  }
-}
-
-class ICCacheModel extends ChangeNotifier {
-  final List<Cache> _caches = [];
-  UnmodifiableListView<Cache> get caches => UnmodifiableListView(_caches);
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
-  Future<void> loadFromFile() async {
-    _isLoading = true;
-    notifyListeners();
-    _caches.clear();
-    await FileHandler.readCaches().then((caches) {
-      for (Cache item in caches) {
-        _caches.add(item);
-      }
-    });
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  Future<void> reorderCache(int from, int to) async {
-    if (from < to) {
-      to--;
-    }
-    FileHandler.reorderCaches(from, to);
-    _caches.insert(to, _caches.removeAt(from));
-    notifyListeners();
-  }
-
-  Future<Cache> createCache() async {
-    Cache cache = Cache(name: "Untitled");
-    await FileHandler.appendCache(cache);
-    _caches.add(cache);
-    notifyListeners();
-    return cache;
-  }
-
-  Future<void> updateCache(Cache cache) async {
-    await FileHandler.updateCache(cache);
-    int targetReplaceIndex = _caches.indexWhere((item) => item.id == cache.id);
-    _caches[targetReplaceIndex] = cache;
-    notifyListeners();
-  }
-
-  Future<void> deleteCacheById(String id) async {
-    await FileHandler.deleteCacheById(id);
-    _caches.removeWhere((caches) => caches.id == id);
-    notifyListeners();
-  }
-}
-
-class ICBlockModel extends ChangeNotifier {
-  // final List<ICBlock> _blocks = [];
-
-  final Map<String, List<ICBlock>> _cacheBlocksMap = {};
-  // UnmodifiableListView<ICBlock> get blocks => UnmodifiableListView(_blocks);
-  UnmodifiableMapView<String, List<ICBlock>> get cacheBlocksMap =>
-      UnmodifiableMapView(_cacheBlocksMap);
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
-  Future<void> loadFromFile() async {
-    _isLoading = true;
-    notifyListeners();
-
-    // _blocks.clear();
-    _cacheBlocksMap.clear();
-    // _blocks.addAll(await FileHandler.readBlocks());
-    log("Update Completed");
-    List<Cache> caches = await FileHandler.readCaches();
-    for (int i = 0; i < caches.length; i++) {
-      _cacheBlocksMap.addAll({
-        caches[i].id: await FileHandler.findBlocksByCacheId(caches[i].id),
-      });
-    }
-    log("Update Completed1");
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  Future<void> updateLocalBlockMapByCacheId(String cacheId) async {
-    _cacheBlocksMap[cacheId] = await FileHandler.findBlocksByCacheId(cacheId);
-    notifyListeners();
-  }
-
-  Future<void> createBlock(String cacheId) async {
-    ICBlock block = ICBlock(cacheId: cacheId, name: "Untitled");
-    Cache? parentCache = await FileHandler.findCacheById(cacheId);
-    if (parentCache == null) {
-      throw Exception("createBlock: parentCache cannot be found");
-    }
-
-    parentCache.addBlockId(block.id);
-    await FileHandler.appendBlock(block);
-    await FileHandler.updateCache(parentCache);
-    await updateLocalBlockMapByCacheId(cacheId);
-    notifyListeners();
-  }
-
-  Future<void> reorderBlockByCacheId(String cacheId, int from, int to) async {
-    if (from < to) {
-      to--;
-    }
-    // Update the local Storge First since it cost less time
-    cacheBlocksMap[cacheId]!.insert(
-      to,
-      cacheBlocksMap[cacheId]!.removeAt(from),
-    );
-    notifyListeners();
-
-    // Then save it to the storage
-    Cache? parentCache = await FileHandler.findCacheById(cacheId);
-    if (parentCache == null) {
-      throw Exception("reorderBlockByCacheId: parentCache not found!");
-    }
-
-    parentCache.swapBlockId(from, to);
-    await FileHandler.updateCache(parentCache);
-
-    notifyListeners();
-  }
-
-  Future<void> updateBlock(ICBlock block) async {
-    await FileHandler.updateBlock(block);
-    await updateLocalBlockMapByCacheId(block.cacheId);
-    notifyListeners();
-  }
-
-  Future<void> deleteBlockById(ICBlock block) async {
-    await FileHandler.deleteBlocksById(block.id);
-    Cache? parentCache = await FileHandler.findCacheById(block.cacheId);
-    if (parentCache == null) {
-      throw Exception("reorderBlockByCacheId: parentCache not found!");
-    }
-    parentCache.removeBlockId(block.id);
-    await FileHandler.updateCache(parentCache);
-    await updateLocalBlockMapByCacheId(block.cacheId);
-    notifyListeners();
-  }
-}
-
-class ICStatusModel extends ChangeNotifier {
-  final List<ICStatus> _statuses = [];
-  UnmodifiableListView<ICStatus> get statuses =>
-      UnmodifiableListView(_statuses);
-  Future<void> loadFromFile() async {
-    _statuses.clear();
-    _statuses.addAll(await FileHandler.readStatus());
-    notifyListeners();
-  }
-
-  Future<void> createStatus() async {
-    ICStatus status = ICStatus(statusName: "UnnamedStatus");
-    FileHandler.appendStatus(status);
-    _statuses.add(status);
-    notifyListeners();
-  }
-
-  Future<void> reorderStatus(int from, int to) async {
-    if (from < to) {
-      to--;
-    }
-    _statuses.insert(to, _statuses.removeAt(from));
-    notifyListeners();
-    await FileHandler.reorderStatuses(from, to);
-    notifyListeners();
-  }
-
-  Future<void> updateStatus(ICStatus status) async {
-    int targetReplaceIndex = statuses.indexWhere(
-      (item) => item.id == status.id,
-    );
-    _statuses[targetReplaceIndex] = status;
-    await FileHandler.updateStatus(status);
-    notifyListeners();
-  }
-
-  Future<void> deleteStatusById(String statusId) async {
-    _statuses.removeWhere((status) => status.id == statusId);
-    FileHandler.deleteStatusById(statusId);
-    notifyListeners();
-  }
-
-  ICStatus? findStatusByBlock(ICBlock block) {
-    if (block.statusId == "") {
-      return null;
-    }
-    for (int i = 0; i < statuses.length; i++) {
-      if (statuses[i].id == block.statusId &&
-          (statuses[i].cacheId == block.cacheId ||
-              statuses[i].cacheId.isEmpty)) {
-        return statuses[i];
-      }
-    }
-    return null;
-  }
-
-  List<ICStatus> findAvailableByCacheId(String cacheId) {
-    List<ICStatus>? availableStatuses = List.empty(growable: true);
-    // Filtering
-    for (int i = 0; i < _statuses.length; i++) {
-      if (_statuses[i].cacheId == cacheId || _statuses[i].cacheId == "") {
-        availableStatuses.add(_statuses[i]);
-      }
-    }
-    return availableStatuses;
-  }
-}
-
 class ICMainView extends StatefulWidget {
   const ICMainView({super.key});
   @override
@@ -339,7 +84,8 @@ class ICMainView extends StatefulWidget {
   }
 }
 
-class _ICMainView extends State<ICMainView> {
+class _ICMainView extends State<ICMainView>
+    with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
   bool collapse = false;
   @override
@@ -383,8 +129,8 @@ class _ICMainView extends State<ICMainView> {
       pageWidget = ICSettingPage();
     } else {
       pageWidget = ICCacheView(
-        key: ValueKey(cacheModel._caches[_selectedIndex - 1].id),
-        cacheid: cacheModel._caches[_selectedIndex - 1].id,
+        key: ValueKey(cacheModel.caches[_selectedIndex - 1].id),
+        cacheid: cacheModel.caches[_selectedIndex - 1].id,
         onPageDeleted: () {
           setState(() {
             _selectedIndex = 0;
@@ -412,6 +158,7 @@ class _ICMainView extends State<ICMainView> {
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         body: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
               width: (collapse) ? 48 : 160,
@@ -424,8 +171,8 @@ class _ICMainView extends State<ICMainView> {
                           children: [
                             ICNavigationBarButton(
                               icon: (collapse)
-                                  ? Icon(Icons.arrow_right)
-                                  : const Icon(Icons.arrow_left),
+                                  ? Icons.arrow_right
+                                  : Icons.arrow_left,
                               title: "",
                               collapsed: collapse,
                               selected: _selectedIndex == -1,
@@ -436,11 +183,10 @@ class _ICMainView extends State<ICMainView> {
                               },
                             ),
                             ICNavigationBarButton(
-                              icon: Icon(
-                                (_selectedIndex == 0)
-                                    ? Icons.dashboard
-                                    : Icons.dashboard_outlined,
-                              ),
+                              icon: (_selectedIndex == 0)
+                                  ? Icons.dashboard
+                                  : Icons.dashboard_outlined,
+
                               title: "Overview",
                               selected: _selectedIndex == 0,
                               collapsed: collapse,
@@ -495,8 +241,8 @@ class _ICMainView extends State<ICMainView> {
                                       key: ValueKey(id),
                                       title: title,
                                       icon: (_selectedIndex == index + 1)
-                                          ? Icon(Icons.pages)
-                                          : Icon(Icons.pages_outlined),
+                                          ? Icons.pages
+                                          : Icons.pages_outlined,
                                       cacheid: id,
                                       collapsed: collapse,
                                       onTap: () {
@@ -530,7 +276,7 @@ class _ICMainView extends State<ICMainView> {
                             Consumer<ICBlockModel>(
                               builder: (context, blockModel, child) {
                                 return ICNavigationBarButton(
-                                  icon: const Icon(Icons.add),
+                                  icon: Icons.add,
                                   title: 'Add Cache',
                                   collapsed: collapse,
                                   selected: false,
@@ -544,11 +290,10 @@ class _ICMainView extends State<ICMainView> {
                               },
                             ),
                             ICNavigationBarButton(
-                              icon: Icon(
-                                _selectedIndex == model.caches.length + 1
-                                    ? Icons.settings
-                                    : Icons.settings_outlined,
-                              ),
+                              icon: _selectedIndex == model.caches.length + 1
+                                  ? Icons.settings
+                                  : Icons.settings_outlined,
+
                               title: "Settings",
                               collapsed: collapse,
                               selected:

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ICNavigationBarButton extends StatelessWidget {
   final String title;
   final String? cacheid;
-  final Icon icon;
+  final IconData icon;
   final Function() onTap;
   final Function()? onEditName;
   final bool selected;
@@ -21,18 +21,40 @@ class ICNavigationBarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext buildContext) {
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        height: 48,
-        child: SizedBox.expand(
-          child: (collapsed)
-              ? Center(child: icon)
-              : Row(
-                  mainAxisSize: MainAxisSize.max,
-                  spacing: 8,
-                  children: [SizedBox(width: 4), icon, Text(title)],
+    return ClipRect(
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 48,
+          child: SizedBox.expand(
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              spacing: 8,
+              children: [
+                const SizedBox(width: 4),
+                Icon(
+                  icon,
+                  color: (selected)
+                      ? Theme.of(buildContext).colorScheme.surfaceTint
+                      : Theme.of(buildContext).colorScheme.onSurfaceVariant,
                 ),
+                (collapsed)
+                    ? const SizedBox.shrink()
+                    : Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: (selected)
+                              ? Theme.of(buildContext).colorScheme.surfaceTint
+                              : Theme.of(
+                                  buildContext,
+                                ).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+              ],
+            ),
+          ),
         ),
       ),
     );
