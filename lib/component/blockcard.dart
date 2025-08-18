@@ -5,6 +5,7 @@ import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/preview.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/blockmodel.dart';
+import 'package:idea_cache/model/cachemodel.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:idea_cache/model/statusmodel.dart';
@@ -53,6 +54,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
   @override
   Widget build(BuildContext context) {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
+    ICCacheModel cacheModel = context.read<ICCacheModel>();
     return Consumer<ICBlockModel>(
       builder: (context, model, child) {
         return SizedBox(
@@ -143,11 +145,12 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                   return KeyboardListener(
                                     focusNode: _focusNode,
                                     autofocus: true,
-                                    onKeyEvent: (KeyEvent keyEvent) {
+                                    onKeyEvent: (KeyEvent keyEvent) async {
                                       if (keyEvent.logicalKey.keyLabel == "Y" ||
                                           keyEvent.logicalKey.keyLabel ==
                                               "Enter") {
-                                        model.deleteBlockById(widget.block);
+                                        await model.deleteBlock(widget.block);
+                                        cacheModel.loadFromFileSlient();
                                         final SnackBar snackBar = SnackBar(
                                           content: Text(
                                             "Block ${widget.block.name} Deleted!",
@@ -191,9 +194,11 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                               children: [
                                                 TextButton(
                                                   onPressed: () async {
-                                                    model.deleteBlockById(
+                                                    await model.deleteBlock(
                                                       widget.block,
                                                     );
+                                                    cacheModel
+                                                        .loadFromFileSlient();
                                                     final SnackBar
                                                     snackBar = SnackBar(
                                                       content: Text(

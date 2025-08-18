@@ -141,6 +141,24 @@ class _ICMainView extends State<ICMainView>
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
+        floatingActionButton: IconButton.filled(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return Container(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: Text(
+                      "You do not have any upcoming notification yet 0w0",
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+          icon: const Icon(Icons.notifications, size: 32),
+        ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
           title: RichText(

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
+import 'package:idea_cache/model/cachemodel.dart';
 import 'package:idea_cache/model/filehandler.dart';
 
 class ICBlockModel extends ChangeNotifier {
@@ -21,14 +22,12 @@ class ICBlockModel extends ChangeNotifier {
     // _blocks.clear();
     _cacheBlocksMap.clear();
     // _blocks.addAll(await FileHandler.readBlocks());
-    log("Update Completed");
     List<Cache> caches = await FileHandler.readCaches();
     for (int i = 0; i < caches.length; i++) {
       _cacheBlocksMap.addAll({
         caches[i].id: await FileHandler.findBlocksByCacheId(caches[i].id),
       });
     }
-    log("Update Completed1");
     _isLoading = false;
     notifyListeners();
   }
@@ -38,7 +37,7 @@ class ICBlockModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createBlock(String cacheId) async {
+  Future<ICBlock> createBlock(String cacheId) async {
     ICBlock block = ICBlock(cacheId: cacheId, name: "Untitled");
     Cache? parentCache = await FileHandler.findCacheById(cacheId);
     if (parentCache == null) {
@@ -50,6 +49,7 @@ class ICBlockModel extends ChangeNotifier {
     await FileHandler.updateCache(parentCache);
     await updateLocalBlockMapByCacheId(cacheId);
     notifyListeners();
+    return block;
   }
 
   Future<void> reorderBlockByCacheId(String cacheId, int from, int to) async {
@@ -81,7 +81,7 @@ class ICBlockModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteBlockById(ICBlock block) async {
+  Future<void> deleteBlock(ICBlock block) async {
     await FileHandler.deleteBlocksById(block.id);
     Cache? parentCache = await FileHandler.findCacheById(block.cacheId);
     if (parentCache == null) {

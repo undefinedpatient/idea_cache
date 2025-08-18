@@ -66,7 +66,6 @@ class _ICBlockView extends State<ICBlockView> {
   @override
   void didUpdateWidget(covariant ICBlockView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    log("ddd");
     _loadBlockContent();
   }
 

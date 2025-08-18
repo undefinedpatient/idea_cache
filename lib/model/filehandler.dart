@@ -53,7 +53,7 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
-        existingCaches.map((value) => value.toJson()).toList(),
+        existingCaches.map((value) => value.toMap()).toList(),
       ),
     );
   }
@@ -156,7 +156,7 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
-        existingCaches.map((value) => value.toJson()).toList(),
+        existingCaches.map((value) => value.toMap()).toList(),
       ),
     );
   }
@@ -287,7 +287,7 @@ class FileHandler {
     caches.insert(to, item);
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncoder.convert(caches.map((cache) => cache.toJson()).toList()),
+      jsonEncoder.convert(caches.map((cache) => cache.toMap()).toList()),
     );
   }
 
@@ -302,7 +302,7 @@ class FileHandler {
     caches.insert(toIndex, fromCache);
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncoder.convert(caches.map((cache) => cache.toJson()).toList()),
+      jsonEncoder.convert(caches.map((cache) => cache.toMap()).toList()),
     );
   }
 
@@ -384,7 +384,7 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
       jsonEncoder.convert(
-        existingCaches.map((value) => value.toJson()).toList(),
+        existingCaches.map((value) => value.toMap()).toList(),
       ),
     );
   }
@@ -559,7 +559,7 @@ class FileHandler {
         if (content.isNotEmpty) {
           final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
           return jsonList
-              .map((json) => Cache.fromJson(json as Map<String, dynamic>))
+              .map((json) => Cache.fromMap(json as Map<String, dynamic>))
               .toList();
         }
       }

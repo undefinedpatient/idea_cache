@@ -51,6 +51,7 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   Widget build(BuildContext context) {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
+    ICCacheModel cacheModel = context.read<ICCacheModel>();
     Widget pageWidget = ICEmptyPage();
     if (activeBlock == null) {
       pageWidget = ICCacheOverview(
@@ -270,8 +271,8 @@ class _ICCacheView extends State<ICCacheView> {
                     );
                   },
                 ),
-                Consumer<ICBlockModel>(
-                  builder: (context, model, child) {
+                Consumer2<ICBlockModel, ICCacheModel>(
+                  builder: (context, blockModel, cacheModel, child) {
                     return Tooltip(
                       message: (appState.setting.toolTipsEnabled)
                           ? "Add Block"
@@ -279,7 +280,11 @@ class _ICCacheView extends State<ICCacheView> {
                       child: MenuItemButton(
                         requestFocusOnHover: false,
                         onPressed: () async {
-                          model.createBlock(widget.cacheid);
+                          await blockModel.createBlock(
+                            widget.cacheid,
+                          );
+                          cacheModel.loadFromFileSlient();
+                          // The cache is written so we need to fetch the new cache data from the file first
                         },
                         child: Icon(Icons.add),
                       ),

@@ -6,13 +6,11 @@ class Cache {
   final String _id;
   final List<String> _blockIds = List.empty(growable: true);
   final List<String> _statusIds = List.empty(growable: true);
-  // Priorize, current only have 0(Normal) and 1 (Pinned)
   String group = "";
   String name;
-  // Construct a new Cache with name
   Cache({required this.name}) : _id = Uuid().v4(), group = "";
   // Construct a Cache from Json
-  Cache.fromJson(Map<String, dynamic> json)
+  Cache.fromMap(Map<String, dynamic> json)
     : _id = json['id'],
       name = json['name'] {
     if (json.containsKey('group')) {
@@ -28,7 +26,7 @@ class Cache {
     }
   }
   // Convert Cache object to Json String, the String can be encode with dart:convert jsonEncode()
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': _id,
       'blockIds': _blockIds,
