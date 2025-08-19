@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/navigationbarbutton.dart';
@@ -11,6 +12,7 @@ import 'package:idea_cache/model/cachemodel.dart';
 import 'package:idea_cache/model/notificationmodel.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/statusmodel.dart';
+import 'package:idea_cache/notificationhandler.dart';
 import 'package:idea_cache/page/cacheview.dart';
 import 'package:idea_cache/page/notificationview.dart';
 import 'package:idea_cache/page/overview.dart';
@@ -162,6 +164,14 @@ class _ICMainView extends State<ICMainView>
         ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
+          actions: [
+            IconButton(
+              onPressed: () {
+                NotificationHandler.sendSampleNotification();
+              },
+              icon: Icon(Icons.ac_unit),
+            ),
+          ],
           title: RichText(
             text: TextSpan(
               text: "IdeaCache ",

@@ -65,6 +65,13 @@ class ICNotificationCard extends StatelessWidget {
                     notification.description,
                     textAlign: TextAlign.center,
                   ),
+                  trailing: Text(
+                    (notification.status == notificationStatus.SCHEDULED)
+                        ? "Scheduled"
+                        : (notification.status == notificationStatus.TRIGGERED)
+                        ? "Triggered"
+                        : "Dismissed",
+                  ),
                 ),
               ),
               if (cache != null)

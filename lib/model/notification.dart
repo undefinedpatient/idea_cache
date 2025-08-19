@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:math';
+
 import 'package:uuid/uuid.dart';
 
 enum notificationStatus { SCHEDULED, TRIGGERED, DISMISSED }
 
 class ICNotification {
   final String _id;
+  final int scheduleId;
   String cacheId;
   String blockId;
   notificationStatus status;
@@ -19,13 +21,15 @@ class ICNotification {
     this.name = "Untitled",
     this.description = "",
     required this.dateTime,
-  }) : _id = Uuid().v4();
+  }) : _id = Uuid().v4(),
+       scheduleId = Random().nextInt(9999999);
 
   String get id => _id;
   // Convert to Map for DB
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'scheduleId': scheduleId,
       'cacheId': cacheId,
       'blockId': blockId,
       'status': status.index,
@@ -37,6 +41,7 @@ class ICNotification {
 
   ICNotification.fromMap(Map<String, dynamic> map)
     : _id = map['id'],
+      scheduleId = map['scheduleId'],
       cacheId = map["cacheId"],
       blockId = map['blockId'],
       status = notificationStatus.values[map['status']],

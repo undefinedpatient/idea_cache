@@ -35,6 +35,17 @@ class _ICNotificationState extends State<ICNotificationView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      await Provider.of<ICNotificationModel>(
+        context,
+        listen: false,
+      ).updateStatusAll();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadiusGeometry.only(

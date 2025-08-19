@@ -32,9 +32,34 @@ class ICNotificationModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateNotification(ICNotification notification) async {
+    FileHandler.updateNotification(notification);
+    int updateTargetIndex = _notifications.indexWhere(
+      (item) => item.id == notification.id,
+    );
+    if (updateTargetIndex < 0) {
+      throw Exception("Cannot find Notification to Update!");
+    }
+    _notifications[updateTargetIndex] = notification;
+    notifyListeners();
+  }
+
   Future<void> deleteNotificationById(String id) async {
     FileHandler.deleteNotificationById(id);
     _notifications.removeWhere((item) => item.id == id);
     notifyListeners();
+  }
+
+  Future<void> updateStatusAll() async {
+    await Future.forEach(_notifications, updateStatus);
+    notifyListeners();
+  }
+
+  Future<void> updateStatus(ICNotification notification) async {
+    if (DateTime.now().isBefore(notification.dateTime) &&
+        notification.status == notificationStatus.SCHEDULED) {
+      notification.status = notificationStatus.TRIGGERED;
+      await FileHandler.updateNotification(notification);
+    }
   }
 }

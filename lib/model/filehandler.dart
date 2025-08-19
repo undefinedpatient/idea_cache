@@ -305,10 +305,10 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.notification,
     );
-    final ICNotification? oldBlock = await findNotificationById(
+    final ICNotification? oldNotification = await findNotificationById(
       notification.id,
     );
-    if (oldBlock == null) {
+    if (oldNotification == null) {
       return appendNotification(notification);
     }
     //Retrieve a list of blocks from the file
@@ -327,7 +327,7 @@ class FileHandler {
     }
 
     List<ICNotification> existingNotifications = await readNotifications();
-    //Replacing Block
+    //Replacing Notification
     for (int i = 0; i < existingNotifications.length; i++) {
       if (existingNotifications[i].id == notification.id) {
         existingNotifications[i] = notification;
@@ -554,7 +554,9 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.notification,
     );
-    final ICNotification? notification = await findNotificationById(notificationId);
+    final ICNotification? notification = await findNotificationById(
+      notificationId,
+    );
     List<ICNotification> existingNotifications = await readNotifications();
     if (notification == null) {
       return file;

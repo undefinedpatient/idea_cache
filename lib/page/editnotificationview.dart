@@ -24,7 +24,6 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
   String userSelectedCacheId = "";
   String userSelectedBlockId = "";
   TimeOfDay userSelectedTime = TimeOfDay.now();
-
   DateTime userSelectDate = DateTime.now();
   final TextEditingController nameEditingController = TextEditingController();
   final TextEditingController descriptionEditingController =
@@ -32,7 +31,14 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
   @override
   void initState() {
     super.initState();
-    if (widget.notification != null) {}
+    if (widget.notification != null) {
+      nameEditingController.text = widget.notification!.name;
+      descriptionEditingController.text = widget.notification!.description;
+      userSelectedCacheId = widget.notification!.cacheId;
+      userSelectedBlockId = widget.notification!.blockId;
+      userSelectDate = widget.notification!.dateTime;
+      userSelectedTime = TimeOfDay.fromDateTime(widget.notification!.dateTime);
+    }
   }
 
   @override
@@ -257,27 +263,50 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
             },
             child: Text("Delete"),
           ),
-        TextButton(
-          onPressed: () async {
-            DateTime time = DateTime.utc(
-              userSelectDate.year,
-              userSelectDate.month,
-              userSelectDate.day,
-              userSelectedTime.hour,
-              userSelectedTime.minute,
-            );
-            ICNotification notification = ICNotification(
-              cacheId: userSelectedCacheId,
-              blockId: userSelectedBlockId,
-              name: nameEditingController.text,
-              description: descriptionEditingController.text,
-              dateTime: time,
-            );
-            await notificationModel.appendNotification(notification);
-            widget.onSubmitted.call();
-          },
-          child: Text("Create Notification"),
-        ),
+        (widget.notification != null)
+            ? TextButton(
+                onPressed: () async {
+                  DateTime time = DateTime.utc(
+                    userSelectDate.year,
+                    userSelectDate.month,
+                    userSelectDate.day,
+                    userSelectedTime.hour,
+                    userSelectedTime.minute,
+                  );
+                  widget.notification!.blockId = userSelectedBlockId;
+                  widget.notification!.cacheId = userSelectedCacheId;
+                  widget.notification!.name = nameEditingController.text;
+                  widget.notification!.dateTime = time;
+                  widget.notification!.description =
+                      descriptionEditingController.text;
+                  await notificationModel.updateNotification(
+                    widget.notification!,
+                  );
+                  widget.onSubmitted.call();
+                },
+                child: Text("Edit Notification"),
+              )
+            : TextButton(
+                onPressed: () async {
+                  DateTime time = DateTime.utc(
+                    userSelectDate.year,
+                    userSelectDate.month,
+                    userSelectDate.day,
+                    userSelectedTime.hour,
+                    userSelectedTime.minute,
+                  );
+                  ICNotification notification = ICNotification(
+                    cacheId: userSelectedCacheId,
+                    blockId: userSelectedBlockId,
+                    name: nameEditingController.text,
+                    description: descriptionEditingController.text,
+                    dateTime: time,
+                  );
+                  await notificationModel.appendNotification(notification);
+                  widget.onSubmitted.call();
+                },
+                child: Text("Create Notification"),
+              ),
       ],
     );
   }
