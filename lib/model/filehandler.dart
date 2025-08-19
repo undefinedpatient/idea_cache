@@ -76,7 +76,7 @@ class FileHandler {
     if (blocks.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < blocks.length; i++) {
-        log(blocks[i].name);
+        // log(blocks[i].name);
         String oldName = block.name;
         if (blocks[i].name == block.name) {
           occurrence++;
@@ -550,6 +550,36 @@ class FileHandler {
     );
   }
 
+  static Future<File> deleteNotificationById(String notificationId) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.notification,
+    );
+    final ICNotification? notification = await findNotificationById(notificationId);
+    List<ICNotification> existingNotifications = await readNotifications();
+    if (notification == null) {
+      return file;
+    }
+
+    for (int i = 0; i < existingNotifications.length; i++) {
+      if (existingNotifications[i].id == notificationId) {
+        existingNotifications.removeAt(i);
+        break;
+      }
+    }
+
+    for (int i = 0; i < existingNotifications.length; i++) {
+      if (existingNotifications[i].cacheId == notificationId) {
+        await deleteStatusById(existingNotifications[i].id);
+      }
+    }
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+    return file.writeAsString(
+      jsonEncoder.convert(
+        existingNotifications.map((value) => value.toMap()).toList(),
+      ),
+    );
+  }
+
   /*
   Find the Cache by cachename
   */
@@ -755,7 +785,7 @@ class FileHandler {
         }
       }
     } catch (e) {
-      log('Error reading blocks: $e');
+      log('Error reading notifications: $e');
     }
     return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
   }

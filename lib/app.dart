@@ -110,7 +110,7 @@ class _ICMainView extends State<ICMainView>
     );
     Future.microtask(
       () => {
-        Provider.of<ICNotificationModel>(context, listen: false).loadFromDB(),
+        Provider.of<ICNotificationModel>(context, listen: false).loadFromFile(),
       },
     );
   }
