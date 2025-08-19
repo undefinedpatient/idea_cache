@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
+import 'package:idea_cache/model/notification.dart';
 import 'package:idea_cache/model/setting.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'cache.dart';
 
-enum FileDestinationType { cache, block, setting, status }
+enum FileDestinationType { cache, block, setting, status, notification }
 
 class FileHandler {
   // File I/O
@@ -32,6 +34,10 @@ class FileHandler {
         return File("$path/IdeaCache/status.json").create(recursive: true);
       case FileDestinationType.setting:
         return File("$path/IdeaCache/settings.json").create(recursive: true);
+      case FileDestinationType.notification:
+        return File(
+          "$path/IdeaCache/notifications.json",
+        ).create(recursive: true);
     }
   }
 
@@ -84,11 +90,12 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
-        existingBlocks.map((value) => value.toJson()).toList(),
+        existingBlocks.map((value) => value.toMap()).toList(),
       ),
     );
   }
 
+  // Append a new Status data in form of json
   static Future<File> appendStatus(ICStatus status) async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.status,
@@ -107,13 +114,42 @@ class FileHandler {
         }
       }
     }
-
     List<ICStatus> existingStatuses = await readStatus();
     existingStatuses.add(status);
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
-        existingStatuses.map((value) => value.toJson()).toList(),
+        existingStatuses.map((value) => value.toMap()).toList(),
+      ),
+    );
+  }
+
+  // Append a new Notification data in form of json
+  static Future<File> appendNotification(ICNotification notification) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.notification,
+    );
+    // If the new block name is already in form abc.001, strip away the .001 first
+    notification.name = notification.name.split('.')[0];
+    List<ICNotification>? notifications = await readNotifications();
+    if (notifications.isNotEmpty) {
+      int occurrence = 0;
+      for (int i = 0; i < notifications.length; i++) {
+        String oldName = notification.name;
+        if (notifications[i].name == notification.name) {
+          occurrence++;
+          notification.name =
+              "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+        }
+      }
+    }
+
+    List<ICNotification> existingNotification = await readNotifications();
+    existingNotification.add(notification);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+    return await file.writeAsString(
+      jsonEncoder.convert(
+        existingNotification.map((value) => value.toMap()).toList(),
       ),
     );
   }
@@ -152,7 +188,6 @@ class FileHandler {
         break;
       }
     }
-
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
@@ -196,9 +231,7 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
 
     return await file.writeAsString(
-      jsonEncoder.convert(
-        existingBlock.map((value) => value.toJson()).toList(),
-      ),
+      jsonEncoder.convert(existingBlock.map((value) => value.toMap()).toList()),
     );
   }
 
@@ -218,15 +251,10 @@ class FileHandler {
       for (int i = 0; i < blocks.length; i++) {
         // If the block has the statusId that is being updated
         if (blocks[i].statusId == newStatus.id) {
-          // log("Match! Checking");
-          // log("Old CacheId: ${oldStatus.cacheId}");
-          // log("New CacheId: ${newStatus.cacheId}");
-          // log("Block CacheId: ${blocks[i].cacheId}");
           // From Global to Local, plus the block is not included anymore
           if (newStatus.cacheId != "" &&
               oldStatus.cacheId == "" &&
               blocks[i].cacheId != newStatus.cacheId) {
-            // log("Case 0 !\n\n");
             blocks[i].statusId = "";
             await updateBlock(blocks[i]);
             continue;
@@ -235,12 +263,10 @@ class FileHandler {
           if (newStatus.cacheId != "" &&
               oldStatus.cacheId != "" &&
               blocks[i].cacheId != newStatus.cacheId) {
-            // log("Case 1 !\n\n");
             blocks[i].statusId = "";
             await updateBlock(blocks[i]);
             continue;
           }
-          // log("Case 2 ?\n\n");
         }
       }
     }
@@ -270,7 +296,50 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
-        existingStatuses.map((value) => value.toJson()).toList(),
+        existingStatuses.map((value) => value.toMap()).toList(),
+      ),
+    );
+  }
+
+  static Future<File> updateNotification(ICNotification notification) async {
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.notification,
+    );
+    final ICNotification? oldBlock = await findNotificationById(
+      notification.id,
+    );
+    if (oldBlock == null) {
+      return appendNotification(notification);
+    }
+    //Retrieve a list of blocks from the file
+    List<ICNotification>? notifications = await readNotifications();
+    notifications.removeWhere((item) => item.id == notification.id);
+    if (notifications.isNotEmpty) {
+      int occurrence = 0;
+      for (int i = 0; i < notifications.length; i++) {
+        String oldName = notification.name;
+        if (notifications[i].name == notification.name) {
+          occurrence++;
+          notification.name =
+              "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
+        }
+      }
+    }
+
+    List<ICNotification> existingNotifications = await readNotifications();
+    //Replacing Block
+    for (int i = 0; i < existingNotifications.length; i++) {
+      if (existingNotifications[i].id == notification.id) {
+        existingNotifications[i] = notification;
+        break;
+      }
+    }
+
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+
+    return await file.writeAsString(
+      jsonEncoder.convert(
+        existingNotifications.map((value) => value.toMap()).toList(),
       ),
     );
   }
@@ -316,8 +385,27 @@ class FileHandler {
     }
     final ICStatus item = statuses.removeAt(from);
     statuses.insert(to, item);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncode(statuses.map((status) => status.toJson()).toList()),
+      jsonEncoder.convert(statuses.map((status) => status.toMap()).toList()),
+    );
+  }
+
+  static Future<File> reorderNotification(int from, int to) async {
+    File file = await _localFile(
+      fileDestinationType: FileDestinationType.notification,
+    );
+    List<ICNotification> notifications = await readNotifications();
+    if (from < to) {
+      to -= 1;
+    }
+    final ICNotification item = notifications.removeAt(from);
+    notifications.insert(to, item);
+    JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
+    return file.writeAsString(
+      jsonEncoder.convert(
+        notifications.map((status) => status.toMap()).toList(),
+      ),
     );
   }
 
@@ -372,7 +460,7 @@ class FileHandler {
         break;
       }
     }
-    //Remove all the status associated with this cache
+    //Remove all the statutoMapciated with this cache
     List<ICStatus> statuses = await readStatus();
     for (int i = 0; i < statuses.length; i++) {
       if (statuses[i].cacheId == cacheId) {
@@ -393,7 +481,7 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.block,
     );
-    final List<ICBlock> existingBlocks = await readBlocks();
+    List<ICBlock> existingBlocks = await readBlocks();
     List<ICBlock> newBlocks = List.empty(growable: true);
     for (int i = 0; i < existingBlocks.length; i++) {
       if (existingBlocks[i].cacheId != cacheId) {
@@ -402,7 +490,7 @@ class FileHandler {
     }
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
-      jsonEncoder.convert(newBlocks.map((value) => value.toJson()).toList()),
+      jsonEncoder.convert(newBlocks.map((value) => value.toMap()).toList()),
     );
   }
 
@@ -425,7 +513,7 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
       jsonEncoder.convert(
-        existingBlocks.map((value) => value.toJson()).toList(),
+        existingBlocks.map((value) => value.toMap()).toList(),
       ),
     );
   }
@@ -457,7 +545,7 @@ class FileHandler {
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
       jsonEncoder.convert(
-        existingStatuses.map((value) => value.toJson()).toList(),
+        existingStatuses.map((value) => value.toMap()).toList(),
       ),
     );
   }
@@ -514,11 +602,17 @@ class FileHandler {
     if (cache == null) {
       throw Exception("findBlocksByCacheId: cache is null");
     }
+    readblocks.forEach((block) {
+      log(block.name);
+    });
     for (int i = 0; i < readblocks.length; i++) {
       if (readblocks[i].cacheId == cacheId) {
         unorderedBlocks.add(readblocks[i]);
       }
     }
+    unorderedBlocks.forEach((block) {
+      log(block.name);
+    });
     for (int i = 0; i < cache.blockIds.length; i++) {
       int indexOfTargetBlock = unorderedBlocks
           .map((block) => block.id)
@@ -549,6 +643,16 @@ class FileHandler {
     return null;
   }
 
+  static Future<ICNotification?> findNotificationById(String id) async {
+    List<ICNotification>? notifications = await readNotifications();
+    for (int i = 0; i < notifications.length; i++) {
+      if (notifications[i].id == id) {
+        return notifications[i];
+      }
+    }
+    return null;
+  }
+
   static Future<List<Cache>> readCaches() async {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.cache,
@@ -569,13 +673,12 @@ class FileHandler {
     return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
   }
 
-  // If data is empty, the readBlocks will automatically fetch data from default storage location
   static Future<List<ICBlock>> readBlocks({String? dataString}) async {
     if (dataString != null && dataString.isNotEmpty) {
       final List<dynamic> jsonList = jsonDecode(dataString) as List<dynamic>;
-      // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic>
-      return jsonList
-          .map((json) => ICBlock.fromJson(json as Map<String, dynamic>))
+      // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic> jsonList
+      jsonList
+          .map((json) => ICBlock.fromMap(json as Map<String, dynamic>))
           .toList();
     }
     final File file = await _localFile(
@@ -586,9 +689,8 @@ class FileHandler {
         final String content = await file.readAsString();
         if (content.isNotEmpty) {
           final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
-
           return jsonList
-              .map((json) => ICBlock.fromJson(json as Map<String, dynamic>))
+              .map((json) => ICBlock.fromMap(json as Map<String, dynamic>))
               .toList();
         }
       }
@@ -603,7 +705,7 @@ class FileHandler {
       final List<dynamic> jsonList = jsonDecode(dataString) as List<dynamic>;
       // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic>
       return jsonList
-          .map((json) => ICStatus.fromJson(json as Map<String, dynamic>))
+          .map((json) => ICStatus.fromMap(json as Map<String, dynamic>))
           .toList();
     }
     final File file = await _localFile(
@@ -616,7 +718,39 @@ class FileHandler {
           final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
 
           return jsonList
-              .map((json) => ICStatus.fromJson(json as Map<String, dynamic>))
+              .map((json) => ICStatus.fromMap(json as Map<String, dynamic>))
+              .toList();
+        }
+      }
+    } catch (e) {
+      log('Error reading blocks: $e');
+    }
+    return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
+  }
+
+  static Future<List<ICNotification>> readNotifications({
+    String? dataString,
+  }) async {
+    if (dataString != null && dataString.isNotEmpty) {
+      final List<dynamic> jsonList = jsonDecode(dataString) as List<dynamic>;
+      // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic>
+      return jsonList
+          .map((json) => ICNotification.fromMap(json as Map<String, dynamic>))
+          .toList();
+    }
+    final File file = await _localFile(
+      fileDestinationType: FileDestinationType.notification,
+    );
+    try {
+      if (await file.exists()) {
+        final String content = await file.readAsString();
+        if (content.isNotEmpty) {
+          final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
+
+          return jsonList
+              .map(
+                (json) => ICNotification.fromMap(json as Map<String, dynamic>),
+              )
               .toList();
         }
       }

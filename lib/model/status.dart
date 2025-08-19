@@ -18,7 +18,7 @@ class ICStatus {
     this.colorCode = (colorCode != null) ? colorCode : this.colorCode;
   }
   ICStatus.empty() : _id = "", statusName = "None";
-  ICStatus.fromJson(Map<String, dynamic> json)
+  ICStatus.fromMap(Map<String, dynamic> json)
     : _id = json['id'],
       cacheId = json['cacheId'],
       statusName = json['statusName'],
@@ -28,7 +28,7 @@ class ICStatus {
     return _id;
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': _id,
       'cacheId': cacheId,

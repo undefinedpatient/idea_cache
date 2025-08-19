@@ -11,6 +11,6 @@ void main() async {
     await windowManager.ensureInitialized();
     await windowManager.setMinimumSize(const Size(420, 560));
   }
-  // await DataBaseHandler.init();
+  await DataBaseHandler.initDB();
   runApp(const ICApp());
 }

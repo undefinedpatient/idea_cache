@@ -11,7 +11,7 @@ class ICBlock {
     : _id = Uuid().v4(),
       content = "",
       statusId = "";
-  ICBlock.fromJson(Map<String, dynamic> json)
+  ICBlock.fromMap(Map<String, dynamic> json)
     : cacheId = json['cacheId'],
       _id = json['id'],
       name = json['name'],
@@ -43,7 +43,7 @@ class ICBlock {
   //     .map((item) => Map<String, dynamic>.from(item as Map))
   //     .toList();
   // Convert Cache object to Json String, the String can be encode with dart:convert jsonEncode()
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': _id,
       'cacheId': cacheId,
