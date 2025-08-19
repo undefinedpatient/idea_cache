@@ -41,12 +41,12 @@ class ICNotification {
 
   ICNotification.fromMap(Map<String, dynamic> map)
     : _id = map['id'],
-      scheduleId = map['scheduleId'],
-      cacheId = map["cacheId"],
-      blockId = map['blockId'],
+      scheduleId = map['scheduleId'] ?? 0,
+      cacheId = map["cacheId"] ?? "",
+      blockId = map['blockId'] ?? "",
       status = notificationStatus.values[map['status']],
-      name = map['name'],
-      description = map['description'],
+      name = map['name'] ?? "",
+      description = map['description'] ?? "",
       dateTime = DateTime.parse(map['dateTime']);
   String toString() {
     return toMap().toString();
