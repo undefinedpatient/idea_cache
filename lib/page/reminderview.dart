@@ -2,21 +2,21 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/notificationcard.dart';
-import 'package:idea_cache/model/notification.dart';
-import 'package:idea_cache/model/notificationmodel.dart';
-import 'package:idea_cache/page/editnotificationview.dart';
+import 'package:idea_cache/model/reminder.dart';
+import 'package:idea_cache/model/remindermodel.dart';
+import 'package:idea_cache/page/editReminder.dart';
 import 'package:provider/provider.dart';
 
-class ICNotificationView extends StatefulWidget {
+class ICReminderView extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return _ICNotificationState();
   }
 }
 
-class _ICNotificationState extends State<ICNotificationView> {
+class _ICNotificationState extends State<ICReminderView> {
   bool isCreationView = false;
-  ICNotification? activeNotification;
+  ICReminder? activeNotification;
   Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
     return AnimatedBuilder(
       animation: animation,
@@ -38,7 +38,7 @@ class _ICNotificationState extends State<ICNotificationView> {
   void initState() {
     super.initState();
     Future.microtask(() async {
-      await Provider.of<ICNotificationModel>(
+      await Provider.of<ICReminderModel>(
         context,
         listen: false,
       ).updateStatusAll();
@@ -72,9 +72,9 @@ class _ICNotificationState extends State<ICNotificationView> {
           title: Text(
             (isCreationView)
                 ? (activeNotification == null)
-                      ? "Create Notification"
-                      : "Edit Notification"
-                : "Notification",
+                      ? "Create Reminders"
+                      : "Edit Reminders"
+                : "Reminders",
           ),
           actionsPadding: EdgeInsets.fromLTRB(8, 0, 8, 0),
           actions: [
@@ -91,7 +91,7 @@ class _ICNotificationState extends State<ICNotificationView> {
             ),
           ],
         ),
-        body: Consumer<ICNotificationModel>(
+        body: Consumer<ICReminderModel>(
           builder: (context, model, child) {
             if (isCreationView) {
               return ICEditNotificationView(
@@ -103,21 +103,21 @@ class _ICNotificationState extends State<ICNotificationView> {
                 notification: activeNotification,
               );
             }
-            if (model.notifications.isNotEmpty) {
+            if (model.reminders.isNotEmpty) {
               return ReorderableListView(
                 padding: EdgeInsets.all(8),
                 proxyDecorator: proxyDecorator,
                 scrollDirection: Axis.horizontal,
                 buildDefaultDragHandles: false,
-                children: model.notifications
+                children: model.reminders
                     .asMap()
                     .entries
                     .map(
-                      (entry) => ICNotificationCard(
+                      (entry) => ICReminderCard(
                         key: ValueKey(entry.value.id),
                         index: entry.key,
-                        notification: entry.value,
-                        onTapNotification: () {
+                        reminder: entry.value,
+                        onTapReminder: () {
                           setState(() {
                             isCreationView = !isCreationView;
                             activeNotification = entry.value;

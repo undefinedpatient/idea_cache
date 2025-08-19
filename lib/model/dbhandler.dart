@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'dart:io' show Platform;
-
-import 'package:idea_cache/model/notification.dart';
+import 'package:idea_cache/model/reminder.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -91,14 +90,14 @@ class DataBaseHandler {
     );
   }
 
-  Future<List<ICNotification>> getNotifications() async {
+  Future<List<ICReminder>> getNotifications() async {
     final db = _notificationDB;
     final List<Map<String, dynamic>> maps = await db!.query('notifications');
-    return List.generate(maps.length, (i) => ICNotification.fromMap(maps[i]));
+    return List.generate(maps.length, (i) => ICReminder.fromMap(maps[i]));
   }
 
   // Return int ID
-  Future<int> insertNotification(ICNotification item) async {
+  Future<int> insertNotification(ICReminder item) async {
     final db = _notificationDB;
     return await db!.insert("notifications", item.toMap());
   }

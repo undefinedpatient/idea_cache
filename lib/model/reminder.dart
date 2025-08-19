@@ -2,29 +2,41 @@ import 'dart:math';
 
 import 'package:uuid/uuid.dart';
 
-enum notificationStatus { SCHEDULED, TRIGGERED, DISMISSED }
+enum reminderStatus { SCHEDULED, TRIGGERED, DISMISSED }
 
-class ICNotification {
+class ICReminder {
   final String _id;
   final int scheduleId;
   String cacheId;
   String blockId;
-  notificationStatus status;
+  reminderStatus status;
   String name;
   String description;
-  DateTime dateTime;
+  DateTime time;
 
-  ICNotification({
+  ICReminder({
     this.cacheId = "",
     this.blockId = "",
-    this.status = notificationStatus.SCHEDULED,
+    this.status = reminderStatus.SCHEDULED,
     this.name = "Untitled",
     this.description = "",
-    required this.dateTime,
+    required this.time,
   }) : _id = Uuid().v4(),
-       scheduleId = Random().nextInt(9999999);
-
+       scheduleId = DateTime.now().microsecondsSinceEpoch;
+  
   String get id => _id;
+  int get hours {
+    return time.difference(DateTime.now()).inHours;
+  }
+
+  int get minutes {
+    return time.difference(DateTime.now()).inMinutes % 60;
+  }
+
+  int get seconds {
+    return time.difference(DateTime.now()).inSeconds % 60;
+  }
+
   // Convert to Map for DB
   Map<String, dynamic> toMap() {
     return {
@@ -35,19 +47,19 @@ class ICNotification {
       'status': status.index,
       'name': name,
       'description': description,
-      'dateTime': dateTime.toString(),
+      'time': time.toString(),
     };
   }
 
-  ICNotification.fromMap(Map<String, dynamic> map)
+  ICReminder.fromMap(Map<String, dynamic> map)
     : _id = map['id'],
       scheduleId = map['scheduleId'] ?? 0,
       cacheId = map["cacheId"] ?? "",
       blockId = map['blockId'] ?? "",
-      status = notificationStatus.values[map['status']],
+      status = reminderStatus.values[map['status']],
       name = map['name'] ?? "",
       description = map['description'] ?? "",
-      dateTime = DateTime.parse(map['dateTime']);
+      time = DateTime.parse(map['time']);
   String toString() {
     return toMap().toString();
   }

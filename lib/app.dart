@@ -9,12 +9,12 @@ import 'package:idea_cache/component/navigationbarbutton.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
-import 'package:idea_cache/model/notificationmodel.dart';
+import 'package:idea_cache/model/remindermodel.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/statusmodel.dart';
 import 'package:idea_cache/notificationhandler.dart';
 import 'package:idea_cache/page/cacheview.dart';
-import 'package:idea_cache/page/notificationview.dart';
+import 'package:idea_cache/page/reminderview.dart';
 import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 
@@ -38,7 +38,7 @@ class ICApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ICCacheModel()),
         ChangeNotifierProvider(create: (context) => ICBlockModel()),
         ChangeNotifierProvider(create: (context) => ICStatusModel()),
-        ChangeNotifierProvider(create: (context) => ICNotificationModel()),
+        ChangeNotifierProvider(create: (context) => ICReminderModel()),
       ],
       child: Consumer<ICSettingsModel>(
         builder: (context, model, child) {
@@ -112,7 +112,7 @@ class _ICMainView extends State<ICMainView>
     );
     Future.microtask(
       () => {
-        Provider.of<ICNotificationModel>(context, listen: false).loadFromFile(),
+        Provider.of<ICReminderModel>(context, listen: false).loadFromFile(),
       },
     );
   }
@@ -156,7 +156,7 @@ class _ICMainView extends State<ICMainView>
             showModalBottomSheet(
               context: context,
               builder: (context) {
-                return ICNotificationView();
+                return ICReminderView();
               },
             );
           },
@@ -167,7 +167,7 @@ class _ICMainView extends State<ICMainView>
           actions: [
             IconButton(
               onPressed: () {
-                NotificationHandler.sendSampleNotification();
+                // NotificationHandler.sendSampleNotification();
               },
               icon: Icon(Icons.ac_unit),
             ),

@@ -1,15 +1,16 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cachemodel.dart';
-import 'package:idea_cache/model/notification.dart';
-import 'package:idea_cache/model/notificationmodel.dart';
+import 'package:idea_cache/model/remindermodel.dart';
+import 'package:idea_cache/model/reminder.dart';
 import 'package:provider/provider.dart';
 
 class ICEditNotificationView extends StatefulWidget {
   final void Function() onSubmitted;
-  final ICNotification? notification;
+  final ICReminder? notification;
   const ICEditNotificationView({
     super.key,
     required this.onSubmitted,
@@ -23,11 +24,19 @@ class ICEditNotificationView extends StatefulWidget {
 class _ICEditNotificationViewState extends State<ICEditNotificationView> {
   String userSelectedCacheId = "";
   String userSelectedBlockId = "";
-  TimeOfDay userSelectedTime = TimeOfDay.now();
-  DateTime userSelectDate = DateTime.now();
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController nameEditingController = TextEditingController();
   final TextEditingController descriptionEditingController =
       TextEditingController();
+  final TextEditingController hourEditingController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController minuteEditingController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController secondEditingController = TextEditingController(
+    text: "0",
+  );
   @override
   void initState() {
     super.initState();
@@ -36,17 +45,17 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
       descriptionEditingController.text = widget.notification!.description;
       userSelectedCacheId = widget.notification!.cacheId;
       userSelectedBlockId = widget.notification!.blockId;
-      userSelectDate = widget.notification!.dateTime;
-      userSelectedTime = TimeOfDay.fromDateTime(widget.notification!.dateTime);
+      hourEditingController.text = widget.notification!.hours.toString();
+      minuteEditingController.text = widget.notification!.minutes.toString();
+      secondEditingController.text = widget.notification!.seconds.toString();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    ICNotificationModel notificationModel = context.read<ICNotificationModel>();
+    ICReminderModel reminderModel = context.read<ICReminderModel>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
     ICBlockModel blockModel = context.read<ICBlockModel>();
-    final _formKey = GlobalKey<FormState>();
 
     return Scaffold(
       body: Form(
@@ -58,7 +67,13 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: 16,
               children: [
-                TextField(
+                TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Name cannot be Empty";
+                    }
+                    return null;
+                  },
                   controller: nameEditingController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -72,7 +87,7 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                     labelText: 'Decription (Optional)',
                   ),
                 ),
-                Divider(),
+
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -162,90 +177,76 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                     ),
                   ],
                 ),
+                Divider(),
                 Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  spacing: 16,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("Time: ", textScaler: TextScaler.linear(1.2)),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.circular(4),
+                    Text("CountDown: ", textScaler: TextScaler.linear(1.2)),
+                    SizedBox(
+                      width: 96,
+                      child: TextFormField(
+                        onChanged: (value) {
+                          if (value.isEmpty) {
+                            hourEditingController.text = "0";
+                          }
+                        },
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^(0|[1-9][0-9]*)$'),
                           ),
-                          padding: EdgeInsets.all(8),
-                          child: Text(
-                            userSelectedTime.format(context),
-                            textScaler: TextScaler.linear(1.2),
-                          ),
+                        ],
+                        controller: hourEditingController,
+                        keyboardType: TextInputType.name,
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Hour',
                         ),
-                        // SizedBox(
-                        //   width: 64,
-                        //   child: TextField(
-                        //     controller: _hourEditingController,
-                        //     decoration: InputDecoration(labelText: "Hour"),
-                        //   ),
-                        // ),
-                        // Text(":"),
-                        // SizedBox(
-                        //   width: 64,
-                        //   child: TextField(
-                        //     controller: _minuteEditingController,
-                        //     decoration: InputDecoration(labelText: "Minute"),
-                        //   ),
-                        // ),
-                        IconButton(
-                          onPressed: () async {
-                            TimeOfDay? time = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay.now(),
-                              confirmText: "Confirm",
-                            );
-                            if (time != null) {
-                              setState(() {
-                                userSelectedTime = time;
-                              });
-                            }
-                          },
-                          icon: Icon(Icons.punch_clock),
-                        ),
-                      ],
+                      ),
                     ),
-                    VerticalDivider(),
-                    Row(
-                      children: [
-                        Text("Date: ", textScaler: TextScaler.linear(1.2)),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.circular(4),
+                    SizedBox(
+                      width: 96,
+                      child: TextFormField(
+                        onChanged: (value) {
+                          if (value.isEmpty) {
+                            minuteEditingController.text = "0";
+                          }
+                        },
+                        keyboardType: TextInputType.name,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^(0|[1-9][0-9]*)$'),
                           ),
-                          padding: EdgeInsets.all(8),
-                          child: Text(
-                            "${userSelectDate.year}-${userSelectDate.month}-${userSelectDate.day}",
-                            textScaler: TextScaler.linear(1.2),
+                        ],
+                        controller: minuteEditingController,
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Minutes',
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 96,
+                      child: TextFormField(
+                        onChanged: (value) {
+                          if (value.isEmpty) {
+                            secondEditingController.text = "0";
+                          }
+                        },
+                        controller: secondEditingController,
+                        keyboardType: TextInputType.name,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^(0|[1-9][0-9]*)$'),
                           ),
+                        ],
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Seconds',
                         ),
-                        IconButton(
-                          onPressed: () async {
-                            DateTime? time = await showDatePicker(
-                              confirmText: "Confirm",
-                              context: context,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(Duration(days: 42)),
-                            );
-                            if (time != null) {
-                              setState(() {
-                                userSelectDate = time;
-                              });
-                            }
-                          },
-                          icon: Icon(Icons.calendar_month),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -258,7 +259,7 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
         if (widget.notification != null)
           TextButton(
             onPressed: () {
-              notificationModel.deleteNotificationById(widget.notification!.id);
+              reminderModel.deleteReminderById(widget.notification!.id);
               widget.onSubmitted.call();
             },
             child: Text("Delete"),
@@ -266,46 +267,45 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
         (widget.notification != null)
             ? TextButton(
                 onPressed: () async {
-                  DateTime time = DateTime.utc(
-                    userSelectDate.year,
-                    userSelectDate.month,
-                    userSelectDate.day,
-                    userSelectedTime.hour,
-                    userSelectedTime.minute,
-                  );
-                  widget.notification!.blockId = userSelectedBlockId;
-                  widget.notification!.cacheId = userSelectedCacheId;
-                  widget.notification!.name = nameEditingController.text;
-                  widget.notification!.dateTime = time;
-                  widget.notification!.description =
-                      descriptionEditingController.text;
-                  await notificationModel.updateNotification(
-                    widget.notification!,
-                  );
-                  widget.onSubmitted.call();
+                  if (_formKey.currentState!.validate()) {
+                    int timeAsSec =
+                        int.parse(hourEditingController.text) * 3600 +
+                        int.parse(minuteEditingController.text) * 60 +
+                        int.parse(secondEditingController.text);
+                    widget.notification!.blockId = userSelectedBlockId;
+                    widget.notification!.cacheId = userSelectedCacheId;
+                    widget.notification!.name = nameEditingController.text;
+                    widget.notification!.description =
+                        descriptionEditingController.text;
+                    widget.notification!.time = DateTime.now().add(
+                      Duration(seconds: timeAsSec),
+                    );
+                    await reminderModel.updateReminder(widget.notification!);
+                    widget.onSubmitted.call();
+                  }
                 },
-                child: Text("Edit Notification"),
+                child: Text("Edit Reminder"),
               )
             : TextButton(
                 onPressed: () async {
-                  DateTime time = DateTime.utc(
-                    userSelectDate.year,
-                    userSelectDate.month,
-                    userSelectDate.day,
-                    userSelectedTime.hour,
-                    userSelectedTime.minute,
-                  );
-                  ICNotification notification = ICNotification(
-                    cacheId: userSelectedCacheId,
-                    blockId: userSelectedBlockId,
-                    name: nameEditingController.text,
-                    description: descriptionEditingController.text,
-                    dateTime: time,
-                  );
-                  await notificationModel.appendNotification(notification);
-                  widget.onSubmitted.call();
+                  if (_formKey.currentState!.validate()) {
+                    int timeAsSec =
+                        int.parse(hourEditingController.text) * 3600 +
+                        int.parse(minuteEditingController.text) * 60 +
+                        int.parse(secondEditingController.text);
+
+                    ICReminder notification = ICReminder(
+                      cacheId: userSelectedCacheId,
+                      blockId: userSelectedBlockId,
+                      name: nameEditingController.text,
+                      description: descriptionEditingController.text,
+                      time: DateTime.now().add(Duration(seconds: timeAsSec)),
+                    );
+                    await reminderModel.appendReminder(notification);
+                    widget.onSubmitted.call();
+                  }
                 },
-                child: Text("Create Notification"),
+                child: Text("Create Reminder"),
               ),
       ],
     );

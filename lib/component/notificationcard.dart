@@ -3,22 +3,22 @@ import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
-import 'package:idea_cache/model/notification.dart';
+import 'package:idea_cache/model/reminder.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:idea_cache/model/statusmodel.dart';
 import 'package:provider/provider.dart';
 
-class ICNotificationCard extends StatelessWidget {
+class ICReminderCard extends StatelessWidget {
   final int index;
-  final ICNotification notification;
-  final void Function() onTapNotification;
+  final ICReminder reminder;
+  final void Function() onTapReminder;
   final void Function(String) onTapCache;
   final void Function(String, String) onTapBlock;
-  const ICNotificationCard({
+  const ICReminderCard({
     super.key,
     required this.index,
-    required this.notification,
-    required this.onTapNotification,
+    required this.reminder,
+    required this.onTapReminder,
     required this.onTapCache,
     required this.onTapBlock,
   });
@@ -28,15 +28,15 @@ class ICNotificationCard extends StatelessWidget {
     Cache? cache;
     ICBlock? block;
     ICStatus? status;
-    if (notification.cacheId != "") {
+    if (reminder.cacheId != "") {
       cache = context.read<ICCacheModel>().caches.firstWhere(
-        (cache) => cache.id == notification.cacheId,
+        (cache) => cache.id == reminder.cacheId,
       );
     }
 
-    if (notification.blockId != "" && cache != null) {
+    if (reminder.blockId != "" && cache != null) {
       block = context.read<ICBlockModel>().cacheBlocksMap[cache.id]!.firstWhere(
-        (block) => block.id == notification.blockId,
+        (block) => block.id == reminder.blockId,
       );
       status = context.read<ICStatusModel>().findStatusByBlock(block);
     }
@@ -58,17 +58,17 @@ class ICNotificationCard extends StatelessWidget {
                 flex: 3,
                 child: ListTile(
                   onTap: () {
-                    onTapNotification();
+                    onTapReminder();
                   },
-                  title: Text(notification.name, textAlign: TextAlign.center),
+                  title: Text(reminder.name, textAlign: TextAlign.center),
                   subtitle: Text(
-                    notification.description,
+                    reminder.description,
                     textAlign: TextAlign.center,
                   ),
                   trailing: Text(
-                    (notification.status == notificationStatus.SCHEDULED)
+                    (reminder.status == reminderStatus.SCHEDULED)
                         ? "Scheduled"
-                        : (notification.status == notificationStatus.TRIGGERED)
+                        : (reminder.status == reminderStatus.TRIGGERED)
                         ? "Triggered"
                         : "Dismissed",
                   ),

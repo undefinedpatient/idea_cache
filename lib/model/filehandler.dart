@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
-import 'package:idea_cache/model/notification.dart';
+import 'package:idea_cache/model/reminder.dart';
 import 'package:idea_cache/model/setting.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'cache.dart';
 
-enum FileDestinationType { cache, block, setting, status, notification }
+enum FileDestinationType { cache, block, setting, status, reminder }
 
 class FileHandler {
   // File I/O
@@ -34,10 +33,8 @@ class FileHandler {
         return File("$path/IdeaCache/status.json").create(recursive: true);
       case FileDestinationType.setting:
         return File("$path/IdeaCache/settings.json").create(recursive: true);
-      case FileDestinationType.notification:
-        return File(
-          "$path/IdeaCache/notifications.json",
-        ).create(recursive: true);
+      case FileDestinationType.reminder:
+        return File("$path/IdeaCache/reminders.json").create(recursive: true);
     }
   }
 
@@ -125,27 +122,27 @@ class FileHandler {
   }
 
   // Append a new Notification data in form of json
-  static Future<File> appendNotification(ICNotification notification) async {
+  static Future<File> appendReminder(ICReminder reminder) async {
     final File file = await _localFile(
-      fileDestinationType: FileDestinationType.notification,
+      fileDestinationType: FileDestinationType.reminder,
     );
     // If the new block name is already in form abc.001, strip away the .001 first
-    notification.name = notification.name.split('.')[0];
-    List<ICNotification>? notifications = await readNotifications();
+    reminder.name = reminder.name.split('.')[0];
+    List<ICReminder>? notifications = await readReminder();
     if (notifications.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < notifications.length; i++) {
-        String oldName = notification.name;
-        if (notifications[i].name == notification.name) {
+        String oldName = reminder.name;
+        if (notifications[i].name == reminder.name) {
           occurrence++;
-          notification.name =
+          reminder.name =
               "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
         }
       }
     }
 
-    List<ICNotification> existingNotification = await readNotifications();
-    existingNotification.add(notification);
+    List<ICReminder> existingNotification = await readReminder();
+    existingNotification.add(reminder);
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
       jsonEncoder.convert(
@@ -301,36 +298,34 @@ class FileHandler {
     );
   }
 
-  static Future<File> updateNotification(ICNotification notification) async {
+  static Future<File> updateReminder(ICReminder reminder) async {
     final File file = await _localFile(
-      fileDestinationType: FileDestinationType.notification,
+      fileDestinationType: FileDestinationType.reminder,
     );
-    final ICNotification? oldNotification = await findNotificationById(
-      notification.id,
-    );
+    final ICReminder? oldNotification = await findNotificationById(reminder.id);
     if (oldNotification == null) {
-      return appendNotification(notification);
+      return appendReminder(reminder);
     }
     //Retrieve a list of blocks from the file
-    List<ICNotification>? notifications = await readNotifications();
-    notifications.removeWhere((item) => item.id == notification.id);
+    List<ICReminder>? notifications = await readReminder();
+    notifications.removeWhere((item) => item.id == reminder.id);
     if (notifications.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < notifications.length; i++) {
-        String oldName = notification.name;
-        if (notifications[i].name == notification.name) {
+        String oldName = reminder.name;
+        if (notifications[i].name == reminder.name) {
           occurrence++;
-          notification.name =
+          reminder.name =
               "${oldName.split('.')[0]}.${occurrence.toString().padLeft(3, '0')}";
         }
       }
     }
 
-    List<ICNotification> existingNotifications = await readNotifications();
+    List<ICReminder> existingNotifications = await readReminder();
     //Replacing Notification
     for (int i = 0; i < existingNotifications.length; i++) {
-      if (existingNotifications[i].id == notification.id) {
-        existingNotifications[i] = notification;
+      if (existingNotifications[i].id == reminder.id) {
+        existingNotifications[i] = reminder;
         break;
       }
     }
@@ -393,13 +388,13 @@ class FileHandler {
 
   static Future<File> reorderNotification(int from, int to) async {
     File file = await _localFile(
-      fileDestinationType: FileDestinationType.notification,
+      fileDestinationType: FileDestinationType.reminder,
     );
-    List<ICNotification> notifications = await readNotifications();
+    List<ICReminder> notifications = await readReminder();
     if (from < to) {
       to -= 1;
     }
-    final ICNotification item = notifications.removeAt(from);
+    final ICReminder item = notifications.removeAt(from);
     notifications.insert(to, item);
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return file.writeAsString(
@@ -550,15 +545,13 @@ class FileHandler {
     );
   }
 
-  static Future<File> deleteNotificationById(String notificationId) async {
+  static Future<File> deleteReminderById(String notificationId) async {
     final File file = await _localFile(
-      fileDestinationType: FileDestinationType.notification,
+      fileDestinationType: FileDestinationType.reminder,
     );
-    final ICNotification? notification = await findNotificationById(
-      notificationId,
-    );
-    List<ICNotification> existingNotifications = await readNotifications();
-    if (notification == null) {
+    final ICReminder? reminder = await findNotificationById(notificationId);
+    List<ICReminder> existingNotifications = await readReminder();
+    if (reminder == null) {
       return file;
     }
 
@@ -675,8 +668,8 @@ class FileHandler {
     return null;
   }
 
-  static Future<ICNotification?> findNotificationById(String id) async {
-    List<ICNotification>? notifications = await readNotifications();
+  static Future<ICReminder?> findNotificationById(String id) async {
+    List<ICReminder>? notifications = await readReminder();
     for (int i = 0; i < notifications.length; i++) {
       if (notifications[i].id == id) {
         return notifications[i];
@@ -760,18 +753,16 @@ class FileHandler {
     return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
   }
 
-  static Future<List<ICNotification>> readNotifications({
-    String? dataString,
-  }) async {
+  static Future<List<ICReminder>> readReminder({String? dataString}) async {
     if (dataString != null && dataString.isNotEmpty) {
       final List<dynamic> jsonList = jsonDecode(dataString) as List<dynamic>;
       // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic>
       return jsonList
-          .map((json) => ICNotification.fromMap(json as Map<String, dynamic>))
+          .map((json) => ICReminder.fromMap(json as Map<String, dynamic>))
           .toList();
     }
     final File file = await _localFile(
-      fileDestinationType: FileDestinationType.notification,
+      fileDestinationType: FileDestinationType.reminder,
     );
     try {
       if (await file.exists()) {
@@ -780,9 +771,7 @@ class FileHandler {
           final List<dynamic> jsonList = jsonDecode(content) as List<dynamic>;
 
           return jsonList
-              .map(
-                (json) => ICNotification.fromMap(json as Map<String, dynamic>),
-              )
+              .map((json) => ICReminder.fromMap(json as Map<String, dynamic>))
               .toList();
         }
       }
