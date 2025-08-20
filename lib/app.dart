@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/navigationbarbutton.dart';
@@ -11,7 +9,6 @@ import 'package:idea_cache/component/reminderbutton.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
-import 'package:idea_cache/model/reminder.dart';
 import 'package:idea_cache/model/remindermodel.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/statusmodel.dart';

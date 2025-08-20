@@ -1,17 +1,31 @@
 import 'dart:async';
 import 'dart:developer' as dev;
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart' as tz;
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/reminder.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/data/latest_all.dart';
 import 'package:timezone/timezone.dart';
 
 // local Notification : in app
 // Notification : pop up on screen, like message notification
 class ICNotificationHandler extends ChangeNotifier {
+  static const WindowsInitializationSettings initializationSettingsWindows =
+      WindowsInitializationSettings(
+        appName: 'IdeaCache',
+        appUserModelId: 'Com.Patient.IdeaCache',
+        guid: '9d8409f2-8955-483b-83b3-b5d982db52f5',
+      );
+  // static const AndroidInitializationSettings androidSettings =
+  //     AndroidInitializationSettings('@mipmap/ic_launcher');
+  static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  static bool canPlayAudio = false;
+  static AudioPlayer player = AudioPlayer();
   static final List<ICReminder> _alarmList = [];
   static Map<reminderStatus, List<ICReminder>> reminderMap = {
     reminderStatus.DISMISSED: [],
@@ -19,6 +33,10 @@ class ICNotificationHandler extends ChangeNotifier {
     reminderStatus.SCHEDULED: [],
     reminderStatus.TRIGGERED: [],
   };
+  static Future<void> playNotificationAudio() async {
+    await player.play(AssetSource("sounds/pop0.wav"));
+  }
+
   static Timer? timer;
   List<ICReminder> get alarmList => _alarmList;
   static ICReminder? get oldestTriggeredReminder {
@@ -134,14 +152,13 @@ class ICNotificationHandler extends ChangeNotifier {
           dismissedInfo +
           "\n Upcoming:" +
           upcomingMessage +
-          "\n AlarmsInfo" +
+          "\n AlarmsInfo:" +
           alarmsInfo,
     );
   }
 
   // Only compute the latest upcoming reminder
   void check(Timer timer) async {
-    printInfo();
     ICReminder? checkedReminder = upcomingReminder;
     if (checkedReminder == null) {
       return;
@@ -155,6 +172,7 @@ class ICNotificationHandler extends ChangeNotifier {
       FileHandler.updateReminder(checkedReminder);
       updateReminder(checkedReminder);
       _alarmList.add(checkedReminder);
+      canPlayAudio = true;
       reminderMap = _sort();
       notifyListeners();
       return;
@@ -177,49 +195,36 @@ class ICNotificationHandler extends ChangeNotifier {
     return temp;
   }
 
-  // static const WindowsInitializationSettings initializationSettingsWindows =
-  //     WindowsInitializationSettings(
-  //       appName: 'IdeaCache',
-  //       appUserModelId: 'Com.Patient.IdeaCache',
-  //       guid: '9d8409f2-8955-483b-83b3-b5d982db52f5',
-  //     );
-  // // static const AndroidInitializationSettings androidSettings =
-  // //     AndroidInitializationSettings('@mipmap/ic_launcher');
-  // static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  //     FlutterLocalNotificationsPlugin();
+  static Future<void> init() async {
+    // Initialize notification plugin
+    const InitializationSettings initSettings = InitializationSettings(
+      // android: androidSettings,
+      windows: initializationSettingsWindows,
+    );
 
-  // static Future<void> init() async {
-  //   // Initialize notification plugin
-  //   const InitializationSettings initSettings = InitializationSettings(
-  //     // android: androidSettings,
-  //     windows: initializationSettingsWindows,
-  //   );
-
-  //   await flutterLocalNotificationsPlugin.initialize(
-  //     initSettings,
-  //     onDidReceiveNotificationResponse: (payload) {},
-  //   );
-  //   String timezoneLocation = await FlutterTimezone.getLocalTimezone();
-  //   tz.initializeTimeZones();
-  //   tz.setLocalLocation(tz.getLocation(timezoneLocation));
-  // }
+    await flutterLocalNotificationsPlugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (payload) {},
+    );
+    String timezoneLocation = await tz.FlutterTimezone.getLocalTimezone();
+    initializeTimeZones();
+    setLocalLocation(getLocation(timezoneLocation));
+  }
 
   // // Debug/Developement Purpose
-  // static Future<void> sendSampleNotification() async {
-  //   WindowsNotificationDetails windowsNotificationDetails =
-  //       WindowsNotificationDetails(
-  //         actions: [WindowsAction(content: "Action", arguments: "arguments")],
-  //       );
-  //   NotificationDetails details = NotificationDetails(
-  //     windows: windowsNotificationDetails,
-  //   );
-  //   NotificationHandler.flutterLocalNotificationsPlugin.show(
-  //     0,
-  //     "Sample Notification",
-  //     "You Get it!",
-  //     details,
-  //   );
-  // }
+  static Future<void> sendSampleNotification(ICReminder reminder) async {
+    WindowsNotificationDetails windowsNotificationDetails =
+        WindowsNotificationDetails();
+    NotificationDetails details = NotificationDetails(
+      windows: windowsNotificationDetails,
+    );
+    ICNotificationHandler.flutterLocalNotificationsPlugin.show(
+      0,
+      reminder.name,
+      "",
+      details,
+    );
+  }
 
   // static Future<void> scheduleLocalNotification(
   //   ICReminder notification, {

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
-
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/reminder.dart';
+import 'package:idea_cache/model/remindermodel.dart';
 import 'package:idea_cache/notificationhandler.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +18,7 @@ class ICReminderButton extends StatefulWidget {
 
 class _ICReminderButtonState extends State<ICReminderButton> {
   late Timer timer;
+  static AudioPlayer player = AudioPlayer();
   @override
   void initState() {
     super.initState();
@@ -26,6 +29,7 @@ class _ICReminderButtonState extends State<ICReminderButton> {
 
   @override
   void dispose() {
+    player.dispose();
     timer.cancel();
     super.dispose();
   }
@@ -38,26 +42,32 @@ class _ICReminderButtonState extends State<ICReminderButton> {
       context,
       listen: true,
     );
+
     for (var currentAlarm in handler.alarmList) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        player.play(AssetSource("sounds/pop0.wav"));
         showDialog(
           context: context,
           builder: (context) {
+            ICNotificationHandler.sendSampleNotification(currentAlarm);
             handler.alarmCallBack(currentAlarm);
             return AlertDialog(
               title: Text("Reminder"),
               content: Text(currentAlarm.name),
               actions: [
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     currentAlarm.status = reminderStatus.DISMISSED;
+                    context.read<ICReminderModel>().updateReminder(
+                      currentAlarm,
+                    );
                     handler.updateReminder(currentAlarm);
                     Navigator.pop(context);
                   },
                   child: const Text("Dismiss"),
                 ),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.pop(context);
                   },
                   child: const Text("Close"),
