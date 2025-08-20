@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart' as tz;
@@ -13,14 +14,22 @@ import 'package:timezone/timezone.dart';
 // local Notification : in app
 // Notification : pop up on screen, like message notification
 class ICNotificationHandler extends ChangeNotifier {
+  static AndroidNotificationChannel channel = const AndroidNotificationChannel(
+    'Channel_id',
+    'Channel_title',
+    description: 'This channel is used for important notifications.',
+    importance: Importance.high,
+    playSound: true,
+  );
   static const WindowsInitializationSettings initializationSettingsWindows =
       WindowsInitializationSettings(
         appName: 'IdeaCache',
         appUserModelId: 'Com.Patient.IdeaCache',
         guid: '9d8409f2-8955-483b-83b3-b5d982db52f5',
       );
-  // static const AndroidInitializationSettings androidSettings =
-  //     AndroidInitializationSettings('@mipmap/ic_launcher');
+  static const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   static final List<ICReminder> _alarmList = [];
@@ -193,8 +202,14 @@ class ICNotificationHandler extends ChangeNotifier {
     const InitializationSettings initSettings = InitializationSettings(
       // android: androidSettings,
       windows: initializationSettingsWindows,
-      android: AndroidInitializationSettings(""),
+      android: initializationSettingsAndroid,
     );
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
 
     await flutterLocalNotificationsPlugin.initialize(
       initSettings,
@@ -211,6 +226,15 @@ class ICNotificationHandler extends ChangeNotifier {
         WindowsNotificationDetails();
     NotificationDetails details = NotificationDetails(
       windows: windowsNotificationDetails,
+      android: AndroidNotificationDetails(
+        channel.id,
+        channel.name,
+        channelDescription: channel.description,
+        importance: Importance.high,
+        color: Colors.blue,
+        playSound: true,
+        icon: '@mipmap/ic_launcher',
+      ),
     );
     ICNotificationHandler.flutterLocalNotificationsPlugin.show(
       0,

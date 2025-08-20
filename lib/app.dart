@@ -387,6 +387,17 @@ class _ICMainView extends State<ICMainView> {
       );
     } else {
       return Scaffold(
+        floatingActionButton: ICReminderButton(
+          onTap: () {
+            isReminderSheetOpened = true;
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return ICReminderView();
+              },
+            );
+          },
+        ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
           title: RichText(
@@ -395,7 +406,7 @@ class _ICMainView extends State<ICMainView> {
               style: Theme.of(context).textTheme.headlineMedium,
               children: <TextSpan>[
                 TextSpan(
-                  text: " v1.3.0",
+                  text: " v1.4.0",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ],
