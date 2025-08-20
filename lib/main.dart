@@ -8,7 +8,7 @@ import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ICNotificationHandler.initReminders();
-  await ICNotificationHandler.init();
+  await ICNotificationHandler.initNotification();
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     await windowManager.ensureInitialized();
     await windowManager.setMinimumSize(const Size(420, 560));

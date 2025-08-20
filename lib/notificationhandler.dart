@@ -23,9 +23,6 @@ class ICNotificationHandler extends ChangeNotifier {
   //     AndroidInitializationSettings('@mipmap/ic_launcher');
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
-  static bool canPlayAudio = false;
-  static AudioPlayer player = AudioPlayer();
   static final List<ICReminder> _alarmList = [];
   static Map<reminderStatus, List<ICReminder>> reminderMap = {
     reminderStatus.DISMISSED: [],
@@ -33,9 +30,6 @@ class ICNotificationHandler extends ChangeNotifier {
     reminderStatus.SCHEDULED: [],
     reminderStatus.TRIGGERED: [],
   };
-  static Future<void> playNotificationAudio() async {
-    await player.play(AssetSource("sounds/pop0.wav"));
-  }
 
   static Timer? timer;
   List<ICReminder> get alarmList => _alarmList;
@@ -172,7 +166,6 @@ class ICNotificationHandler extends ChangeNotifier {
       FileHandler.updateReminder(checkedReminder);
       updateReminder(checkedReminder);
       _alarmList.add(checkedReminder);
-      canPlayAudio = true;
       reminderMap = _sort();
       notifyListeners();
       return;
@@ -195,11 +188,12 @@ class ICNotificationHandler extends ChangeNotifier {
     return temp;
   }
 
-  static Future<void> init() async {
+  static Future<void> initNotification() async {
     // Initialize notification plugin
     const InitializationSettings initSettings = InitializationSettings(
       // android: androidSettings,
       windows: initializationSettingsWindows,
+      android: AndroidInitializationSettings(""),
     );
 
     await flutterLocalNotificationsPlugin.initialize(
@@ -212,7 +206,7 @@ class ICNotificationHandler extends ChangeNotifier {
   }
 
   // // Debug/Developement Purpose
-  static Future<void> sendSampleNotification(ICReminder reminder) async {
+  static Future<void> sendNotification(ICReminder reminder) async {
     WindowsNotificationDetails windowsNotificationDetails =
         WindowsNotificationDetails();
     NotificationDetails details = NotificationDetails(

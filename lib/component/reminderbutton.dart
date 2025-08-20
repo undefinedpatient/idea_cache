@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/reminder.dart';
 import 'package:idea_cache/model/remindermodel.dart';
@@ -49,7 +48,7 @@ class _ICReminderButtonState extends State<ICReminderButton> {
         showDialog(
           context: context,
           builder: (context) {
-            ICNotificationHandler.sendSampleNotification(currentAlarm);
+            ICNotificationHandler.sendNotification(currentAlarm);
             handler.alarmCallBack(currentAlarm);
             return AlertDialog(
               title: Text("Reminder"),
