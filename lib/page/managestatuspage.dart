@@ -110,9 +110,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                   ? "Change Status Color"
                                   : "",
                               child: PopupMenuButton(
-                                onOpened: () {
-                                  log("dsa");
-                                },
+                                onOpened: () {},
                                 icon: Icon(
                                   Icons.circle,
                                   color: Color(entry.value.colorCode),

@@ -11,6 +11,7 @@ import 'package:idea_cache/component/reminderbutton.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
+import 'package:idea_cache/model/reminder.dart';
 import 'package:idea_cache/model/remindermodel.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/statusmodel.dart';
@@ -128,6 +129,11 @@ class _ICMainView extends State<ICMainView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     timer.cancel();
     super.dispose();
@@ -191,7 +197,7 @@ class _ICMainView extends State<ICMainView> {
               style: Theme.of(context).textTheme.headlineMedium,
               children: <TextSpan>[
                 TextSpan(
-                  text: " v1.3.2",
+                  text: " v1.4.0",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ],

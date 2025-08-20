@@ -16,7 +16,6 @@ class ICReminderModel extends ChangeNotifier {
     notifyListeners();
     _reminders.clear();
     _reminders.addAll(await FileHandler.readReminders());
-    _reminders.forEach((item) => log(item.name));
     _isLoading = false;
     notifyListeners();
   }

@@ -33,26 +33,23 @@ class _ICReminderButtonState extends State<ICReminderButton> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // ICReminder? currentAlarm = .firstOrNull;
-
     // If there's an active alarm and we haven't shown it yet, show dialog
     ICNotificationHandler handler = Provider.of<ICNotificationHandler>(
       context,
       listen: true,
     );
     for (var currentAlarm in handler.alarmList) {
-      // _previouslyShownAlarm = currentAlarm;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog(
           context: context,
           builder: (context) {
+            handler.alarmCallBack(currentAlarm);
             return AlertDialog(
               title: Text("Reminder"),
               content: Text(currentAlarm.name),
               actions: [
                 TextButton(
                   onPressed: () {
-                    handler.alarmCallBack(currentAlarm);
                     currentAlarm.status = reminderStatus.DISMISSED;
                     handler.updateReminder(currentAlarm);
                     Navigator.pop(context);
@@ -61,7 +58,6 @@ class _ICReminderButtonState extends State<ICReminderButton> {
                 ),
                 TextButton(
                   onPressed: () {
-                    handler.alarmCallBack(currentAlarm);
                     Navigator.pop(context);
                   },
                   child: const Text("Close"),

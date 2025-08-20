@@ -247,7 +247,6 @@ class _ICCacheView extends State<ICCacheView> {
                             block: entry.value,
                             // blockid: entry.value.id,
                             onTap: () {
-                              log(entry.value.name);
                               if (appState.isContentEdited) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -280,9 +279,7 @@ class _ICCacheView extends State<ICCacheView> {
                       child: MenuItemButton(
                         requestFocusOnHover: false,
                         onPressed: () async {
-                          await blockModel.createBlock(
-                            widget.cacheid,
-                          );
+                          await blockModel.createBlock(widget.cacheid);
                           cacheModel.loadFromFileSlient();
                           // The cache is written so we need to fetch the new cache data from the file first
                         },

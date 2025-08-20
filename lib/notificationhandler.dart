@@ -1,21 +1,18 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:developer' as dev;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/reminder.dart';
-import 'package:idea_cache/model/remindermodel.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart';
-import 'package:uuid/rng.dart';
 
 // local Notification : in app
 // Notification : pop up on screen, like message notification
 class ICNotificationHandler extends ChangeNotifier {
-  static List<ICReminder> _alarmList = [];
+  static final List<ICReminder> _alarmList = [];
   static Map<reminderStatus, List<ICReminder>> reminderMap = {
     reminderStatus.DISMISSED: [],
     reminderStatus.NOTACTIVE: [],
@@ -52,9 +49,10 @@ class ICNotificationHandler extends ChangeNotifier {
       if (reminders[i].status == reminderStatus.SCHEDULED &&
           reminders[i].time.isBefore(DateTime.now())) {
         reminders[i].status = reminderStatus.TRIGGERED;
-        await FileHandler.updateReminder(reminders[i]);
-        _alarmList.add(reminders[i]);
         reminderMap[reminderStatus.TRIGGERED]!.add(reminders[i]);
+        await FileHandler.updateReminder(reminders[i]);
+
+        _alarmList.add(reminders[i]);
         continue;
       }
       if (reminders[i].status == reminderStatus.TRIGGERED) {
