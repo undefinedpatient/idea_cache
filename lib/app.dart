@@ -180,14 +180,7 @@ class _ICMainView extends State<ICMainView> {
         ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
-          actions: [
-            IconButton(
-              onPressed: () {
-                // NotificationHandler.sendSampleNotification();
-              },
-              icon: Icon(Icons.ac_unit),
-            ),
-          ],
+          actions: [],
           title: RichText(
             text: TextSpan(
               text: "IdeaCache ",
