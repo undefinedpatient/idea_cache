@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/navigationbarbutton.dart';
+import 'package:idea_cache/component/reminderbutton.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
@@ -39,6 +41,7 @@ class ICApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ICBlockModel()),
         ChangeNotifierProvider(create: (context) => ICStatusModel()),
         ChangeNotifierProvider(create: (context) => ICReminderModel()),
+        ChangeNotifierProvider(create: (context) => ICNotificationHandler()),
       ],
       child: Consumer<ICSettingsModel>(
         builder: (context, model, child) {
@@ -93,9 +96,11 @@ class _ICMainView extends State<ICMainView>
     with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
   bool collapse = false;
+  late Timer timer;
   @override
   void initState() {
     super.initState();
+
     Future.microtask(
       () => {
         Provider.of<ICSettingsModel>(context, listen: false).loadFromFile(),
@@ -115,6 +120,11 @@ class _ICMainView extends State<ICMainView>
         Provider.of<ICReminderModel>(context, listen: false).loadFromFile(),
       },
     );
+    Future.microtask(
+      () => {
+        Provider.of<ICNotificationHandler>(context, listen: false).initLoop(),
+      },
+    );
   }
 
   @override
@@ -125,8 +135,10 @@ class _ICMainView extends State<ICMainView>
   @override
   Widget build(BuildContext buildContext) {
     Widget? pageWidget;
+
     ICSettingsModel appState = context.watch<ICSettingsModel>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
+
     if (_selectedIndex == 0) {
       pageWidget = ICOverview(
         onSetPage: (int index) {
@@ -151,8 +163,8 @@ class _ICMainView extends State<ICMainView>
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return Scaffold(
-        floatingActionButton: IconButton.filled(
-          onPressed: () {
+        floatingActionButton: ICReminderButton(
+          onTap: () {
             showModalBottomSheet(
               context: context,
               builder: (context) {
@@ -160,7 +172,14 @@ class _ICMainView extends State<ICMainView>
               },
             );
           },
-          icon: const Icon(Icons.notifications, size: 32),
+          onReminderTriggered: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return ICReminderView();
+              },
+            );
+          },
         ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(

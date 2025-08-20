@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:uuid/uuid.dart';
 
-enum reminderStatus { SCHEDULED, TRIGGERED, DISMISSED }
+enum reminderStatus { NOTACTIVE, SCHEDULED, TRIGGERED, DISMISSED }
 
 class ICReminder {
   final String _id;
@@ -11,7 +11,6 @@ class ICReminder {
   String blockId;
   reminderStatus status;
   String name;
-  String description;
   DateTime time;
 
   ICReminder({
@@ -19,22 +18,27 @@ class ICReminder {
     this.blockId = "",
     this.status = reminderStatus.SCHEDULED,
     this.name = "Untitled",
-    this.description = "",
     required this.time,
   }) : _id = Uuid().v4(),
-       scheduleId = DateTime.now().microsecondsSinceEpoch;
-  
+       scheduleId = DateTime.now().millisecondsSinceEpoch;
+
   String get id => _id;
   int get hours {
-    return time.difference(DateTime.now()).inHours;
+    return (time.difference(DateTime.now()).isNegative)
+        ? 0
+        : time.difference(DateTime.now()).inHours;
   }
 
   int get minutes {
-    return time.difference(DateTime.now()).inMinutes % 60;
+    return (time.difference(DateTime.now()).isNegative)
+        ? 0
+        : time.difference(DateTime.now()).inMinutes % 60;
   }
 
   int get seconds {
-    return time.difference(DateTime.now()).inSeconds % 60;
+    return (time.difference(DateTime.now()).isNegative)
+        ? 0
+        : time.difference(DateTime.now()).inSeconds % 60;
   }
 
   // Convert to Map for DB
@@ -46,7 +50,6 @@ class ICReminder {
       'blockId': blockId,
       'status': status.index,
       'name': name,
-      'description': description,
       'time': time.toString(),
     };
   }
@@ -58,9 +61,12 @@ class ICReminder {
       blockId = map['blockId'] ?? "",
       status = reminderStatus.values[map['status']],
       name = map['name'] ?? "",
-      description = map['description'] ?? "",
       time = DateTime.parse(map['time']);
   String toString() {
     return toMap().toString();
+  }
+
+  int getTimeReminding() {
+    return time.difference(DateTime.now()).inMinutes;
   }
 }

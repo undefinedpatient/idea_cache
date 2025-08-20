@@ -15,7 +15,7 @@ class ICReminderModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     _reminders.clear();
-    _reminders.addAll(await FileHandler.readReminder());
+    _reminders.addAll(await FileHandler.readReminders());
     _reminders.forEach((item) => log(item.name));
     _isLoading = false;
     notifyListeners();
@@ -23,17 +23,17 @@ class ICReminderModel extends ChangeNotifier {
 
   Future<void> loadFromFileSlient() async {
     _reminders.clear();
-    _reminders.addAll(await FileHandler.readReminder());
+    _reminders.addAll(await FileHandler.readReminders());
   }
 
   Future<void> appendReminder(ICReminder reminder) async {
-    FileHandler.appendReminder(reminder);
+    await FileHandler.appendReminder(reminder);
     _reminders.add(reminder);
     notifyListeners();
   }
 
   Future<void> updateReminder(ICReminder reminder) async {
-    FileHandler.updateReminder(reminder);
+    await FileHandler.updateReminder(reminder);
     int updateTargetIndex = _reminders.indexWhere(
       (item) => item.id == reminder.id,
     );

@@ -128,7 +128,7 @@ class FileHandler {
     );
     // If the new block name is already in form abc.001, strip away the .001 first
     reminder.name = reminder.name.split('.')[0];
-    List<ICReminder>? notifications = await readReminder();
+    List<ICReminder>? notifications = await readReminders();
     if (notifications.isNotEmpty) {
       int occurrence = 0;
       for (int i = 0; i < notifications.length; i++) {
@@ -141,7 +141,7 @@ class FileHandler {
       }
     }
 
-    List<ICReminder> existingNotification = await readReminder();
+    List<ICReminder> existingNotification = await readReminders();
     existingNotification.add(reminder);
     JsonEncoder jsonEncoder = JsonEncoder.withIndent("  ");
     return await file.writeAsString(
@@ -302,12 +302,12 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.reminder,
     );
-    final ICReminder? oldNotification = await findNotificationById(reminder.id);
-    if (oldNotification == null) {
+    final ICReminder? oldReminder = await findReminderById(reminder.id);
+    if (oldReminder == null) {
       return appendReminder(reminder);
     }
     //Retrieve a list of blocks from the file
-    List<ICReminder>? notifications = await readReminder();
+    List<ICReminder>? notifications = await readReminders();
     notifications.removeWhere((item) => item.id == reminder.id);
     if (notifications.isNotEmpty) {
       int occurrence = 0;
@@ -321,7 +321,7 @@ class FileHandler {
       }
     }
 
-    List<ICReminder> existingNotifications = await readReminder();
+    List<ICReminder> existingNotifications = await readReminders();
     //Replacing Notification
     for (int i = 0; i < existingNotifications.length; i++) {
       if (existingNotifications[i].id == reminder.id) {
@@ -390,7 +390,7 @@ class FileHandler {
     File file = await _localFile(
       fileDestinationType: FileDestinationType.reminder,
     );
-    List<ICReminder> notifications = await readReminder();
+    List<ICReminder> notifications = await readReminders();
     if (from < to) {
       to -= 1;
     }
@@ -549,8 +549,8 @@ class FileHandler {
     final File file = await _localFile(
       fileDestinationType: FileDestinationType.reminder,
     );
-    final ICReminder? reminder = await findNotificationById(notificationId);
-    List<ICReminder> existingNotifications = await readReminder();
+    final ICReminder? reminder = await findReminderById(notificationId);
+    List<ICReminder> existingNotifications = await readReminders();
     if (reminder == null) {
       return file;
     }
@@ -627,17 +627,11 @@ class FileHandler {
     if (cache == null) {
       throw Exception("findBlocksByCacheId: cache is null");
     }
-    readblocks.forEach((block) {
-      log(block.name);
-    });
     for (int i = 0; i < readblocks.length; i++) {
       if (readblocks[i].cacheId == cacheId) {
         unorderedBlocks.add(readblocks[i]);
       }
     }
-    unorderedBlocks.forEach((block) {
-      log(block.name);
-    });
     for (int i = 0; i < cache.blockIds.length; i++) {
       int indexOfTargetBlock = unorderedBlocks
           .map((block) => block.id)
@@ -668,11 +662,11 @@ class FileHandler {
     return null;
   }
 
-  static Future<ICReminder?> findNotificationById(String id) async {
-    List<ICReminder>? notifications = await readReminder();
-    for (int i = 0; i < notifications.length; i++) {
-      if (notifications[i].id == id) {
-        return notifications[i];
+  static Future<ICReminder?> findReminderById(String id) async {
+    List<ICReminder>? reminders = await readReminders();
+    for (int i = 0; i < reminders.length; i++) {
+      if (reminders[i].id == id) {
+        return reminders[i];
       }
     }
     return null;
@@ -753,7 +747,7 @@ class FileHandler {
     return []; // Return empty list if file doesn't exist, is empty, or has invalid JSON
   }
 
-  static Future<List<ICReminder>> readReminder({String? dataString}) async {
+  static Future<List<ICReminder>> readReminders({String? dataString}) async {
     if (dataString != null && dataString.isNotEmpty) {
       final List<dynamic> jsonList = jsonDecode(dataString) as List<dynamic>;
       // The list Hold list of all blocks existing, and map each of the entry to Map<String, dynamic>

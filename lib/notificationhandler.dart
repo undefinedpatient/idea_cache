@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
-
+import 'dart:developer' as dev;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/reminder.dart';
@@ -9,8 +10,154 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart';
+import 'package:uuid/rng.dart';
 
-class NotificationHandler {
+// local Notification : in app
+// Notification : pop up on screen, like message notification
+class ICNotificationHandler extends ChangeNotifier {
+  static Map<reminderStatus, List<ICReminder>> reminderMap = {
+    reminderStatus.DISMISSED: [],
+    reminderStatus.NOTACTIVE: [],
+    reminderStatus.SCHEDULED: [],
+    reminderStatus.TRIGGERED: [],
+  };
+  static Timer? timer;
+
+  static ICReminder? get oldestTriggeredReminder {
+    if (reminderMap[reminderStatus.TRIGGERED]!.isEmpty) {
+      return null;
+    }
+    return reminderMap[reminderStatus.TRIGGERED]!.last;
+  }
+
+  static ICReminder? get upcomingReminder {
+    if (reminderMap[reminderStatus.SCHEDULED]!.isEmpty) {
+      return null;
+    }
+    return reminderMap[reminderStatus.SCHEDULED]!.first;
+  }
+
+  void clearQueue() {
+    reminderMap.clear();
+    notifyListeners();
+  }
+
+  void wipeTimer(Timer timer) {
+    timer.cancel();
+  }
+
+  static Future<void> initReminders() async {
+    List<ICReminder> reminders = await FileHandler.readReminders();
+    for (int i = 0; i < reminders.length; i++) {
+      if (reminders[i].status == reminderStatus.SCHEDULED) {
+        reminderMap[reminderStatus.SCHEDULED]!.add(reminders[i]);
+      }
+      if (reminders[i].status == reminderStatus.TRIGGERED) {
+        reminderMap[reminderStatus.TRIGGERED]!.add(reminders[i]);
+      }
+      if (reminders[i].status == reminderStatus.NOTACTIVE) {
+        reminderMap[reminderStatus.NOTACTIVE]!.add(reminders[i]);
+      }
+      if (reminders[i].status == reminderStatus.DISMISSED) {
+        reminderMap[reminderStatus.DISMISSED]!.add(reminders[i]);
+      }
+    }
+  }
+
+  void initLoop() {
+    timer = Timer.periodic(Duration(milliseconds: 1000), check);
+  }
+
+  void updateReminder(ICReminder reminder) {
+    reminderMap.forEach((status, reminders) {
+      reminders.removeWhere((item) => reminder.scheduleId == item.scheduleId);
+    });
+    reminderMap[reminder.status]!.add(reminder);
+    reminderMap = _sort();
+    notifyListeners();
+  }
+
+  void removeReminder(ICReminder reminder) {
+    reminderMap.forEach((status, reminders) {
+      reminders.removeWhere((item) => reminder.scheduleId == item.scheduleId);
+    });
+    notifyListeners();
+  }
+
+  void printInfo() {
+    String timerInfo = timer?.tick.toString() ?? "Timer unavailable";
+    String notActiveInfo = "";
+    for (ICReminder value in reminderMap[reminderStatus.NOTACTIVE]!) {
+      notActiveInfo += "{${value.name}} ";
+    }
+    String scheduleInfo = "";
+    for (ICReminder value in reminderMap[reminderStatus.SCHEDULED]!) {
+      scheduleInfo += "{${value.name}} ";
+    }
+    String triggeredInfo = "";
+    for (ICReminder value in reminderMap[reminderStatus.TRIGGERED]!) {
+      triggeredInfo += "{${value.name}} ";
+    }
+    String dismissedInfo = "";
+    for (ICReminder value in reminderMap[reminderStatus.DISMISSED]!) {
+      dismissedInfo += "{${value.name}} ";
+    }
+    String upcomingMessage = (upcomingReminder != null)
+        ? upcomingReminder!.name
+        : "";
+    dev.log(
+      timerInfo +
+          "\n NOT ACTIVE:" +
+          notActiveInfo +
+          "\n SCHEDULED: " +
+          scheduleInfo +
+          "\n TRIGGERED: " +
+          triggeredInfo +
+          "\n DISMISSED:" +
+          dismissedInfo +
+          "\n Upcoming:" +
+          upcomingMessage,
+    );
+  }
+
+  // Only compute the latest upcoming reminder
+  void check(Timer timer) async {
+    printInfo();
+    ICReminder? checkedReminder = upcomingReminder;
+    if (checkedReminder == null) {
+      return;
+    }
+    if (checkedReminder.time.compareTo(DateTime.now()) <= 0 ||
+        checkedReminder.time.isAtSameMomentAs(DateTime.now())) {
+      reminderMap[reminderStatus.SCHEDULED]!.removeWhere(
+        (item) => item.scheduleId == checkedReminder.scheduleId,
+      );
+      checkedReminder.status = reminderStatus.TRIGGERED;
+      FileHandler.updateReminder(checkedReminder);
+      updateReminder(checkedReminder);
+
+      reminderMap = _sort();
+      notifyListeners();
+      return;
+    }
+  }
+
+  static Map<reminderStatus, List<ICReminder>> _sort() {
+    Map<reminderStatus, List<ICReminder>> temp = reminderMap;
+    temp.forEach((status, reminders) {
+      for (int i = 0; i < reminders.length; i++) {
+        for (int j = i; j < reminders.length - i; j++) {
+          if (reminders[i].time.isAfter(reminders[j].time)) {
+            ICReminder temp = reminders[i];
+            reminders[i] = reminders[j];
+            reminders[j] = temp;
+          }
+        }
+      }
+    });
+    return temp;
+  }
+
   // static const WindowsInitializationSettings initializationSettingsWindows =
   //     WindowsInitializationSettings(
   //       appName: 'IdeaCache',

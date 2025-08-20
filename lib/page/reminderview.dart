@@ -1,10 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:idea_cache/component/notificationcard.dart';
+import 'package:idea_cache/component/remindercard.dart';
 import 'package:idea_cache/model/reminder.dart';
 import 'package:idea_cache/model/remindermodel.dart';
-import 'package:idea_cache/page/editReminder.dart';
+import 'package:idea_cache/page/editreminderview.dart';
 import 'package:provider/provider.dart';
 
 class ICReminderView extends StatefulWidget {
@@ -100,7 +100,7 @@ class _ICNotificationState extends State<ICReminderView> {
                     isCreationView = !isCreationView;
                   });
                 },
-                notification: activeNotification,
+                reminder: activeNotification,
               );
             }
             if (model.reminders.isNotEmpty) {

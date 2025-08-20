@@ -6,15 +6,16 @@ import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cachemodel.dart';
 import 'package:idea_cache/model/remindermodel.dart';
 import 'package:idea_cache/model/reminder.dart';
+import 'package:idea_cache/notificationhandler.dart';
 import 'package:provider/provider.dart';
 
 class ICEditNotificationView extends StatefulWidget {
   final void Function() onSubmitted;
-  final ICReminder? notification;
+  final ICReminder? reminder;
   const ICEditNotificationView({
     super.key,
     required this.onSubmitted,
-    this.notification,
+    this.reminder,
   });
 
   @override
@@ -26,8 +27,6 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
   String userSelectedBlockId = "";
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameEditingController = TextEditingController();
-  final TextEditingController descriptionEditingController =
-      TextEditingController();
   final TextEditingController hourEditingController = TextEditingController(
     text: "0",
   );
@@ -40,14 +39,13 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
   @override
   void initState() {
     super.initState();
-    if (widget.notification != null) {
-      nameEditingController.text = widget.notification!.name;
-      descriptionEditingController.text = widget.notification!.description;
-      userSelectedCacheId = widget.notification!.cacheId;
-      userSelectedBlockId = widget.notification!.blockId;
-      hourEditingController.text = widget.notification!.hours.toString();
-      minuteEditingController.text = widget.notification!.minutes.toString();
-      secondEditingController.text = widget.notification!.seconds.toString();
+    if (widget.reminder != null) {
+      nameEditingController.text = widget.reminder!.name;
+      userSelectedCacheId = widget.reminder!.cacheId;
+      userSelectedBlockId = widget.reminder!.blockId;
+      hourEditingController.text = widget.reminder!.hours.toString();
+      minuteEditingController.text = widget.reminder!.minutes.toString();
+      secondEditingController.text = widget.reminder!.seconds.toString();
     }
   }
 
@@ -69,7 +67,7 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
               children: [
                 TextFormField(
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return "Name cannot be Empty";
                     }
                     return null;
@@ -78,13 +76,6 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Name',
-                  ),
-                ),
-                TextField(
-                  controller: descriptionEditingController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Decription (Optional)',
                   ),
                 ),
 
@@ -256,15 +247,18 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
         ),
       ),
       persistentFooterButtons: [
-        if (widget.notification != null)
+        if (widget.reminder != null)
           TextButton(
             onPressed: () {
-              reminderModel.deleteReminderById(widget.notification!.id);
+              reminderModel.deleteReminderById(widget.reminder!.id);
+              context.read<ICNotificationHandler>().removeReminder(
+                widget.reminder!,
+              );
               widget.onSubmitted.call();
             },
             child: Text("Delete"),
           ),
-        (widget.notification != null)
+        (widget.reminder != null)
             ? TextButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
@@ -272,15 +266,19 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                         int.parse(hourEditingController.text) * 3600 +
                         int.parse(minuteEditingController.text) * 60 +
                         int.parse(secondEditingController.text);
-                    widget.notification!.blockId = userSelectedBlockId;
-                    widget.notification!.cacheId = userSelectedCacheId;
-                    widget.notification!.name = nameEditingController.text;
-                    widget.notification!.description =
-                        descriptionEditingController.text;
-                    widget.notification!.time = DateTime.now().add(
+
+                    widget.reminder!.blockId = userSelectedBlockId;
+                    widget.reminder!.cacheId = userSelectedCacheId;
+                    widget.reminder!.name = nameEditingController.text;
+                    widget.reminder!.status = reminderStatus.SCHEDULED;
+                    widget.reminder!.time = DateTime.now().add(
                       Duration(seconds: timeAsSec),
                     );
-                    await reminderModel.updateReminder(widget.notification!);
+                    await reminderModel.updateReminder(widget.reminder!);
+                    context.read<ICNotificationHandler>().updateReminder(
+                      widget.reminder!,
+                    );
+
                     widget.onSubmitted.call();
                   }
                 },
@@ -294,14 +292,17 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                         int.parse(minuteEditingController.text) * 60 +
                         int.parse(secondEditingController.text);
 
-                    ICReminder notification = ICReminder(
+                    ICReminder reminder = ICReminder(
                       cacheId: userSelectedCacheId,
                       blockId: userSelectedBlockId,
                       name: nameEditingController.text,
-                      description: descriptionEditingController.text,
                       time: DateTime.now().add(Duration(seconds: timeAsSec)),
                     );
-                    await reminderModel.appendReminder(notification);
+                    // Do not need to call reminderModel, the addReminder aleady add one
+                    await reminderModel.appendReminder(reminder);
+                    context.read<ICNotificationHandler>().updateReminder(
+                      reminder,
+                    );
                     widget.onSubmitted.call();
                   }
                 },
