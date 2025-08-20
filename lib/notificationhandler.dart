@@ -15,6 +15,7 @@ import 'package:uuid/rng.dart';
 // local Notification : in app
 // Notification : pop up on screen, like message notification
 class ICNotificationHandler extends ChangeNotifier {
+  static List<ICReminder> _alarmList = [];
   static Map<reminderStatus, List<ICReminder>> reminderMap = {
     reminderStatus.DISMISSED: [],
     reminderStatus.NOTACTIVE: [],
@@ -22,19 +23,13 @@ class ICNotificationHandler extends ChangeNotifier {
     reminderStatus.TRIGGERED: [],
   };
   static Timer? timer;
-
+  List<ICReminder> get alarmList => _alarmList;
   static ICReminder? get oldestTriggeredReminder {
-    if (reminderMap[reminderStatus.TRIGGERED]!.isEmpty) {
-      return null;
-    }
-    return reminderMap[reminderStatus.TRIGGERED]!.last;
+    return reminderMap[reminderStatus.TRIGGERED]!.lastOrNull;
   }
 
   static ICReminder? get upcomingReminder {
-    if (reminderMap[reminderStatus.SCHEDULED]!.isEmpty) {
-      return null;
-    }
-    return reminderMap[reminderStatus.SCHEDULED]!.first;
+    return reminderMap[reminderStatus.SCHEDULED]!.firstOrNull;
   }
 
   void clearQueue() {
@@ -46,20 +41,39 @@ class ICNotificationHandler extends ChangeNotifier {
     timer.cancel();
   }
 
+  void alarmCallBack(ICReminder reminder) {
+    _alarmList.removeWhere((item) => item.scheduleId == reminder.scheduleId);
+  }
+
   static Future<void> initReminders() async {
     List<ICReminder> reminders = await FileHandler.readReminders();
     for (int i = 0; i < reminders.length; i++) {
-      if (reminders[i].status == reminderStatus.SCHEDULED) {
-        reminderMap[reminderStatus.SCHEDULED]!.add(reminders[i]);
+      // If the reminders should be in Triggered Status
+      if (reminders[i].status == reminderStatus.SCHEDULED &&
+          reminders[i].time.isBefore(DateTime.now())) {
+        reminders[i].status = reminderStatus.TRIGGERED;
+        await FileHandler.updateReminder(reminders[i]);
+        _alarmList.add(reminders[i]);
+        reminderMap[reminderStatus.TRIGGERED]!.add(reminders[i]);
+        continue;
       }
       if (reminders[i].status == reminderStatus.TRIGGERED) {
         reminderMap[reminderStatus.TRIGGERED]!.add(reminders[i]);
+        _alarmList.add(reminders[i]);
+        continue;
       }
+      if (reminders[i].status == reminderStatus.SCHEDULED) {
+        reminderMap[reminderStatus.SCHEDULED]!.add(reminders[i]);
+        continue;
+      }
+
       if (reminders[i].status == reminderStatus.NOTACTIVE) {
         reminderMap[reminderStatus.NOTACTIVE]!.add(reminders[i]);
+        continue;
       }
       if (reminders[i].status == reminderStatus.DISMISSED) {
         reminderMap[reminderStatus.DISMISSED]!.add(reminders[i]);
+        continue;
       }
     }
   }
@@ -81,6 +95,7 @@ class ICNotificationHandler extends ChangeNotifier {
     reminderMap.forEach((status, reminders) {
       reminders.removeWhere((item) => reminder.scheduleId == item.scheduleId);
     });
+    _alarmList.removeWhere((item) => item.id == reminder.id);
     notifyListeners();
   }
 
@@ -102,6 +117,10 @@ class ICNotificationHandler extends ChangeNotifier {
     for (ICReminder value in reminderMap[reminderStatus.DISMISSED]!) {
       dismissedInfo += "{${value.name}} ";
     }
+    String alarmsInfo = "";
+    for (ICReminder value in alarmList) {
+      alarmsInfo += "{${value.name}} ";
+    }
     String upcomingMessage = (upcomingReminder != null)
         ? upcomingReminder!.name
         : "";
@@ -116,7 +135,9 @@ class ICNotificationHandler extends ChangeNotifier {
           "\n DISMISSED:" +
           dismissedInfo +
           "\n Upcoming:" +
-          upcomingMessage,
+          upcomingMessage +
+          "\n AlarmsInfo" +
+          alarmsInfo,
     );
   }
 
@@ -135,7 +156,7 @@ class ICNotificationHandler extends ChangeNotifier {
       checkedReminder.status = reminderStatus.TRIGGERED;
       FileHandler.updateReminder(checkedReminder);
       updateReminder(checkedReminder);
-
+      _alarmList.add(checkedReminder);
       reminderMap = _sort();
       notifyListeners();
       return;

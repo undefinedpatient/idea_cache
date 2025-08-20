@@ -127,7 +127,7 @@ class _ICReminderCardState extends State<ICReminderCard> {
                                 ? Theme.of(context).colorScheme.primaryContainer
                                 : (widget.reminder.status ==
                                       reminderStatus.TRIGGERED)
-                                ? Colors.yellowAccent.shade700
+                                ? Colors.yellow.shade700
                                 : Colors.grey,
                           }),
                         ),

@@ -92,9 +92,9 @@ class ICMainView extends StatefulWidget {
   }
 }
 
-class _ICMainView extends State<ICMainView>
-    with SingleTickerProviderStateMixin {
+class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
+  bool isReminderSheetOpened = false;
   bool collapse = false;
   late Timer timer;
   @override
@@ -129,6 +129,7 @@ class _ICMainView extends State<ICMainView>
 
   @override
   void dispose() {
+    timer.cancel();
     super.dispose();
   }
 
@@ -165,14 +166,7 @@ class _ICMainView extends State<ICMainView>
       return Scaffold(
         floatingActionButton: ICReminderButton(
           onTap: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return ICReminderView();
-              },
-            );
-          },
-          onReminderTriggered: () {
+            isReminderSheetOpened = true;
             showModalBottomSheet(
               context: context,
               builder: (context) {

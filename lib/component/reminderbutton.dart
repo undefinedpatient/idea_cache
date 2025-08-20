@@ -8,12 +8,7 @@ import 'package:provider/provider.dart';
 
 class ICReminderButton extends StatefulWidget {
   final void Function() onTap;
-  final void Function() onReminderTriggered;
-  const ICReminderButton({
-    super.key,
-    required this.onTap,
-    required this.onReminderTriggered,
-  });
+  const ICReminderButton({super.key, required this.onTap});
 
   @override
   State<ICReminderButton> createState() => _ICReminderButtonState();
@@ -36,6 +31,50 @@ class _ICReminderButtonState extends State<ICReminderButton> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ICReminder? currentAlarm = .firstOrNull;
+
+    // If there's an active alarm and we haven't shown it yet, show dialog
+    ICNotificationHandler handler = Provider.of<ICNotificationHandler>(
+      context,
+      listen: true,
+    );
+    for (var currentAlarm in handler.alarmList) {
+      // _previouslyShownAlarm = currentAlarm;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Reminder"),
+              content: Text(currentAlarm.name),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    handler.alarmCallBack(currentAlarm);
+                    currentAlarm.status = reminderStatus.DISMISSED;
+                    handler.updateReminder(currentAlarm);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Dismiss"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    handler.alarmCallBack(currentAlarm);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Close"),
+                ),
+              ],
+            );
+          },
+        );
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     ICReminder? reminder =
         ICNotificationHandler.oldestTriggeredReminder ??
@@ -50,7 +89,7 @@ class _ICReminderButtonState extends State<ICReminderButton> {
           style: ButtonStyle(
             backgroundColor: WidgetStateColor.fromMap({
               WidgetState.any: (reminder?.status == reminderStatus.TRIGGERED)
-                  ? Colors.yellowAccent.shade700
+                  ? Colors.yellow.shade700
                   : Theme.of(context).colorScheme.primary,
             }),
           ),
@@ -61,9 +100,14 @@ class _ICReminderButtonState extends State<ICReminderButton> {
                   spacing: 8,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.notifications, size: 32),
+                    Icon(
+                      (reminder.status == reminderStatus.TRIGGERED)
+                          ? Icons.notifications_active
+                          : Icons.notifications,
+                      size: 32,
+                    ),
                     Text(
-                      reminder!.name,
+                      reminder.name,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),

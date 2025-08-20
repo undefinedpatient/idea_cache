@@ -87,7 +87,7 @@ class _ICNotificationState extends State<ICReminderView> {
               },
               icon: (isCreationView)
                   ? Icon(Icons.cancel_outlined)
-                  : Icon(Icons.add),
+                  : Icon(Icons.notification_add),
             ),
           ],
         ),
