@@ -32,8 +32,6 @@ dependency_overrides:
       ref: fix-flutter-3-32-macos-crash
 flutter:
   uses-material-design: true
-  assets:
-    - assets/audios/
   fonts:
     - family: Abel
       fonts:

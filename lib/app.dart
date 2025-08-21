@@ -91,7 +91,6 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _selectedIndex = 0;
-  bool isReminderSheetOpened = false;
   bool collapse = false;
   late Timer timer;
   @override
@@ -167,7 +166,6 @@ class _ICMainView extends State<ICMainView> {
       return Scaffold(
         floatingActionButton: ICReminderButton(
           onTap: () {
-            isReminderSheetOpened = true;
             showModalBottomSheet(
               context: context,
               builder: (context) {
@@ -178,7 +176,6 @@ class _ICMainView extends State<ICMainView> {
         ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
-          actions: [TextButton(onPressed: () async {}, child: Text("data"))],
           title: RichText(
             text: TextSpan(
               text: "IdeaCache ",
@@ -380,7 +377,6 @@ class _ICMainView extends State<ICMainView> {
       return Scaffold(
         floatingActionButton: ICReminderButton(
           onTap: () {
-            isReminderSheetOpened = true;
             showModalBottomSheet(
               context: context,
               builder: (context) {
