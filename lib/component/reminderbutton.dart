@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/reminder.dart';
 import 'package:idea_cache/model/remindermodel.dart';
@@ -17,7 +15,7 @@ class ICReminderButton extends StatefulWidget {
 
 class _ICReminderButtonState extends State<ICReminderButton> {
   late Timer timer;
-  static AudioPlayer player = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +26,6 @@ class _ICReminderButtonState extends State<ICReminderButton> {
 
   @override
   void dispose() {
-    player.dispose();
     timer.cancel();
     super.dispose();
   }
@@ -42,13 +39,11 @@ class _ICReminderButtonState extends State<ICReminderButton> {
       listen: true,
     );
 
-    for (var currentAlarm in handler.alarmList) {
+    for (var currentAlarm in handler.popupDialogList) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        player.play(AssetSource("sounds/pop0.wav"));
         showDialog(
           context: context,
           builder: (context) {
-            ICNotificationHandler.sendNotification(currentAlarm);
             handler.alarmCallBack(currentAlarm);
             return AlertDialog(
               title: Text("Reminder"),

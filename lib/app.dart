@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/component/navigationbarbutton.dart';
@@ -98,7 +97,6 @@ class _ICMainView extends State<ICMainView> {
   @override
   void initState() {
     super.initState();
-
     Future.microtask(
       () => {
         Provider.of<ICSettingsModel>(context, listen: false).loadFromFile(),
@@ -180,7 +178,7 @@ class _ICMainView extends State<ICMainView> {
         ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
-          actions: [],
+          actions: [TextButton(onPressed: () async {}, child: Text("data"))],
           title: RichText(
             text: TextSpan(
               text: "IdeaCache ",

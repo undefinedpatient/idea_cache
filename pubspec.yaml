@@ -18,11 +18,8 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   file_picker: ^10.2.0
   flutter_local_notifications: ^19.4.0
-  sqflite: ^2.4.2
-  shared_preferences: ^2.5.3
   timezone: ^0.10.1
   flutter_timezone: ^4.1.1
-  audioplayers: ^6.5.0
 
 dev_dependencies:
   flutter_test:
@@ -36,7 +33,7 @@ dependency_overrides:
 flutter:
   uses-material-design: true
   assets:
-    - assets/sounds/
+    - assets/audios/
   fonts:
     - family: Abel
       fonts:

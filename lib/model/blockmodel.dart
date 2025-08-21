@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/cache.dart';
-import 'package:idea_cache/model/cachemodel.dart';
 import 'package:idea_cache/model/filehandler.dart';
 
 class ICBlockModel extends ChangeNotifier {

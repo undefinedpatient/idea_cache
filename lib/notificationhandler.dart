@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -32,7 +31,7 @@ class ICNotificationHandler extends ChangeNotifier {
 
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-  static final List<ICReminder> _alarmList = [];
+  static final List<ICReminder> _popupDialogList = [];
   static Map<reminderStatus, List<ICReminder>> reminderMap = {
     reminderStatus.DISMISSED: [],
     reminderStatus.NOTACTIVE: [],
@@ -41,7 +40,7 @@ class ICNotificationHandler extends ChangeNotifier {
   };
 
   static Timer? timer;
-  List<ICReminder> get alarmList => _alarmList;
+  List<ICReminder> get popupDialogList => _popupDialogList;
   static ICReminder? get oldestTriggeredReminder {
     return reminderMap[reminderStatus.TRIGGERED]!.lastOrNull;
   }
@@ -60,7 +59,7 @@ class ICNotificationHandler extends ChangeNotifier {
   }
 
   void alarmCallBack(ICReminder reminder) {
-    _alarmList.removeWhere((item) => item.scheduleId == reminder.scheduleId);
+    _popupDialogList.clear();
   }
 
   static Future<void> initReminders() async {
@@ -73,12 +72,10 @@ class ICNotificationHandler extends ChangeNotifier {
         reminderMap[reminderStatus.TRIGGERED]!.add(reminders[i]);
         await FileHandler.updateReminder(reminders[i]);
 
-        _alarmList.add(reminders[i]);
         continue;
       }
       if (reminders[i].status == reminderStatus.TRIGGERED) {
         reminderMap[reminderStatus.TRIGGERED]!.add(reminders[i]);
-        _alarmList.add(reminders[i]);
         continue;
       }
       if (reminders[i].status == reminderStatus.SCHEDULED) {
@@ -114,7 +111,7 @@ class ICNotificationHandler extends ChangeNotifier {
     reminderMap.forEach((status, reminders) {
       reminders.removeWhere((item) => reminder.scheduleId == item.scheduleId);
     });
-    _alarmList.removeWhere((item) => item.id == reminder.id);
+    _popupDialogList.removeWhere((item) => item.id == reminder.id);
     notifyListeners();
   }
 
@@ -137,7 +134,7 @@ class ICNotificationHandler extends ChangeNotifier {
       dismissedInfo += "{${value.name}} ";
     }
     String alarmsInfo = "";
-    for (ICReminder value in alarmList) {
+    for (ICReminder value in popupDialogList) {
       alarmsInfo += "{${value.name}} ";
     }
     String upcomingMessage = (upcomingReminder != null)
@@ -174,8 +171,9 @@ class ICNotificationHandler extends ChangeNotifier {
       checkedReminder.status = reminderStatus.TRIGGERED;
       FileHandler.updateReminder(checkedReminder);
       updateReminder(checkedReminder);
-      _alarmList.add(checkedReminder);
+      _popupDialogList.add(checkedReminder);
       reminderMap = _sort();
+      sendNotification(checkedReminder);
       notifyListeners();
       return;
     }
