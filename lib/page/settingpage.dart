@@ -20,7 +20,6 @@ class _ICSettingPageState extends State<ICSettingPage> {
   void initState() {
     super.initState();
     Future.microtask(() async {
-      await Provider.of<ICSettingsModel>(context, listen: false).loadFromFile();
       _localSetting = Provider.of<ICSettingsModel>(
         context,
         listen: false,

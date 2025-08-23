@@ -122,8 +122,11 @@ class _ICNavigationBarButtonState extends State<ICNavigationBarButton> {
       return ClipRect(
         child: InkWell(
           onTap: widget.onTap,
-          child: SizedBox(
+          child: Container(
             height: 48,
+            color: (widget.selected)
+                ? Theme.of(context).colorScheme.onPrimaryContainer
+                : Colors.transparent,
             child: SizedBox.expand(
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -146,7 +149,10 @@ class _ICNavigationBarButtonState extends State<ICNavigationBarButton> {
       return ClipRect(
         child: InkWell(
           onTap: widget.onTap,
-          child: SizedBox(
+          child: Container(
+            color: (widget.selected)
+                ? Theme.of(context).colorScheme.onPrimaryContainer
+                : Colors.transparent,
             height: 48,
             child: SizedBox.expand(
               child: Row(

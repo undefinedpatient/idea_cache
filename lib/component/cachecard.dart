@@ -49,7 +49,11 @@ class _ICCacheCardState extends State<ICCacheCard> {
                         Text(
                           localCache.name,
                           overflow: TextOverflow.ellipsis,
-                          textScaler: TextScaler.linear(1.5),
+                          textScaler: TextScaler.linear(1.2),
+                        ),
+                        Text(
+                          overflow: TextOverflow.ellipsis,
+                          "# of Blocks: ${localCache.blockIds.length}",
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
