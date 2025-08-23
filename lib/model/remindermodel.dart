@@ -49,16 +49,13 @@ class ICReminderModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateStatusAll() async {
-    await Future.forEach(_reminders, updateStatus);
+  Future<void> reorderReminder(int from, int to) async {
+    log("From $from, to $to");
+    FileHandler.reorderNotification(from, to);
+    if (from < to) {
+      to--;
+    }
+    _reminders.insert(to, _reminders.removeAt(from));
     notifyListeners();
-  }
-
-  Future<void> updateStatus(ICReminder reminder) async {
-    // if (DateTime.now().isBefore(reminder.time) &&
-    //     reminder.status == reminderStatus.SCHEDULED) {
-    //   reminder.status = reminderStatus.TRIGGERED;
-    //   await FileHandler.updateNotification(reminder);
-    // }
   }
 }

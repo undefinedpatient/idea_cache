@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -44,16 +45,6 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant ICCacheOverview oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
   void dispose() {
     _textEditingController.dispose();
 
@@ -68,9 +59,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
         title: Text("Overview"),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
-          VerticalDivider(),
           DropdownButton(
-            autofocus: false,
             padding: EdgeInsets.all(4),
             value: isScrollVertical,
             items: [
@@ -166,7 +155,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                             onTap: () {
                               widget.setPage(entry.key, entry.value);
                             },
-                            direction: (isScrollVertical == true)
+                            axis: (isScrollVertical == true)
                                 ? Axis.horizontal
                                 : Axis.vertical,
                           );

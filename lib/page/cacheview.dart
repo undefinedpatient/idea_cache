@@ -51,7 +51,6 @@ class _ICCacheView extends State<ICCacheView> {
   @override
   Widget build(BuildContext context) {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
-    ICCacheModel cacheModel = context.read<ICCacheModel>();
     Widget pageWidget = ICEmptyPage();
     if (activeBlock == null) {
       pageWidget = ICCacheOverview(

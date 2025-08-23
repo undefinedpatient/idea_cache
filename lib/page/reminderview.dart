@@ -37,12 +37,6 @@ class _ICNotificationState extends State<ICReminderView> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      await Provider.of<ICReminderModel>(
-        context,
-        listen: false,
-      ).updateStatusAll();
-    });
   }
 
   @override
@@ -128,7 +122,9 @@ class _ICNotificationState extends State<ICReminderView> {
                       ),
                     )
                     .toList(),
-                onReorder: (oldIndex, newIndex) {},
+                onReorder: (oldIndex, newIndex) async {
+                  await model.reorderReminder(oldIndex, newIndex);
+                },
               );
             }
             return Center(

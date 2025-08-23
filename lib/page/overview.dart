@@ -176,7 +176,7 @@ class _ICOverview extends State<ICOverview> {
                         .entries
                         .map((entry) {
                           return ICCacheCard(
-                            axis: (isScrollVertical)
+                            scrollDirection: (isScrollVertical)
                                 ? Axis.vertical
                                 : Axis.horizontal,
                             key: ValueKey(entry.value.id),
@@ -237,7 +237,7 @@ class _ICOverview extends State<ICOverview> {
                         .entries
                         .map((entry) {
                           return ICCacheCard(
-                            axis: (isScrollVertical)
+                            scrollDirection: (isScrollVertical)
                                 ? Axis.vertical
                                 : Axis.horizontal,
                             key: ValueKey(entry.value.id),
