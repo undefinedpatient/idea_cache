@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -144,7 +145,7 @@ class _ICMainView extends State<ICMainView> {
       pageWidget = ICOverview(
         onSetPage: (int index) {
           setState(() {
-            _selectedIndex = index;
+            _selectedIndex = index + 1;
           });
         },
       );

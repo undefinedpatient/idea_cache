@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/cachecard.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
@@ -183,7 +182,10 @@ class _ICOverview extends State<ICOverview> {
                             index: entry.key,
                             cacheId: entry.value.id,
                             onSetPage: () {
-                              widget.onSetPage(entry.key + 1);
+                              int indexOfCache = model.caches.indexWhere(
+                                (cache) => cache.id == entry.value.id,
+                              );
+                              widget.onSetPage(indexOfCache);
                             },
                           );
                         })
@@ -196,8 +198,6 @@ class _ICOverview extends State<ICOverview> {
                     proxyDecorator: proxyDecorator,
                     padding: EdgeInsets.all(0),
                     onReorder: (oldIndex, newIndex) async {
-                      log("\n");
-
                       List<Cache> tempList = model.caches
                           .where((cache) => cache.group == "")
                           .toList();
@@ -206,17 +206,6 @@ class _ICOverview extends State<ICOverview> {
                           tempList[(oldIndex < newIndex)
                               ? newIndex - 1
                               : newIndex];
-                      log("${fromCache.name}vs${toCache.name}");
-                      log(
-                        model.caches.map((cache) {
-                          return "${cache.name}";
-                        }).toString(),
-                      );
-                      log(
-                        tempList.map((cache) {
-                          return "${cache.name}";
-                        }).toString(),
-                      );
                       await model.reorderCachesByIds(fromCache.id, toCache.id);
                     },
                     shrinkWrap: true,
@@ -244,7 +233,10 @@ class _ICOverview extends State<ICOverview> {
                             index: entry.key,
                             cacheId: entry.value.id,
                             onSetPage: () {
-                              widget.onSetPage(entry.key + 1);
+                              int indexOfCache = model.caches.indexWhere(
+                                (cache) => cache.id == entry.value.id,
+                              );
+                              widget.onSetPage(indexOfCache);
                             },
                           );
                         })
