@@ -397,10 +397,8 @@ class _ICBlockView extends State<ICBlockView> {
                         null,
                       ),
                     ),
-                    paintCursorAboveText: true,
                     padding: EdgeInsets.all(18),
                     placeholder: "Write Something",
-                    enableAlwaysIndentOnTab: true,
                     expands: true,
                   ),
 

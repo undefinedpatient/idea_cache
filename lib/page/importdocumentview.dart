@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/filehandler.dart';
+import 'package:idea_cache/model/settingsmodel.dart';
+import 'package:provider/provider.dart';
 
 class ICImportDocumentView extends StatefulWidget {
   final QuillController quillController;
@@ -134,6 +136,11 @@ class _ICImportDocumentViewState extends State<ICImportDocumentView> {
               Text("Currently only default block.json format is supported"),
               TextButton(
                 onPressed: () {
+                  if (blocks.isEmpty) {
+                    Navigator.of(context).pop();
+                    return;
+                  }
+
                   if (selectedBlockIndex != -1 && blocks.isNotEmpty) {
                     ICBlock block = blocks[selectedBlockIndex];
                     // If the content is Empty, skip it to avoid error
@@ -146,6 +153,10 @@ class _ICImportDocumentViewState extends State<ICImportDocumentView> {
                     );
                   }
 
+                  Provider.of<ICSettingsModel>(
+                    context,
+                    listen: false,
+                  ).setContentEditedState(true);
                   Navigator.of(context).pop();
                 },
                 child: Text("Import"),
