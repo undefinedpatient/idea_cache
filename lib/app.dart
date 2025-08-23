@@ -209,6 +209,7 @@ class _ICMainView extends State<ICMainView> {
                               title: "",
                               collapsed: collapse,
                               selected: _selectedIndex == -1,
+                              enableEdit: false,
                               onTap: () {
                                 setState(() {
                                   collapse = !collapse;
@@ -223,6 +224,7 @@ class _ICMainView extends State<ICMainView> {
                               title: "Overview",
                               selected: _selectedIndex == 0,
                               collapsed: collapse,
+                              enableEdit: false,
                               onTap: () {
                                 if (appState.isContentEdited) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -288,8 +290,9 @@ class _ICMainView extends State<ICMainView> {
                                       icon: (_selectedIndex == index + 1)
                                           ? Icons.pages
                                           : Icons.pages_outlined,
-                                      cacheid: id,
+                                      cache: entry.value,
                                       collapsed: collapse,
+                                      enableEdit: true,
                                       onTap: () {
                                         if (appState.isContentEdited) {
                                           ScaffoldMessenger.of(
@@ -309,9 +312,6 @@ class _ICMainView extends State<ICMainView> {
                                           _selectedIndex = index + 1;
                                         });
                                       },
-                                      onEditName: () async {
-                                        model.loadFromFile();
-                                      },
                                       selected: _selectedIndex == index + 1,
                                     ),
                                   );
@@ -321,6 +321,7 @@ class _ICMainView extends State<ICMainView> {
                             Consumer<ICBlockModel>(
                               builder: (context, blockModel, child) {
                                 return ICNavigationBarButton(
+                                  enableEdit: false,
                                   icon: Icons.add,
                                   title: 'Add Cache',
                                   collapsed: collapse,
@@ -335,6 +336,7 @@ class _ICMainView extends State<ICMainView> {
                               },
                             ),
                             ICNavigationBarButton(
+                              enableEdit: false,
                               icon: _selectedIndex == model.caches.length + 1
                                   ? Icons.settings
                                   : Icons.settings_outlined,

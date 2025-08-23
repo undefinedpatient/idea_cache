@@ -51,6 +51,204 @@ class _ICBlockCardState extends State<ICBlockCard> {
     super.dispose();
   }
 
+  Widget _preview(BuildContext ctx, ICSettingsModel settingModel) {
+    return Builder(
+      builder: (ctx) {
+        return Flexible(
+          fit: FlexFit.tight,
+          flex: 1,
+          child: Consumer<ICStatusModel>(
+            builder: (context, model, child) {
+              ICStatus? currentStatus = model.findStatusByBlock(widget.block);
+              return Tooltip(
+                message: (settingModel.setting.toolTipsEnabled)
+                    ? "Preview"
+                    : "",
+                child: ListTile(
+                  tileColor: (currentStatus != null)
+                      ? Color(currentStatus.colorCode).withAlpha(100)
+                      : Theme.of(context).colorScheme.surfaceDim,
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          child: ICPreview(
+                            blockId: widget.block.id,
+                            nagivateToPageCallback: widget.onTap,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  title: (status != null) ? Text("") : Text(""),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _popupMenu(
+    BuildContext ctx,
+    ICCacheModel cacheModel,
+    ICBlockModel blockModel,
+  ) {
+    return Builder(
+      builder: (ctx) {
+        return PopupMenuButton(
+          menuPadding: EdgeInsets.all(0),
+          tooltip: "",
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              onTap: () {
+                _textEditingController.text = widget.block.name;
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    // _textEditingController.text = userCache!.name;
+                    return Dialog(
+                      child: Container(
+                        width: 240,
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 8,
+                          children: [
+                            TextField(
+                              controller: _textEditingController,
+                              decoration: InputDecoration(
+                                labelText: "Edit Block Name",
+                              ),
+                              onSubmitted: (value) async {
+                                widget.block.name = value;
+                                blockModel.updateBlock(widget.block);
+
+                                Navigator.pop(context);
+                              },
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                widget.block.name = _textEditingController.text;
+                                blockModel.updateBlock(widget.block);
+                                Navigator.pop(context);
+                              },
+                              child: Text("Save"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Row(
+                spacing: 8,
+                children: [Icon(Icons.edit_outlined, size: 16), Text("Rename")],
+              ),
+            ),
+            PopupMenuItem(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return KeyboardListener(
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      onKeyEvent: (KeyEvent keyEvent) async {
+                        if (keyEvent.logicalKey.keyLabel == "Y" ||
+                            keyEvent.logicalKey.keyLabel == "Enter") {
+                          await blockModel.deleteBlock(widget.block);
+                          cacheModel.loadFromFileSlient();
+                          final SnackBar snackBar = SnackBar(
+                            content: Text(
+                              "Block ${widget.block.name} Deleted!",
+                            ),
+                            duration: Durations.extralong3,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          Navigator.pop(context);
+                        }
+                        if (keyEvent.logicalKey.keyLabel == "N") {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Dialog(
+                        shape: BeveledRectangleBorder(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            spacing: 8,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                "Confirm Block Deletion?",
+                                style: Theme.of(context).textTheme.bodyMedium!
+                                    .copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.secondary,
+                                    ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      await blockModel.deleteBlock(
+                                        widget.block,
+                                      );
+                                      cacheModel.loadFromFileSlient();
+                                      final SnackBar snackBar = SnackBar(
+                                        content: Text(
+                                          "Block ${widget.block.name} Deleted!",
+                                        ),
+                                        duration: Durations.extralong3,
+                                      );
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(snackBar);
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text(
+                                      "Delete (Y)",
+                                      style: TextStyle(color: Colors.redAccent),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text("Close (n)"),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Row(
+                spacing: 8,
+                children: [
+                  Icon(Icons.delete_outline, size: 16),
+                  Text("Delete"),
+                ],
+              ),
+            ),
+          ].toList(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
@@ -84,195 +282,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                 ).colorScheme.onSurface.withAlpha(50),
                               ),
                             ),
-                            trailing: PopupMenuButton(
-                              menuPadding: EdgeInsets.all(0),
-                              tooltip: "",
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  onTap: () {
-                                    _textEditingController.text =
-                                        widget.block.name;
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        // _textEditingController.text = userCache!.name;
-                                        return Dialog(
-                                          child: Container(
-                                            width: 240,
-                                            padding: EdgeInsets.all(16),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              spacing: 8,
-                                              children: [
-                                                TextField(
-                                                  controller:
-                                                      _textEditingController,
-                                                  decoration: InputDecoration(
-                                                    labelText:
-                                                        "Edit Block Name",
-                                                  ),
-                                                  onSubmitted: (value) async {
-                                                    widget.block.name = value;
-                                                    model.updateBlock(
-                                                      widget.block,
-                                                    );
-
-                                                    Navigator.pop(context);
-                                                  },
-                                                ),
-                                                TextButton(
-                                                  onPressed: () async {
-                                                    widget.block.name =
-                                                        _textEditingController
-                                                            .text;
-                                                    model.updateBlock(
-                                                      widget.block,
-                                                    );
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text("Save"),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: Row(
-                                    spacing: 8,
-                                    children: [
-                                      Icon(Icons.edit_outlined, size: 16),
-                                      Text("Rename"),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return KeyboardListener(
-                                          focusNode: _focusNode,
-                                          autofocus: true,
-                                          onKeyEvent: (KeyEvent keyEvent) async {
-                                            if (keyEvent.logicalKey.keyLabel ==
-                                                    "Y" ||
-                                                keyEvent.logicalKey.keyLabel ==
-                                                    "Enter") {
-                                              await model.deleteBlock(
-                                                widget.block,
-                                              );
-                                              cacheModel.loadFromFileSlient();
-                                              final SnackBar
-                                              snackBar = SnackBar(
-                                                content: Text(
-                                                  "Block ${widget.block.name} Deleted!",
-                                                ),
-                                                duration: Durations.extralong3,
-                                              );
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(snackBar);
-                                              Navigator.pop(context);
-                                            }
-                                            if (keyEvent.logicalKey.keyLabel ==
-                                                "N") {
-                                              Navigator.pop(context);
-                                            }
-                                          },
-                                          child: Dialog(
-                                            shape: BeveledRectangleBorder(),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(24),
-                                              child: Column(
-                                                spacing: 8,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: <Widget>[
-                                                  Text(
-                                                    "Confirm Block Deletion?",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium!
-                                                        .copyWith(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .secondary,
-                                                        ),
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      TextButton(
-                                                        onPressed: () async {
-                                                          await model
-                                                              .deleteBlock(
-                                                                widget.block,
-                                                              );
-                                                          cacheModel
-                                                              .loadFromFileSlient();
-                                                          final SnackBar
-                                                          snackBar = SnackBar(
-                                                            content: Text(
-                                                              "Block ${widget.block.name} Deleted!",
-                                                            ),
-                                                            duration: Durations
-                                                                .extralong3,
-                                                          );
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            snackBar,
-                                                          );
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                        },
-                                                        child: const Text(
-                                                          "Delete (Y)",
-                                                          style: TextStyle(
-                                                            color: Colors
-                                                                .redAccent,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                        },
-                                                        child: const Text(
-                                                          "Close (n)",
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: Row(
-                                    spacing: 8,
-                                    children: [
-                                      Icon(Icons.delete_outline, size: 16),
-                                      Text("Delete"),
-                                    ],
-                                  ),
-                                ),
-                              ].toList(),
-                            ),
+                            trailing: _popupMenu(context, cacheModel, model),
                             onTap: widget.onTap,
                             title: ClipRect(
                               clipBehavior: Clip.antiAlias,
@@ -430,43 +440,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                           ),
                         ),
                       ),
-                      Flexible(
-                        fit: FlexFit.tight,
-                        flex: 1,
-                        child: Consumer<ICStatusModel>(
-                          builder: (context, model, child) {
-                            ICStatus? currentStatus = model.findStatusByBlock(
-                              widget.block,
-                            );
-                            return Tooltip(
-                              message: (appState.setting.toolTipsEnabled)
-                                  ? "Preview"
-                                  : "",
-                              child: ListTile(
-                                tileColor: (currentStatus != null)
-                                    ? Color(
-                                        currentStatus.colorCode,
-                                      ).withAlpha(100)
-                                    : Theme.of(context).colorScheme.surfaceDim,
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Dialog(
-                                        child: ICPreview(
-                                          blockId: widget.block.id,
-                                          nagivateToPageCallback: widget.onTap,
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                title: (status != null) ? Text("") : Text(""),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      _preview(context, appState),
                     ],
                   )
                 : Flex(
@@ -499,237 +473,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                         ).colorScheme.onSurface.withAlpha(50),
                                       ),
                                     ),
-                                    PopupMenuButton(
-                                      menuPadding: EdgeInsets.all(0),
-                                      tooltip: "",
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                          onTap: () {
-                                            _textEditingController.text =
-                                                widget.block.name;
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                // _textEditingController.text = userCache!.name;
-                                                return Dialog(
-                                                  child: Container(
-                                                    width: 240,
-                                                    padding: EdgeInsets.all(16),
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      spacing: 8,
-                                                      children: [
-                                                        TextField(
-                                                          controller:
-                                                              _textEditingController,
-                                                          decoration:
-                                                              InputDecoration(
-                                                                labelText:
-                                                                    "Edit Block Name",
-                                                              ),
-                                                          onSubmitted:
-                                                              (value) async {
-                                                                widget
-                                                                        .block
-                                                                        .name =
-                                                                    value;
-                                                                model.updateBlock(
-                                                                  widget.block,
-                                                                );
-
-                                                                Navigator.pop(
-                                                                  context,
-                                                                );
-                                                              },
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: () async {
-                                                            widget.block.name =
-                                                                _textEditingController
-                                                                    .text;
-                                                            model.updateBlock(
-                                                              widget.block,
-                                                            );
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                          },
-                                                          child: Text("Save"),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Row(
-                                            spacing: 8,
-                                            children: [
-                                              Icon(
-                                                Icons.edit_outlined,
-                                                size: 16,
-                                              ),
-                                              Text("Rename"),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuItem(
-                                          onTap: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return KeyboardListener(
-                                                  focusNode: _focusNode,
-                                                  autofocus: true,
-                                                  onKeyEvent:
-                                                      (
-                                                        KeyEvent keyEvent,
-                                                      ) async {
-                                                        if (keyEvent
-                                                                    .logicalKey
-                                                                    .keyLabel ==
-                                                                "Y" ||
-                                                            keyEvent
-                                                                    .logicalKey
-                                                                    .keyLabel ==
-                                                                "Enter") {
-                                                          await model
-                                                              .deleteBlock(
-                                                                widget.block,
-                                                              );
-                                                          cacheModel
-                                                              .loadFromFileSlient();
-                                                          final SnackBar
-                                                          snackBar = SnackBar(
-                                                            content: Text(
-                                                              "Block ${widget.block.name} Deleted!",
-                                                            ),
-                                                            duration: Durations
-                                                                .extralong3,
-                                                          );
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            snackBar,
-                                                          );
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                        }
-                                                        if (keyEvent
-                                                                .logicalKey
-                                                                .keyLabel ==
-                                                            "N") {
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                        }
-                                                      },
-                                                  child: Dialog(
-                                                    shape:
-                                                        BeveledRectangleBorder(),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                            24,
-                                                          ),
-                                                      child: Column(
-                                                        spacing: 8,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            "Confirm Block Deletion?",
-                                                            style: Theme.of(context)
-                                                                .textTheme
-                                                                .bodyMedium!
-                                                                .copyWith(
-                                                                  color: Theme.of(
-                                                                    context,
-                                                                  ).colorScheme.secondary,
-                                                                ),
-                                                          ),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              TextButton(
-                                                                onPressed: () async {
-                                                                  await model
-                                                                      .deleteBlock(
-                                                                        widget
-                                                                            .block,
-                                                                      );
-                                                                  cacheModel
-                                                                      .loadFromFileSlient();
-                                                                  final SnackBar
-                                                                  snackBar = SnackBar(
-                                                                    content: Text(
-                                                                      "Block ${widget.block.name} Deleted!",
-                                                                    ),
-                                                                    duration:
-                                                                        Durations
-                                                                            .extralong3,
-                                                                  );
-                                                                  ScaffoldMessenger.of(
-                                                                    context,
-                                                                  ).showSnackBar(
-                                                                    snackBar,
-                                                                  );
-                                                                  Navigator.pop(
-                                                                    context,
-                                                                  );
-                                                                },
-                                                                child: const Text(
-                                                                  "Delete (Y)",
-                                                                  style: TextStyle(
-                                                                    color: Colors
-                                                                        .redAccent,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.pop(
-                                                                    context,
-                                                                  );
-                                                                },
-                                                                child: const Text(
-                                                                  "Close (n)",
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Row(
-                                            spacing: 8,
-                                            children: [
-                                              Icon(
-                                                Icons.delete_outline,
-                                                size: 16,
-                                              ),
-                                              Text("Delete"),
-                                            ],
-                                          ),
-                                        ),
-                                      ].toList(),
-                                    ),
+                                    _popupMenu(context, cacheModel, model),
                                   ],
                                 ),
                                 ClipRect(
@@ -905,43 +649,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                           ),
                         ),
                       ),
-                      Flexible(
-                        fit: FlexFit.tight,
-                        flex: 1,
-                        child: Consumer<ICStatusModel>(
-                          builder: (context, model, child) {
-                            ICStatus? currentStatus = model.findStatusByBlock(
-                              widget.block,
-                            );
-                            return Tooltip(
-                              message: (appState.setting.toolTipsEnabled)
-                                  ? "Preview"
-                                  : "",
-                              child: ListTile(
-                                tileColor: (currentStatus != null)
-                                    ? Color(
-                                        currentStatus.colorCode,
-                                      ).withAlpha(100)
-                                    : Theme.of(context).colorScheme.surfaceDim,
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Dialog(
-                                        child: ICPreview(
-                                          blockId: widget.block.id,
-                                          nagivateToPageCallback: widget.onTap,
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                title: (status != null) ? Text("") : Text(""),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      _preview(context, appState),
                     ],
                   ),
           ),
