@@ -67,7 +67,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                 child: ListTile(
                   tileColor: (currentStatus != null)
                       ? Color(currentStatus.colorCode).withAlpha(100)
-                      : Theme.of(context).colorScheme.surfaceDim,
+                      : Theme.of(context).colorScheme.surfaceDim.withAlpha(100),
                   onTap: () {
                     showDialog(
                       context: context,
@@ -412,7 +412,11 @@ class _ICBlockCardState extends State<ICBlockCard> {
                                                 ),
                                                 color: Color(
                                                   currentStatus?.colorCode ??
-                                                      0xFF000000,
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceDim
+                                                          .withAlpha(100)
+                                                          .toARGB32(),
                                                 ).withAlpha(100),
                                                 child: Padding(
                                                   padding:
