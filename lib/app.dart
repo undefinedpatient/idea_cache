@@ -200,19 +200,14 @@ class _ICMainView extends State<ICMainView> {
         ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         appBar: AppBar(
-          title: RichText(
-            text: TextSpan(
-              text: "IdeaCache ",
-              style: Theme.of(context).textTheme.headlineMedium,
-              children: <TextSpan>[
-                TextSpan(
-                  text: " v1.4.1",
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ],
+          toolbarHeight: 32,
+          title: Text(
+            "IdeaCache v1.4.1",
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+              color: Theme.of(context).colorScheme.inversePrimary,
             ),
           ),
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          backgroundColor: Theme.of(context).colorScheme.surfaceTint,
         ),
         body: Row(
           mainAxisSize: MainAxisSize.min,
