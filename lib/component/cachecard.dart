@@ -265,7 +265,7 @@ class _ICCacheCardState extends State<ICCacheCard> {
                 width: 200,
                 child: Card(
                   elevation: 2,
-                  clipBehavior: Clip.hardEdge,
+                  clipBehavior: Clip.antiAlias,
                   child: ListTile(
                     leading: ReorderableDragStartListener(
                       index: widget.index,
@@ -274,7 +274,10 @@ class _ICCacheCardState extends State<ICCacheCard> {
                         color: Theme.of(context).colorScheme.surfaceTint,
                       ),
                     ),
-                    title: Text(localCache.name),
+                    title: Text(
+                      localCache.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     trailing: PopupMenuButton(
                       padding: EdgeInsetsGeometry.all(0),
                       menuPadding: EdgeInsets.all(0),

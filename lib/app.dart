@@ -91,9 +91,9 @@ class ICMainView extends StatefulWidget {
 }
 
 class _ICMainView extends State<ICMainView> {
+  int _initialBlockPageIndex = -1;
   int _selectedIndex = 0;
   bool collapse = false;
-  late Timer timer;
   @override
   void initState() {
     super.initState();
@@ -130,16 +130,15 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   void dispose() {
-    timer.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext buildContext) {
     Widget? pageWidget;
-
     ICSettingsModel appState = context.watch<ICSettingsModel>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
+    ICBlockModel blockModel = context.read<ICBlockModel>();
 
     if (_selectedIndex == -1) {
       pageWidget = ICOverview(
@@ -153,6 +152,7 @@ class _ICMainView extends State<ICMainView> {
       pageWidget = ICSettingPage();
     } else {
       pageWidget = ICCacheView(
+        initialIndex: _initialBlockPageIndex,
         key: ValueKey(cacheModel.caches[_selectedIndex].id),
         cacheid: cacheModel.caches[_selectedIndex].id,
         onPageDeleted: () {
@@ -170,7 +170,30 @@ class _ICMainView extends State<ICMainView> {
             showModalBottomSheet(
               context: context,
               builder: (context) {
-                return ICReminderView();
+                return ICReminderView(
+                  onTapBlock: (String cacheId, String blockId) {
+                    log(cacheId + blockId);
+                    setState(() {
+                      _selectedIndex = cacheModel.caches.indexWhere(
+                        (cache) => cache.id == cacheId,
+                      );
+                      _initialBlockPageIndex = blockModel
+                          .cacheBlocksMap[cacheId]!
+                          .indexWhere((block) => block.id == blockId);
+                    });
+                    Navigator.pop(context);
+                  },
+                  onTapCache: (String cacheId) {
+                    log(cacheId);
+                    setState(() {
+                      _selectedIndex = cacheModel.caches.indexWhere(
+                        (cache) => cache.id == cacheId,
+                      );
+                      _initialBlockPageIndex = -1;
+                    });
+                    Navigator.pop(context);
+                  },
+                );
               },
             );
           },
@@ -309,6 +332,7 @@ class _ICMainView extends State<ICMainView> {
                                           return;
                                         }
                                         setState(() {
+                                          _initialBlockPageIndex = -1;
                                           _selectedIndex = index;
                                         });
                                       },
@@ -381,7 +405,10 @@ class _ICMainView extends State<ICMainView> {
             showModalBottomSheet(
               context: context,
               builder: (context) {
-                return ICReminderView();
+                return ICReminderView(
+                  onTapBlock: (String cacheId, String blockId) {},
+                  onTapCache: (String cacheId) {},
+                );
               },
             );
           },

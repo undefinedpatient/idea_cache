@@ -50,18 +50,20 @@ class _ICNavigationBarButtonState extends State<ICNavigationBarButton> {
 
   Widget _editableTitle(BuildContext ctx) {
     if (!isEditing) {
-      return GestureDetector(
-        onSecondaryTap: () {
-          _enterEditMode();
-        },
-        child: Text(
-          _textEditingController.text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: (widget.selected)
-                ? Theme.of(ctx).colorScheme.surfaceTint
-                : Theme.of(ctx).colorScheme.onSurfaceVariant,
+      return Expanded(
+        child: GestureDetector(
+          onSecondaryTap: () {
+            _enterEditMode();
+          },
+          child: Text(
+            _textEditingController.text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: (widget.selected)
+                  ? Theme.of(ctx).colorScheme.surfaceTint
+                  : Theme.of(ctx).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       );

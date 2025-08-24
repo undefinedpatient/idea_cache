@@ -59,15 +59,20 @@ class _ICReminderCardState extends State<ICReminderCard> {
     ICBlock? block;
     ICStatus? status;
     if (widget.reminder.cacheId != "") {
-      cache = context.read<ICCacheModel>().caches.firstWhere(
+      int index = context.read<ICCacheModel>().caches.indexWhere(
         (cache) => cache.id == widget.reminder.cacheId,
       );
+      if (index != -1) {
+        cache = context.read<ICCacheModel>().caches[index];
+      }
     }
 
     if (widget.reminder.blockId != "" && cache != null) {
-      block = context.read<ICBlockModel>().cacheBlocksMap[cache.id]!.firstWhere(
-        (block) => block.id == widget.reminder.blockId,
-      );
+      int index = context
+          .read<ICBlockModel>()
+          .cacheBlocksMap[cache.id]!
+          .indexWhere((block) => block.id == widget.reminder.blockId);
+      block = context.read<ICBlockModel>().cacheBlocksMap[cache.id]![index];
       status = context.read<ICStatusModel>().findStatusByBlock(block);
     }
     return Consumer2<ICReminderModel, ICNotificationHandler>(
@@ -171,7 +176,9 @@ class _ICReminderCardState extends State<ICReminderCard> {
                       flex: 1,
                       child: ListTile(
                         tileColor: Theme.of(context).colorScheme.surfaceDim,
-                        onTap: () {},
+                        onTap: () {
+                          widget.onTapCache(cache!.id);
+                        },
                         title: Text(
                           cache.name,
                           textAlign: TextAlign.center,
@@ -189,7 +196,9 @@ class _ICReminderCardState extends State<ICReminderCard> {
                         tileColor: (status != null)
                             ? Color(status.colorCode)
                             : Theme.of(context).colorScheme.surfaceDim,
-                        onTap: () {},
+                        onTap: () {
+                          widget.onTapBlock(cache!.id, block!.id);
+                        },
                         subtitle: Icon(Icons.square_outlined),
                         title: Text(
                           block.name,

@@ -21,6 +21,7 @@ class ICCacheModel extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
   Future<void> loadFromFileSlient() async {
     _caches.clear();
     await FileHandler.readCaches().then((caches) {
@@ -29,6 +30,14 @@ class ICCacheModel extends ChangeNotifier {
       }
     });
   }
+
+  bool checkExistance(String cacheId) {
+    if (_caches.indexWhere((cache) => cache.id == cacheId) != -1) {
+      return true;
+    }
+    return false;
+  }
+
   Future<void> reorderCachesByIds(String from, String to) async {
     int fromIndex = _caches.indexWhere((cache) => cache.id == from);
     int toIndex = _caches.indexWhere((cache) => cache.id == to);
@@ -53,7 +62,7 @@ class ICCacheModel extends ChangeNotifier {
     notifyListeners();
     return cache;
   }
-  
+
   Future<void> updateCache(Cache cache) async {
     await FileHandler.updateCache(cache);
     int targetReplaceIndex = _caches.indexWhere((item) => item.id == cache.id);

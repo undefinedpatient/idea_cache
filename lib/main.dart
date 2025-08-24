@@ -11,7 +11,7 @@ void main() async {
   await ICNotificationHandler.initNotification();
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     await windowManager.ensureInitialized();
-    await windowManager.setMinimumSize(const Size(420, 560));
+    await windowManager.setMinimumSize(const Size(420, 420));
   }
 
   runApp(const ICApp());

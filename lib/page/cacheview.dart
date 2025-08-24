@@ -15,12 +15,14 @@ import 'package:provider/provider.dart'; // Removed unused imports
 class ICCacheView extends StatefulWidget {
   final String cacheid;
   final double tabHeight;
+  final int initialIndex;
   final void Function() onPageDeleted;
 
   const ICCacheView({
     super.key,
     required this.cacheid,
     required this.onPageDeleted,
+    this.initialIndex = -1,
     double? tabHeight,
   }) : tabHeight = (tabHeight != null) ? tabHeight : 42;
 
@@ -40,6 +42,30 @@ class _ICCacheView extends State<ICCacheView> {
   int _selectedIndex = -1;
   OverlayEntry? entryImportOverlay;
   final FocusNode _focusNode = FocusNode();
+  @override
+  void initState() {
+    super.initState();
+    ICBlockModel blockModel = context.read<ICBlockModel>();
+    if (widget.initialIndex != -1) {
+      activeBlock =
+          blockModel.cacheBlocksMap[widget.cacheid]![widget.initialIndex];
+      _selectedIndex = widget.initialIndex;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ICCacheView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    ICBlockModel blockModel = context.read<ICBlockModel>();
+    if (widget.initialIndex != -1) {
+      activeBlock =
+          blockModel.cacheBlocksMap[widget.cacheid]![widget.initialIndex];
+      _selectedIndex = widget.initialIndex;
+    } else {
+      activeBlock = null;
+      _selectedIndex = -1;
+    }
+  }
 
   @override
   void dispose() {

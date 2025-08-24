@@ -18,9 +18,7 @@ class ICBlockModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    // _blocks.clear();
     _cacheBlocksMap.clear();
-    // _blocks.addAll(await FileHandler.readBlocks());
     List<Cache> caches = await FileHandler.readCaches();
     for (int i = 0; i < caches.length; i++) {
       _cacheBlocksMap.addAll({
@@ -29,6 +27,16 @@ class ICBlockModel extends ChangeNotifier {
     }
     _isLoading = false;
     notifyListeners();
+  }
+
+  // This function check the existance of certain block in certain cache,
+  // return false if the target block not exist
+  bool checkExistance(String cacheId, String blockId) {
+    if (_cacheBlocksMap[cacheId]!.indexWhere((block) => block.id == blockId) !=
+        -1) {
+      return true;
+    }
+    return false;
   }
 
   Future<void> updateLocalBlockMapByCacheId(String cacheId) async {

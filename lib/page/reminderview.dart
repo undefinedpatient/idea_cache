@@ -8,6 +8,13 @@ import 'package:idea_cache/page/editreminderview.dart';
 import 'package:provider/provider.dart';
 
 class ICReminderView extends StatefulWidget {
+  final void Function(String) onTapCache;
+  final void Function(String, String) onTapBlock;
+  const ICReminderView({
+    super.key,
+    required this.onTapBlock,
+    required this.onTapCache,
+  });
   @override
   State<StatefulWidget> createState() {
     return _ICNotificationState();
@@ -117,8 +124,8 @@ class _ICNotificationState extends State<ICReminderView> {
                             activeNotification = entry.value;
                           });
                         },
-                        onTapCache: (String cacheId) {},
-                        onTapBlock: (String cacheId, String blockId) {},
+                        onTapCache: widget.onTapCache,
+                        onTapBlock: widget.onTapBlock,
                       ),
                     )
                     .toList(),

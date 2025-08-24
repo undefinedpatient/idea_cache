@@ -36,13 +36,32 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
   final TextEditingController secondEditingController = TextEditingController(
     text: "0",
   );
+  String _trimText(String text, int length) {
+    if (text.length > length) {
+      return "${text.substring(0, length)}...";
+    } else {
+      return text;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    ICCacheModel cacheModel = Provider.of<ICCacheModel>(context, listen: false);
+    ICBlockModel blockModel = Provider.of<ICBlockModel>(context, listen: false);
     if (widget.reminder != null) {
       nameEditingController.text = widget.reminder!.name;
-      userSelectedCacheId = widget.reminder!.cacheId;
-      userSelectedBlockId = widget.reminder!.blockId;
+
+      if (cacheModel.checkExistance(widget.reminder!.cacheId)) {
+        userSelectedCacheId = widget.reminder!.cacheId;
+        if (blockModel.checkExistance(
+          widget.reminder!.cacheId,
+          widget.reminder!.blockId,
+        )) {
+          userSelectedBlockId = widget.reminder!.blockId;
+        }
+      }
+
       hourEditingController.text = widget.reminder!.hours.toString();
       minuteEditingController.text = widget.reminder!.minutes.toString();
       secondEditingController.text = widget.reminder!.seconds.toString();
@@ -105,7 +124,7 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                                     .map(
                                       (cache) => DropdownMenuItem(
                                         value: cache.id,
-                                        child: Text(cache.name),
+                                        child: Text(_trimText(cache.name, 12)),
                                       ),
                                     )
                                     .followedBy([
@@ -148,9 +167,11 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                                     : blockModel
                                           .cacheBlocksMap[userSelectedCacheId]!
                                           .map(
-                                            (cache) => DropdownMenuItem(
-                                              value: cache.id,
-                                              child: Text(cache.name),
+                                            (block) => DropdownMenuItem(
+                                              value: block.id,
+                                              child: Text(
+                                                _trimText(block.name, 12),
+                                              ),
                                             ),
                                           )
                                           .followedBy([
