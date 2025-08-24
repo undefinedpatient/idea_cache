@@ -77,7 +77,7 @@ class _ICReminderCardState extends State<ICReminderCard> {
     }
     return Consumer2<ICReminderModel, ICNotificationHandler>(
       builder: (context, reminderModel, notificationHandler, child) {
-        return ReorderableDragStartListener(
+        return ReorderableDelayedDragStartListener(
           index: widget.index,
           child: SizedBox(
             width: 180,

@@ -23,6 +23,7 @@ class ICReminderView extends StatefulWidget {
 
 class _ICNotificationState extends State<ICReminderView> {
   bool isCreationView = false;
+
   ICReminder? activeNotification;
   Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
     return AnimatedBuilder(

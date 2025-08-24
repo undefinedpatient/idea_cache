@@ -63,7 +63,7 @@ class _ICCacheView extends State<ICCacheView> {
       _selectedIndex = widget.initialIndex;
     } else {
       activeBlock = null;
-      _selectedIndex = -1;
+      _selectedIndex = -1; 
     }
   }
 

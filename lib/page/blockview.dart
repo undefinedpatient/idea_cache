@@ -174,11 +174,6 @@ class _ICBlockView extends State<ICBlockView> {
                             ? "Underline"
                             : "",
                       ),
-                      strikeThrough: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Strike Through"
-                            : "",
-                      ),
                       clearFormat: QuillToolbarClearFormatButtonOptions(
                         tooltip: (appState.setting.toolTipsEnabled)
                             ? "Clear Format"
@@ -230,6 +225,7 @@ class _ICBlockView extends State<ICBlockView> {
                     sectionDividerColor: Theme.of(
                       context,
                     ).colorScheme.onSurface,
+                    showStrikeThrough: false,
                     showAlignmentButtons: true,
                     showInlineCode: false,
                     showSubscript: false,

@@ -51,7 +51,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
     super.dispose();
   }
 
-  Widget _preview(BuildContext ctx, ICSettingsModel settingModel) {
+  Widget _previewWidget(BuildContext ctx, ICSettingsModel settingModel) {
     return Builder(
       builder: (ctx) {
         return Flexible(
@@ -91,7 +91,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
     );
   }
 
-  Widget _popupMenu(
+  Widget _popupMenuWidget(
     BuildContext ctx,
     ICCacheModel cacheModel,
     ICBlockModel blockModel,
@@ -255,403 +255,435 @@ class _ICBlockCardState extends State<ICBlockCard> {
     ICCacheModel cacheModel = context.read<ICCacheModel>();
     return Consumer<ICBlockModel>(
       builder: (context, model, child) {
-        return SizedBox(
-          height: (widget.axis == Axis.horizontal) ? 90 : 160,
-          width: (widget.axis == Axis.horizontal) ? 360 : 200,
-          child: Card(
-            elevation: 2,
-            clipBehavior: Clip.antiAlias,
-            child: (widget.axis == Axis.horizontal)
-                ? Flex(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    direction: widget.axis,
-                    children: [
-                      Flexible(
-                        fit: FlexFit.tight,
-                        flex: 3,
-                        child: ClipRRect(
-                          clipBehavior: Clip.antiAlias,
-                          child: ListTile(
-                            leading: ReorderableDragStartListener(
-                              index: widget.index,
-                              child: Icon(
-                                Icons.reorder,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withAlpha(50),
+        return ReorderableDelayedDragStartListener(
+          index: widget.index,
+          child: SizedBox(
+            height: (widget.axis == Axis.horizontal) ? 90 : 160,
+            width: (widget.axis == Axis.horizontal) ? 360 : 200,
+            child: Card(
+              elevation: 2,
+              clipBehavior: Clip.antiAlias,
+              child: (widget.axis == Axis.horizontal)
+                  ? Flex(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      direction: widget.axis,
+                      children: [
+                        Flexible(
+                          fit: FlexFit.tight,
+                          flex: 3,
+                          child: ClipRRect(
+                            clipBehavior: Clip.antiAlias,
+                            child: ListTile(
+                              leading: ReorderableDragStartListener(
+                                index: widget.index,
+                                child: Icon(
+                                  Icons.reorder,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withAlpha(50),
+                                ),
                               ),
-                            ),
-                            trailing: _popupMenu(context, cacheModel, model),
-                            onTap: widget.onTap,
-                            title: ClipRect(
-                              clipBehavior: Clip.antiAlias,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.min,
-                                spacing: 8,
-                                children: [
-                                  Text(
-                                    widget.block.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  // Status Indicator here
-                                  Consumer<ICStatusModel>(
-                                    builder: (context, statusModel, child) {
-                                      List<ICStatus> availableStatus =
-                                          statusModel.findAvailableByCacheId(
-                                            widget.block.cacheId,
-                                          );
-                                      ICStatus? currentStatus = statusModel
-                                          .findStatusByBlock(widget.block);
-                                      return PopupMenuButton(
-                                        tooltip: "",
-                                        menuPadding: EdgeInsets.all(0),
-                                        elevation: 2,
-                                        clipBehavior: Clip.antiAlias,
-                                        borderRadius: BorderRadius.circular(8),
-                                        itemBuilder: (context) => availableStatus
-                                            .map(
-                                              (status) => PopupMenuItem(
-                                                onTap: () async {
-                                                  ICBlock block = widget.block;
-                                                  block.statusId = status.id;
-                                                  model.updateBlock(block);
-                                                },
-                                                child: Row(
-                                                  spacing: 8,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.circle,
-                                                      color: Color(
-                                                        status.colorCode,
+                              trailing: _popupMenuWidget(
+                                context,
+                                cacheModel,
+                                model,
+                              ),
+                              onTap: widget.onTap,
+                              title: ClipRect(
+                                clipBehavior: Clip.antiAlias,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisSize: MainAxisSize.min,
+                                  spacing: 8,
+                                  children: [
+                                    Text(
+                                      widget.block.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    // Status Indicator here
+                                    Consumer<ICStatusModel>(
+                                      builder: (context, statusModel, child) {
+                                        List<ICStatus> availableStatus =
+                                            statusModel.findAvailableByCacheId(
+                                              widget.block.cacheId,
+                                            );
+                                        ICStatus? currentStatus = statusModel
+                                            .findStatusByBlock(widget.block);
+                                        return PopupMenuButton(
+                                          tooltip: "",
+                                          menuPadding: EdgeInsets.all(0),
+                                          elevation: 2,
+                                          clipBehavior: Clip.antiAlias,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          itemBuilder: (context) => availableStatus
+                                              .map(
+                                                (status) => PopupMenuItem(
+                                                  onTap: () async {
+                                                    ICBlock block =
+                                                        widget.block;
+                                                    block.statusId = status.id;
+                                                    model.updateBlock(block);
+                                                  },
+                                                  child: Row(
+                                                    spacing: 8,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.circle,
+                                                        color: Color(
+                                                          status.colorCode,
+                                                        ),
+                                                        size: 16,
                                                       ),
-                                                      size: 16,
-                                                    ),
-                                                    Text(status.statusName),
-                                                  ],
+                                                      Text(status.statusName),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                            )
-                                            .followedBy([
-                                              PopupMenuItem(
-                                                onTap: () async {
-                                                  ICBlock block = widget.block;
-                                                  block.statusId = "";
-                                                  model.updateBlock(block);
-                                                  setState(() {});
-                                                },
-                                                child: Row(
-                                                  spacing: 8,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.circle,
-                                                      color: Theme.of(
-                                                        context,
-                                                      ).colorScheme.surfaceDim,
-                                                      size: 16,
-                                                    ),
-                                                    Text("Empty Status"),
-                                                  ],
+                                              )
+                                              .followedBy([
+                                                PopupMenuItem(
+                                                  onTap: () async {
+                                                    ICBlock block =
+                                                        widget.block;
+                                                    block.statusId = "";
+                                                    model.updateBlock(block);
+                                                    setState(() {});
+                                                  },
+                                                  child: Row(
+                                                    spacing: 8,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.circle,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .surfaceDim,
+                                                        size: 16,
+                                                      ),
+                                                      Text("Empty Status"),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              PopupMenuItem(
-                                                onTap: () async {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                          return Dialog(
-                                                            child:
-                                                                ICManageStatusPage(
-                                                                  calleeBlock:
-                                                                      widget
-                                                                          .block,
-                                                                ),
-                                                          );
-                                                        },
-                                                  );
-                                                },
-                                                child: Row(
-                                                  spacing: 8,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.edit,
-                                                      color: Theme.of(
-                                                        context,
-                                                      ).colorScheme.onSurface,
-                                                      size: 16,
-                                                    ),
-                                                    Text("Edit Status"),
-                                                  ],
+                                                PopupMenuItem(
+                                                  onTap: () async {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        return Dialog(
+                                                          child:
+                                                              ICManageStatusPage(
+                                                                calleeBlock:
+                                                                    widget
+                                                                        .block,
+                                                              ),
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  child: Row(
+                                                    spacing: 8,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.edit,
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).colorScheme.onSurface,
+                                                        size: 16,
+                                                      ),
+                                                      Text("Edit Status"),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                            ])
-                                            .toList(),
+                                              ])
+                                              .toList(),
 
-                                        child: Row(
-                                          spacing: 8,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Material(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              color: Color(
-                                                currentStatus?.colorCode ??
-                                                    0xFF000000,
-                                              ).withAlpha(100),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                      8,
-                                                      4,
-                                                      8,
-                                                      4,
+                                          child: Row(
+                                            spacing: 8,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Material(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                color: Color(
+                                                  currentStatus?.colorCode ??
+                                                      0xFF000000,
+                                                ).withAlpha(100),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        8,
+                                                        4,
+                                                        8,
+                                                        4,
+                                                      ),
+                                                  child: Text(
+                                                    currentStatus?.statusName ??
+                                                        "No status",
+                                                    style: TextStyle(
+                                                      color:
+                                                          (currentStatus !=
+                                                              null)
+                                                          ? Theme.of(context)
+                                                                .colorScheme
+                                                                .primary
+                                                          : Theme.of(context)
+                                                                .colorScheme
+                                                                .surfaceContainerHighest,
                                                     ),
-                                                child: Text(
-                                                  currentStatus?.statusName ??
-                                                      "No status",
-                                                  style: TextStyle(
-                                                    color:
-                                                        (currentStatus != null)
-                                                        ? Theme.of(
-                                                            context,
-                                                          ).colorScheme.primary
-                                                        : Theme.of(context)
-                                                              .colorScheme
-                                                              .surfaceContainerHighest,
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        _previewWidget(context, appState),
+                      ],
+                    )
+                  : Flex(
+                      direction: Axis.vertical,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Flexible(
+                          flex: 2,
+                          fit: FlexFit.tight,
+                          child: InkWell(
+                            onTap: widget.onTap,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      ReorderableDragStartListener(
+                                        index: widget.index,
+                                        child: Icon(
+                                          Icons.reorder,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface.withAlpha(50),
                                         ),
-                                      );
-                                    },
+                                      ),
+                                      _popupMenuWidget(
+                                        context,
+                                        cacheModel,
+                                        model,
+                                      ),
+                                    ],
+                                  ),
+                                  ClipRect(
+                                    clipBehavior: Clip.antiAlias,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisSize: MainAxisSize.min,
+                                      spacing: 8,
+                                      children: [
+                                        Text(
+                                          widget.block.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        // Status Indicator here
+                                        Consumer<ICStatusModel>(
+                                          builder: (context, statusModel, child) {
+                                            List<ICStatus> availableStatus =
+                                                statusModel
+                                                    .findAvailableByCacheId(
+                                                      widget.block.cacheId,
+                                                    );
+                                            ICStatus? currentStatus =
+                                                statusModel.findStatusByBlock(
+                                                  widget.block,
+                                                );
+                                            return PopupMenuButton(
+                                              tooltip: "",
+                                              menuPadding: EdgeInsets.all(0),
+                                              elevation: 2,
+                                              clipBehavior: Clip.antiAlias,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              itemBuilder: (context) => availableStatus
+                                                  .map(
+                                                    (status) => PopupMenuItem(
+                                                      onTap: () async {
+                                                        ICBlock block =
+                                                            widget.block;
+                                                        block.statusId =
+                                                            status.id;
+                                                        model.updateBlock(
+                                                          block,
+                                                        );
+                                                      },
+                                                      child: Row(
+                                                        spacing: 8,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.circle,
+                                                            color: Color(
+                                                              status.colorCode,
+                                                            ),
+                                                            size: 16,
+                                                          ),
+                                                          Text(
+                                                            status.statusName,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  )
+                                                  .followedBy([
+                                                    PopupMenuItem(
+                                                      onTap: () async {
+                                                        ICBlock block =
+                                                            widget.block;
+                                                        block.statusId = "";
+                                                        model.updateBlock(
+                                                          block,
+                                                        );
+                                                        setState(() {});
+                                                      },
+                                                      child: Row(
+                                                        spacing: 8,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.circle,
+                                                            color:
+                                                                Theme.of(
+                                                                      context,
+                                                                    )
+                                                                    .colorScheme
+                                                                    .surfaceDim,
+                                                            size: 16,
+                                                          ),
+                                                          Text("Empty Status"),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    PopupMenuItem(
+                                                      onTap: () async {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (
+                                                                BuildContext
+                                                                context,
+                                                              ) {
+                                                                return Dialog(
+                                                                  child: ICManageStatusPage(
+                                                                    calleeBlock:
+                                                                        widget
+                                                                            .block,
+                                                                  ),
+                                                                );
+                                                              },
+                                                        );
+                                                      },
+                                                      child: Row(
+                                                        spacing: 8,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.edit,
+                                                            color:
+                                                                Theme.of(
+                                                                      context,
+                                                                    )
+                                                                    .colorScheme
+                                                                    .onSurface,
+                                                            size: 16,
+                                                          ),
+                                                          Text("Edit Status"),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ])
+                                                  .toList(),
+
+                                              child: Row(
+                                                spacing: 8,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Material(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8,
+                                                          ),
+                                                    ),
+                                                    color: Color(
+                                                      currentStatus
+                                                              ?.colorCode ??
+                                                          0xFF000000,
+                                                    ).withAlpha(100),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.fromLTRB(
+                                                            8,
+                                                            4,
+                                                            8,
+                                                            4,
+                                                          ),
+                                                      child: Text(
+                                                        currentStatus
+                                                                ?.statusName ??
+                                                            "No status",
+                                                        style: TextStyle(
+                                                          color:
+                                                              (currentStatus !=
+                                                                  null)
+                                                              ? Theme.of(
+                                                                      context,
+                                                                    )
+                                                                    .colorScheme
+                                                                    .primary
+                                                              : Theme.of(
+                                                                      context,
+                                                                    )
+                                                                    .colorScheme
+                                                                    .surfaceContainerHighest,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      _preview(context, appState),
-                    ],
-                  )
-                : Flex(
-                    direction: Axis.vertical,
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Flexible(
-                        flex: 2,
-                        fit: FlexFit.tight,
-                        child: InkWell(
-                          onTap: widget.onTap,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ReorderableDragStartListener(
-                                      index: widget.index,
-                                      child: Icon(
-                                        Icons.reorder,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurface.withAlpha(50),
-                                      ),
-                                    ),
-                                    _popupMenu(context, cacheModel, model),
-                                  ],
-                                ),
-                                ClipRect(
-                                  clipBehavior: Clip.antiAlias,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    mainAxisSize: MainAxisSize.min,
-                                    spacing: 8,
-                                    children: [
-                                      Text(
-                                        widget.block.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      // Status Indicator here
-                                      Consumer<ICStatusModel>(
-                                        builder: (context, statusModel, child) {
-                                          List<ICStatus> availableStatus =
-                                              statusModel
-                                                  .findAvailableByCacheId(
-                                                    widget.block.cacheId,
-                                                  );
-                                          ICStatus? currentStatus = statusModel
-                                              .findStatusByBlock(widget.block);
-                                          return PopupMenuButton(
-                                            tooltip: "",
-                                            menuPadding: EdgeInsets.all(0),
-                                            elevation: 2,
-                                            clipBehavior: Clip.antiAlias,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            itemBuilder: (context) => availableStatus
-                                                .map(
-                                                  (status) => PopupMenuItem(
-                                                    onTap: () async {
-                                                      ICBlock block =
-                                                          widget.block;
-                                                      block.statusId =
-                                                          status.id;
-                                                      model.updateBlock(block);
-                                                    },
-                                                    child: Row(
-                                                      spacing: 8,
-                                                      children: [
-                                                        Icon(
-                                                          Icons.circle,
-                                                          color: Color(
-                                                            status.colorCode,
-                                                          ),
-                                                          size: 16,
-                                                        ),
-                                                        Text(status.statusName),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                )
-                                                .followedBy([
-                                                  PopupMenuItem(
-                                                    onTap: () async {
-                                                      ICBlock block =
-                                                          widget.block;
-                                                      block.statusId = "";
-                                                      model.updateBlock(block);
-                                                      setState(() {});
-                                                    },
-                                                    child: Row(
-                                                      spacing: 8,
-                                                      children: [
-                                                        Icon(
-                                                          Icons.circle,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .surfaceDim,
-                                                          size: 16,
-                                                        ),
-                                                        Text("Empty Status"),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  PopupMenuItem(
-                                                    onTap: () async {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder:
-                                                            (
-                                                              BuildContext
-                                                              context,
-                                                            ) {
-                                                              return Dialog(
-                                                                child: ICManageStatusPage(
-                                                                  calleeBlock:
-                                                                      widget
-                                                                          .block,
-                                                                ),
-                                                              );
-                                                            },
-                                                      );
-                                                    },
-                                                    child: Row(
-                                                      spacing: 8,
-                                                      children: [
-                                                        Icon(
-                                                          Icons.edit,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .onSurface,
-                                                          size: 16,
-                                                        ),
-                                                        Text("Edit Status"),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ])
-                                                .toList(),
-
-                                            child: Row(
-                                              spacing: 8,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Material(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
-                                                  color: Color(
-                                                    currentStatus?.colorCode ??
-                                                        0xFF000000,
-                                                  ).withAlpha(100),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.fromLTRB(
-                                                          8,
-                                                          4,
-                                                          8,
-                                                          4,
-                                                        ),
-                                                    child: Text(
-                                                      currentStatus
-                                                              ?.statusName ??
-                                                          "No status",
-                                                      style: TextStyle(
-                                                        color:
-                                                            (currentStatus !=
-                                                                null)
-                                                            ? Theme.of(context)
-                                                                  .colorScheme
-                                                                  .primary
-                                                            : Theme.of(context)
-                                                                  .colorScheme
-                                                                  .surfaceContainerHighest,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      _preview(context, appState),
-                    ],
-                  ),
+                        _previewWidget(context, appState),
+                      ],
+                    ),
+            ),
           ),
         );
       },
