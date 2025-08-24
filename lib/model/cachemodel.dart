@@ -39,10 +39,13 @@ class ICCacheModel extends ChangeNotifier {
   }
 
   Future<void> reorderCachesByIds(String from, String to) async {
+    FileHandler.reorderCachesByIds(from, to);
     int fromIndex = _caches.indexWhere((cache) => cache.id == from);
+    log("fromIndex $fromIndex");
     int toIndex = _caches.indexWhere((cache) => cache.id == to);
     Cache fromCache = _caches.removeAt(fromIndex);
     _caches.insert(toIndex, fromCache);
+
     notifyListeners();
   }
 

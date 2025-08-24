@@ -287,8 +287,8 @@ class _ICMainView extends State<ICMainView> {
                                       _selectedIndex < model.caches.length) {
                                     setState(() {
                                       _selectedIndex = (oldIndex < newIndex)
-                                          ? newIndex
-                                          : newIndex + 1;
+                                          ? newIndex - 1
+                                          : newIndex;
                                     });
                                   }
                                 },

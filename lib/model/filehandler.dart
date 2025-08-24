@@ -338,7 +338,6 @@ class FileHandler {
       ),
     );
   }
-
   static Future<File> reorderCaches(int from, int to) async {
     File file = await _localFile(
       fileDestinationType: FileDestinationType.cache,
