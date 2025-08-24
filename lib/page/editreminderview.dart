@@ -77,6 +77,7 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
           body: Form(
             key: _formKey,
             child: SingleChildScrollView(

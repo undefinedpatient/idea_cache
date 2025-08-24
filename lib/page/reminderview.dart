@@ -50,6 +50,7 @@ class _ICNotificationState extends State<ICReminderView> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
+      clipBehavior: Clip.antiAlias,
       borderRadius: BorderRadiusGeometry.only(
         topLeft: Radius.circular(12),
         topRight: Radius.circular(12),
@@ -59,7 +60,11 @@ class _ICNotificationState extends State<ICReminderView> {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
         // padding: EdgeInsets.all(16),
         appBar: AppBar(
+          toolbarHeight: 42,
+          backgroundColor: Theme.of(context).colorScheme.surfaceTint,
           leading: IconButton(
+            iconSize: 24,
+            color: Theme.of(context).colorScheme.inversePrimary,
             onPressed: () {
               if (isCreationView) {
                 setState(() {
@@ -77,10 +82,15 @@ class _ICNotificationState extends State<ICReminderView> {
                       ? "Create Reminders"
                       : "Edit Reminders"
                 : "Reminders",
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+              color: Theme.of(context).colorScheme.inversePrimary,
+            ),
           ),
           actionsPadding: EdgeInsets.fromLTRB(8, 0, 8, 0),
           actions: [
             IconButton(
+              iconSize: 24,
+              color: Theme.of(context).colorScheme.inversePrimary,
               onPressed: () {
                 setState(() {
                   activeNotification = null;
