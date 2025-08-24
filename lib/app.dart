@@ -141,23 +141,23 @@ class _ICMainView extends State<ICMainView> {
     ICSettingsModel appState = context.watch<ICSettingsModel>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
 
-    if (_selectedIndex == 0) {
+    if (_selectedIndex == -1) {
       pageWidget = ICOverview(
         onSetPage: (int index) {
           setState(() {
-            _selectedIndex = index + 1;
+            _selectedIndex = index;
           });
         },
       );
-    } else if (_selectedIndex > cacheModel.caches.length) {
+    } else if (_selectedIndex > cacheModel.caches.length - 1) {
       pageWidget = ICSettingPage();
     } else {
       pageWidget = ICCacheView(
-        key: ValueKey(cacheModel.caches[_selectedIndex - 1].id),
-        cacheid: cacheModel.caches[_selectedIndex - 1].id,
+        key: ValueKey(cacheModel.caches[_selectedIndex].id),
+        cacheid: cacheModel.caches[_selectedIndex].id,
         onPageDeleted: () {
           setState(() {
-            _selectedIndex = 0;
+            _selectedIndex = -1;
           });
         },
       );
@@ -209,7 +209,7 @@ class _ICMainView extends State<ICMainView> {
                                   : Icons.arrow_left,
                               title: "",
                               collapsed: collapse,
-                              selected: _selectedIndex == -1,
+                              selected: _selectedIndex == -2,
                               enableEdit: false,
                               onTap: () {
                                 setState(() {
@@ -218,12 +218,12 @@ class _ICMainView extends State<ICMainView> {
                               },
                             ),
                             ICNavigationBarButton(
-                              icon: (_selectedIndex == 0)
+                              icon: (_selectedIndex == -1)
                                   ? Icons.dashboard
                                   : Icons.dashboard_outlined,
 
                               title: "Overview",
-                              selected: _selectedIndex == 0,
+                              selected: _selectedIndex == -1,
                               collapsed: collapse,
                               enableEdit: false,
                               onTap: () {
@@ -240,7 +240,7 @@ class _ICMainView extends State<ICMainView> {
                                   return;
                                 }
                                 setState(() {
-                                  _selectedIndex = 0;
+                                  _selectedIndex = -1;
                                   pageWidget = ICOverview(
                                     onSetPage: (int index) {
                                       setState(() {
@@ -265,9 +265,8 @@ class _ICMainView extends State<ICMainView> {
                                     fromCache.id,
                                     toCache.id,
                                   );
-                                  if (_selectedIndex > 0 &&
-                                      _selectedIndex <
-                                          model.caches.length + 1) {
+                                  if (_selectedIndex > -1 &&
+                                      _selectedIndex < model.caches.length) {
                                     setState(() {
                                       _selectedIndex = (oldIndex < newIndex)
                                           ? newIndex
@@ -288,7 +287,7 @@ class _ICMainView extends State<ICMainView> {
                                     child: ICNavigationBarButton(
                                       key: ValueKey(id),
                                       title: title,
-                                      icon: (_selectedIndex == index + 1)
+                                      icon: (_selectedIndex == index)
                                           ? Icons.pages
                                           : Icons.pages_outlined,
                                       cache: entry.value,
@@ -310,10 +309,10 @@ class _ICMainView extends State<ICMainView> {
                                           return;
                                         }
                                         setState(() {
-                                          _selectedIndex = index + 1;
+                                          _selectedIndex = index;
                                         });
                                       },
-                                      selected: _selectedIndex == index + 1,
+                                      selected: _selectedIndex == index,
                                     ),
                                   );
                                 }).toList(),
@@ -338,14 +337,13 @@ class _ICMainView extends State<ICMainView> {
                             ),
                             ICNavigationBarButton(
                               enableEdit: false,
-                              icon: _selectedIndex == model.caches.length + 1
+                              icon: _selectedIndex == model.caches.length
                                   ? Icons.settings
                                   : Icons.settings_outlined,
 
                               title: "Settings",
                               collapsed: collapse,
-                              selected:
-                                  _selectedIndex == model.caches.length + 1,
+                              selected: _selectedIndex == model.caches.length,
                               onTap: () {
                                 if (appState.isContentEdited) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -361,7 +359,7 @@ class _ICMainView extends State<ICMainView> {
                                   return;
                                 }
                                 setState(() {
-                                  _selectedIndex = model.caches.length + 1;
+                                  _selectedIndex = model.caches.length;
                                   pageWidget = ICSettingPage();
                                 });
                               },

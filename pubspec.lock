@@ -310,12 +310,11 @@ packages:
   flutter_quill:
     dependency: "direct main"
     description:
-      path: "."
-      ref: fix-flutter-3-32-macos-crash
-      resolved-ref: c9fb2fc64d820ed53a313398a46828b8faae072f
-      url: "https://github.com/theniceboy/flutter-quill.git"
-    source: git
-    version: "11.4.1"
+      name: flutter_quill
+      sha256: "8e33ef670abad16405582a37ce63ac82b7531998682e8bd8348d0f3da998b8ce"
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.4.2"
   flutter_quill_delta_from_html:
     dependency: transitive
     description:

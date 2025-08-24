@@ -21,7 +21,6 @@ class ICBlockView extends StatefulWidget {
 }
 
 class _ICBlockView extends State<ICBlockView> {
-  bool isAdvancedToolBarOn = false;
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -98,58 +97,34 @@ class _ICBlockView extends State<ICBlockView> {
             child: Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Container(
-                      padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-                      child: SizedBox(
-                        width: 190,
-                        child: ListTile(
-                          selectedTileColor: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                          selected: isAdvancedToolBarOn,
-                          onTap: () {
-                            setState(() {
-                              isAdvancedToolBarOn = !isAdvancedToolBarOn;
-                            });
+                    MenuItemButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              child: ICImportDocumentView(
+                                quillController: _controller,
+                              ),
+                            );
                           },
-                          title: Text("Advanced Tool Bar"),
-                        ),
-                      ),
+                        );
+                      },
+                      requestFocusOnHover: false,
+                      child: Text(" Import "),
                     ),
-                    Container(
-                      child: Row(
-                        children: [
-                          MenuItemButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Dialog(
-                                    child: ICImportDocumentView(
-                                      quillController: _controller,
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            requestFocusOnHover: false,
-                            child: Text(" Import "),
-                          ),
-                          MenuItemButton(
-                            onPressed: () {
-                              _onSave(context);
-                              appState.setContentEditedState(false);
-                              setState(() {});
-                            },
-                            requestFocusOnHover: false,
-                            child: (appState.isContentEdited)
-                                ? Text(" Not Saved! ")
-                                : Text(" Save "),
-                          ),
-                        ],
-                      ),
+                    MenuItemButton(
+                      onPressed: () {
+                        _onSave(context);
+                        appState.setContentEditedState(false);
+                        setState(() {});
+                      },
+                      requestFocusOnHover: false,
+                      child: (appState.isContentEdited)
+                          ? Text(" Not Saved! ")
+                          : Text(" Save "),
                     ),
 
                     // Text(widget.blockid),
@@ -229,58 +204,11 @@ class _ICBlockView extends State<ICBlockView> {
                             ? "Quote"
                             : "",
                       ),
-                      indentDecrease: QuillToolbarIndentButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Decrease Indent"
-                            : "",
-                      ),
-                      indentIncrease: QuillToolbarIndentButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Increase Indent"
-                            : "",
-                      ),
-                      codeBlock: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Code Block"
-                            : "",
-                      ),
                       search: QuillToolbarSearchButtonOptions(
                         tooltip: (appState.setting.toolTipsEnabled)
                             ? "Search"
                             : "",
                       ),
-                      inlineCode: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Inline Code"
-                            : "",
-                      ),
-                      color: QuillToolbarColorButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Text Color"
-                            : "",
-                      ),
-                      backgroundColor: QuillToolbarColorButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Background Color"
-                            : "",
-                      ),
-
-                      subscript: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Subscript"
-                            : "",
-                      ),
-                      superscript: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Superscript"
-                            : "",
-                      ),
-                      selectHeaderStyleDropdownButton:
-                          QuillToolbarSelectHeaderStyleDropdownButtonOptions(
-                            tooltip: (appState.setting.toolTipsEnabled)
-                                ? "Select Header Style"
-                                : "",
-                          ),
                       fontSize: QuillToolbarFontSizeButtonOptions(
                         tooltip: (appState.setting.toolTipsEnabled)
                             ? "Font Size"
@@ -302,15 +230,15 @@ class _ICBlockView extends State<ICBlockView> {
                     sectionDividerColor: Theme.of(
                       context,
                     ).colorScheme.onSurface,
-                    showAlignmentButtons: isAdvancedToolBarOn,
-                    showInlineCode: isAdvancedToolBarOn,
-                    showSubscript: isAdvancedToolBarOn,
-                    showSuperscript: isAdvancedToolBarOn,
-                    showColorButton: isAdvancedToolBarOn,
-                    showHeaderStyle: isAdvancedToolBarOn,
-                    showLink: isAdvancedToolBarOn,
-                    showCodeBlock: isAdvancedToolBarOn,
-                    showBackgroundColorButton: isAdvancedToolBarOn,
+                    showAlignmentButtons: true,
+                    showInlineCode: false,
+                    showSubscript: false,
+                    showSuperscript: false,
+                    showColorButton: false,
+                    showHeaderStyle: false,
+                    showCodeBlock: false,
+                    showBackgroundColorButton: false,
+                    showIndent: false,
                   ),
                 ),
               ],
