@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +21,7 @@ class ICBlockView extends StatefulWidget {
 }
 
 class _ICBlockView extends State<ICBlockView> {
+  bool canRevert = false;
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -81,7 +83,10 @@ class _ICBlockView extends State<ICBlockView> {
     ICUserPreferences pref = context.read<ICUserPreferences>();
     _controller.document.changes.listen((event) {
       appState.setContentEditedState(true);
-      setState(() {}); //Trigger Rebuild
+
+      setState(() {
+        canRevert = true;
+      }); //Trigger Rebuild
     });
     // Rebuild the widget when the focus change, used to indicate whether the editor is being edited
     _focusNode.addListener(() {
@@ -99,6 +104,17 @@ class _ICBlockView extends State<ICBlockView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    MenuItemButton(
+                      onPressed: (!canRevert)
+                          ? null
+                          : () {
+                              _loadBlockContent();
+                              appState.setContentEditedState(false);
+                              setState(() {});
+                            },
+                      requestFocusOnHover: false,
+                      child: Text(" Revert"),
+                    ),
                     MenuItemButton(
                       onPressed: () {
                         showDialog(
