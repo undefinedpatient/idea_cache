@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/page/importdocumentview.dart';
+import 'package:idea_cache/userpreferences.dart';
 import 'package:provider/provider.dart';
 
 class ICBlockView extends StatefulWidget {
@@ -78,7 +77,8 @@ class _ICBlockView extends State<ICBlockView> {
 
   @override
   Widget build(BuildContext context) {
-    ICSettingsModel appState = context.watch<ICSettingsModel>();
+    ICAppState appState = context.watch<ICAppState>();
+    ICUserPreferences pref = context.read<ICUserPreferences>();
     _controller.document.changes.listen((event) {
       appState.setContentEditedState(true);
       setState(() {}); //Trigger Rebuild
@@ -135,9 +135,7 @@ class _ICBlockView extends State<ICBlockView> {
                   config: QuillSimpleToolbarConfig(
                     buttonOptions: QuillSimpleToolbarButtonOptions(
                       fontFamily: QuillToolbarFontFamilyButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Font Family"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Font Family" : "",
                         items: _fontFamilies,
                       ),
                       selectAlignmentButtons:
@@ -150,64 +148,40 @@ class _ICBlockView extends State<ICBlockView> {
                             ),
                           ),
                       redoHistory: QuillToolbarHistoryButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Redo"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Redo" : "",
                       ),
                       undoHistory: QuillToolbarHistoryButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Undo"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Undo" : "",
                       ),
                       bold: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Bold"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Bold" : "",
                       ),
                       italic: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Italic"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Italic" : "",
                       ),
                       underLine: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Underline"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Underline" : "",
                       ),
                       clearFormat: QuillToolbarClearFormatButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Clear Format"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Clear Format" : "",
                       ),
                       listNumbers: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Numbered List"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Numbered List" : "",
                       ),
                       listBullets: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Bulleted List"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Bulleted List" : "",
                       ),
                       toggleCheckList: QuillToolbarToggleCheckListButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Toggle Check List"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Toggle Check List" : "",
                       ),
                       quote: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Quote"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Quote" : "",
                       ),
                       search: QuillToolbarSearchButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Search"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Search" : "",
                       ),
                       fontSize: QuillToolbarFontSizeButtonOptions(
-                        tooltip: (appState.setting.toolTipsEnabled)
-                            ? "Font Size"
-                            : "",
+                        tooltip: (pref.toolTips) ? "Font Size" : "",
                         items: Map.from({
                           '16': '16',
                           '18': '18',

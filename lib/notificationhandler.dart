@@ -141,19 +141,7 @@ class ICNotificationHandler extends ChangeNotifier {
         ? upcomingReminder!.name
         : "";
     dev.log(
-      timerInfo +
-          "\n NOT ACTIVE:" +
-          notActiveInfo +
-          "\n SCHEDULED: " +
-          scheduleInfo +
-          "\n TRIGGERED: " +
-          triggeredInfo +
-          "\n DISMISSED:" +
-          dismissedInfo +
-          "\n Upcoming:" +
-          upcomingMessage +
-          "\n AlarmsInfo:" +
-          alarmsInfo,
+      "$timerInfo\n NOT ACTIVE:$notActiveInfo\n SCHEDULED: $scheduleInfo\n TRIGGERED: $triggeredInfo\n DISMISSED:$dismissedInfo\n Upcoming:$upcomingMessage\n AlarmsInfo:$alarmsInfo",
     );
   }
 

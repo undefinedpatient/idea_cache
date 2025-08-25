@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:idea_cache/app.dart';
 import 'package:idea_cache/component/preview.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/blockmodel.dart';
@@ -10,6 +9,7 @@ import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:idea_cache/model/statusmodel.dart';
 import 'package:idea_cache/page/managestatuspage.dart';
+import 'package:idea_cache/userpreferences.dart';
 import 'package:provider/provider.dart';
 
 // The Status will be following colorScheme.surfaceDim if it is an empty status
@@ -32,8 +32,8 @@ class ICBlockCard extends StatefulWidget {
 
 class _ICBlockCardState extends State<ICBlockCard> {
   ICStatus? status;
-  FocusNode _focusNode = FocusNode();
-  TextEditingController _textEditingController = TextEditingController(
+  final FocusNode _focusNode = FocusNode();
+  final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
   OverlayEntry? manageStatusOverlay;
@@ -51,7 +51,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
     super.dispose();
   }
 
-  Widget _previewWidget(BuildContext ctx, ICSettingsModel settingModel) {
+  Widget _previewWidget(BuildContext ctx, ICUserPreferences pref) {
     return Builder(
       builder: (ctx) {
         return Flexible(
@@ -61,9 +61,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
             builder: (context, model, child) {
               ICStatus? currentStatus = model.findStatusByBlock(widget.block);
               return Tooltip(
-                message: (settingModel.setting.toolTipsEnabled)
-                    ? "Preview"
-                    : "",
+                message: (pref.toolTips) ? "Preview" : "",
                 child: ListTile(
                   tileColor: (currentStatus != null)
                       ? Color(currentStatus.colorCode).withAlpha(100)
@@ -251,7 +249,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
 
   @override
   Widget build(BuildContext context) {
-    ICSettingsModel appState = context.watch<ICSettingsModel>();
+    ICUserPreferences pref = context.watch<ICUserPreferences>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
     return Consumer<ICBlockModel>(
       builder: (context, model, child) {
@@ -454,7 +452,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                             ),
                           ),
                         ),
-                        _previewWidget(context, appState),
+                        _previewWidget(context, pref),
                       ],
                     )
                   : Flex(
@@ -684,7 +682,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
                             ),
                           ),
                         ),
-                        _previewWidget(context, appState),
+                        _previewWidget(context, pref),
                       ],
                     ),
             ),
