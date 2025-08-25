@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/reminder.dart';
-import 'package:idea_cache/model/setting.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -403,37 +402,6 @@ class FileHandler {
     );
   }
 
-  static Future<Setting> loadSetting() async {
-    File file = await _localFile(
-      fileDestinationType: FileDestinationType.setting,
-    );
-    try {
-      if (file.existsSync()) {
-        String content = await file.readAsString();
-        Map<String, dynamic> jsonMap =
-            jsonDecode(content) as Map<String, dynamic>;
-        return Setting.fromJson(jsonMap);
-      }
-    } catch (err) {
-      log(name: "FileHandler.loadSetting()", err.toString(), level: 2);
-    }
-    return Setting();
-  }
-
-  static Future<File> saveSetting(Setting setting) async {
-    File file = await _localFile(
-      fileDestinationType: FileDestinationType.setting,
-    );
-    String content = "";
-    try {
-      if (file.existsSync()) {
-        content = jsonEncode(setting.toJson());
-      }
-    } catch (err) {
-      log(name: "FileHandler.saveSetting()", err.toString(), level: 2);
-    }
-    return await file.writeAsString(content);
-  }
 
   /*
   Delete a cache with the given cacheId

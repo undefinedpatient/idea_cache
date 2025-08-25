@@ -26,7 +26,7 @@ class ICReminderCard extends StatefulWidget {
     required this.onTapReminder,
     required this.onTapCache,
     required this.onTapBlock,
-  }) {}
+  });
 
   @override
   State<ICReminderCard> createState() => _ICReminderCardState();

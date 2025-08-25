@@ -153,7 +153,7 @@ class _ICImportDocumentViewState extends State<ICImportDocumentView> {
                     );
                   }
 
-                  Provider.of<ICSettingsModel>(
+                  Provider.of<ICAppState>(
                     context,
                     listen: false,
                   ).setContentEditedState(true);

@@ -62,6 +62,7 @@ class ICReminder {
       status = reminderStatus.values[map['status']],
       name = map['name'] ?? "",
       time = DateTime.parse(map['time']);
+  @override
   String toString() {
     return toMap().toString();
   }

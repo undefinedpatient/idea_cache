@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
 import 'package:idea_cache/model/block.dart';
@@ -10,6 +8,7 @@ import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/page/blockview.dart';
 import 'package:idea_cache/page/cacheoverview.dart';
 import 'package:idea_cache/page/emptypage.dart';
+import 'package:idea_cache/userpreferences.dart';
 import 'package:provider/provider.dart'; // Removed unused imports
 
 class ICCacheView extends StatefulWidget {
@@ -63,7 +62,7 @@ class _ICCacheView extends State<ICCacheView> {
       _selectedIndex = widget.initialIndex;
     } else {
       activeBlock = null;
-      _selectedIndex = -1; 
+      _selectedIndex = -1;
     }
   }
 
@@ -76,7 +75,8 @@ class _ICCacheView extends State<ICCacheView> {
 
   @override
   Widget build(BuildContext context) {
-    ICSettingsModel appState = context.watch<ICSettingsModel>();
+    ICUserPreferences pref = context.watch<ICUserPreferences>();
+    ICAppState appState = context.watch<ICAppState>();
     Widget pageWidget = ICEmptyPage();
     if (activeBlock == null) {
       pageWidget = ICCacheOverview(
@@ -106,7 +106,7 @@ class _ICCacheView extends State<ICCacheView> {
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
         actions: [
           Tooltip(
-            message: (appState.setting.toolTipsEnabled) ? "Pin Cache" : "",
+            message: (pref.toolTips) ? "Pin Cache" : "",
             child: Consumer<ICCacheModel>(
               builder: (context, model, child) {
                 return (model.isLoading)
@@ -132,7 +132,7 @@ class _ICCacheView extends State<ICCacheView> {
             ),
           ),
           Tooltip(
-            message: (appState.setting.toolTipsEnabled) ? "Delete Cache" : "",
+            message: (pref.toolTips) ? "Delete Cache" : "",
             child: Consumer<ICCacheModel>(
               builder: (context, model, child) {
                 return IconButton(
@@ -298,9 +298,7 @@ class _ICCacheView extends State<ICCacheView> {
                 Consumer2<ICBlockModel, ICCacheModel>(
                   builder: (context, blockModel, cacheModel, child) {
                     return Tooltip(
-                      message: (appState.setting.toolTipsEnabled)
-                          ? "Add Block"
-                          : "",
+                      message: (pref.toolTips) ? "Add Block" : "",
                       child: MenuItemButton(
                         requestFocusOnHover: false,
                         onPressed: () async {

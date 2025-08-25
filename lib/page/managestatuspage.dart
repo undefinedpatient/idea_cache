@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cachemodel.dart';
@@ -10,6 +9,7 @@ import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
 import 'package:idea_cache/model/status.dart';
 import 'package:idea_cache/model/statusmodel.dart';
+import 'package:idea_cache/userpreferences.dart';
 import 'package:provider/provider.dart';
 
 class ICManageStatusPage extends StatefulWidget {
@@ -54,11 +54,11 @@ class _ICManageStatus extends State<ICManageStatusPage> {
       Colors.purple,
       Colors.orange,
     ];
-    ICSettingsModel appState = context.watch<ICSettingsModel>();
+    ICUserPreferences pref = context.watch<ICUserPreferences>();
     String userSelectedCacheId = "";
     return Consumer3<ICStatusModel, ICBlockModel, ICCacheModel>(
       builder: (context, statusModel, blockModel, cacheModel, child) {
-        return Container(
+        return SizedBox(
           height: 600,
           width: 480,
           child: Scaffold(
@@ -68,9 +68,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
               backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
               actions: [
                 Tooltip(
-                  message: (appState.setting.toolTipsEnabled)
-                      ? "Create Status"
-                      : "",
+                  message: (pref.toolTips) ? "Create Status" : "",
                   child: IconButton(
                     onPressed: () async {
                       statusModel.createStatus();
@@ -106,7 +104,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                               ),
                             ),
                             Tooltip(
-                              message: (appState.setting.toolTipsEnabled)
+                              message: (pref.toolTips)
                                   ? "Change Status Color"
                                   : "",
                               child: PopupMenuButton(
@@ -150,7 +148,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                 Platform.isLinux ||
                                 Platform.isMacOS)
                               Tooltip(
-                                message: (appState.setting.toolTipsEnabled)
+                                message: (pref.toolTips)
                                     ? "Change the Visibility of this Status"
                                     : "",
                                 child: DropdownButton(
@@ -184,7 +182,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                 ),
                               ),
                             Tooltip(
-                              message: (appState.setting.toolTipsEnabled)
+                              message: (pref.toolTips)
                                   ? "Change Status Name"
                                   : "",
                               child: IconButton(
@@ -239,9 +237,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                                         Text("Visibility: "),
                                                         Tooltip(
                                                           message:
-                                                              (appState
-                                                                  .setting
-                                                                  .toolTipsEnabled)
+                                                              (pref.toolTips)
                                                               ? "Change the Visibility of this Status"
                                                               : "",
                                                           // It is saved on confirm, different from desktop
@@ -311,9 +307,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                               ),
                             ),
                             Tooltip(
-                              message: (appState.setting.toolTipsEnabled)
-                                  ? "Delete Status"
-                                  : "",
+                              message: (pref.toolTips) ? "Delete Status" : "",
                               child: IconButton(
                                 onPressed: () async {
                                   statusModel.deleteStatusById(entry.value.id);

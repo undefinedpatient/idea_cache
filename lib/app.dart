@@ -19,6 +19,7 @@ import 'package:idea_cache/page/overview.dart';
 import 'dart:io';
 
 import 'package:idea_cache/page/settingpage.dart';
+import 'package:idea_cache/userpreferences.dart';
 import 'package:provider/provider.dart';
 
 /* 
@@ -34,41 +35,42 @@ class ICApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ICSettingsModel()),
+        ChangeNotifierProvider(create: (context) => ICAppState()),
         ChangeNotifierProvider(create: (context) => ICCacheModel()),
         ChangeNotifierProvider(create: (context) => ICBlockModel()),
         ChangeNotifierProvider(create: (context) => ICStatusModel()),
         ChangeNotifierProvider(create: (context) => ICReminderModel()),
         ChangeNotifierProvider(create: (context) => ICNotificationHandler()),
+        ChangeNotifierProvider(create: (context) => ICUserPreferences()),
       ],
-      child: Consumer<ICSettingsModel>(
-        builder: (context, model, child) {
+      child: Consumer<ICUserPreferences>(
+        builder: (context, pref, child) {
           return MaterialApp(
             home: ICMainView(),
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Color(model.setting.colorCode),
+                seedColor: Color(ICUserPreferences().tint),
                 brightness: Brightness.light,
                 contrastLevel: 0.5,
               ),
 
               textTheme: Typography.blackCupertino.apply(
-                fontFamily: model.setting.fontFamily,
+                fontFamily: ICUserPreferences().fontFamily,
                 displayColor: Colors.black,
               ),
             ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Color(model.setting.colorCode),
+                seedColor: Color(ICUserPreferences().tint),
                 brightness: Brightness.dark,
                 contrastLevel: 0.5,
               ),
               textTheme: Typography.whiteCupertino.apply(
-                fontFamily: model.setting.fontFamily,
+                fontFamily: ICUserPreferences().fontFamily,
                 displayColor: Colors.white,
               ),
             ),
-            themeMode: model.setting.themeMode,
+            themeMode: ICUserPreferences().themeMode,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
@@ -97,11 +99,6 @@ class _ICMainView extends State<ICMainView> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => {
-        Provider.of<ICSettingsModel>(context, listen: false).loadFromFile(),
-      },
-    );
     Future.microtask(
       () => {Provider.of<ICCacheModel>(context, listen: false).loadFromFile()},
     );
@@ -136,7 +133,7 @@ class _ICMainView extends State<ICMainView> {
   @override
   Widget build(BuildContext buildContext) {
     Widget? pageWidget;
-    ICSettingsModel appState = context.watch<ICSettingsModel>();
+    ICAppState appState = context.watch<ICAppState>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
     ICBlockModel blockModel = context.read<ICBlockModel>();
 
@@ -202,7 +199,7 @@ class _ICMainView extends State<ICMainView> {
         appBar: AppBar(
           toolbarHeight: 32,
           title: Text(
-            "IdeaCache v1.4.1",
+            "IdeaCache v1.4.2",
             style: Theme.of(context).textTheme.bodyLarge!.copyWith(
               color: Theme.of(context).colorScheme.inversePrimary,
             ),
@@ -416,7 +413,7 @@ class _ICMainView extends State<ICMainView> {
               style: Theme.of(context).textTheme.headlineMedium,
               children: <TextSpan>[
                 TextSpan(
-                  text: " v1.4.0",
+                  text: " v1.4.2",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ],
