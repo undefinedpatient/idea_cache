@@ -39,12 +39,12 @@ class _ICSettingPageState extends State<ICSettingPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Flex(
+              mainAxisSize: MainAxisSize.min,
               direction: Axis.horizontal,
               children: [
                 Flexible(flex: 1, fit: FlexFit.tight, child: Divider()),
-                Flexible(
-                  flex: 2,
-                  fit: FlexFit.tight,
+                ConstrainedBox(
+                  constraints: BoxConstraints.tightFor(width: 64),
                   child: Text("Theme", textAlign: TextAlign.center),
                 ),
                 Flexible(flex: 16, fit: FlexFit.tight, child: Divider()),
@@ -81,9 +81,8 @@ class _ICSettingPageState extends State<ICSettingPage> {
               direction: Axis.horizontal,
               children: [
                 Flexible(flex: 1, fit: FlexFit.tight, child: Divider()),
-                Flexible(
-                  flex: 2,
-                  fit: FlexFit.tight,
+                ConstrainedBox(
+                  constraints: BoxConstraints.tightFor(width: 64),
                   child: Text("Misc", textAlign: TextAlign.center),
                 ),
                 Flexible(flex: 16, fit: FlexFit.tight, child: Divider()),
