@@ -88,9 +88,9 @@ class _ICOverview extends State<ICOverview> {
           ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
               children: [
                 Card(
                   elevation: 2,
@@ -144,7 +144,8 @@ class _ICOverview extends State<ICOverview> {
                 ),
                 Divider(),
                 Text("Pinned", textScaler: TextScaler.linear(1.5)),
-                Expanded(
+                SizedBox(
+                  height: (isScrollVertical) ? null : 180,
                   child: ReorderableListView(
                     proxyDecorator: proxyDecorator,
                     padding: EdgeInsets.all(0),
@@ -192,7 +193,8 @@ class _ICOverview extends State<ICOverview> {
                   ),
                 ),
                 Divider(),
-                Expanded(
+                SizedBox(
+                  height: (isScrollVertical) ? null : 180,
                   child: ReorderableListView(
                     proxyDecorator: proxyDecorator,
                     padding: EdgeInsets.all(0),
