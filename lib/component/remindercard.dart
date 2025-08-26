@@ -72,8 +72,10 @@ class _ICReminderCardState extends State<ICReminderCard> {
           .read<ICBlockModel>()
           .cacheBlocksMap[cache.id]!
           .indexWhere((block) => block.id == widget.reminder.blockId);
-      block = context.read<ICBlockModel>().cacheBlocksMap[cache.id]![index];
-      status = context.read<ICStatusModel>().findStatusByBlock(block);
+      if (index != -1) {
+        block = context.read<ICBlockModel>().cacheBlocksMap[cache.id]![index];
+        status = context.read<ICStatusModel>().findStatusByBlock(block);
+      }
     }
     return Consumer2<ICReminderModel, ICNotificationHandler>(
       builder: (context, reminderModel, notificationHandler, child) {
