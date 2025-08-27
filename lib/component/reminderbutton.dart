@@ -92,13 +92,9 @@ class _ICReminderButtonState extends State<ICReminderButton> {
                 child: const Icon(Icons.notifications),
               )
             : FloatingActionButton.extended(
-                // style: ButtonStyle(
-                //   backgroundColor: WidgetStateColor.fromMap({
-                //     WidgetState.any: (reminder?.status == reminderStatus.TRIGGERED)
-                //         ? Colors.yellow.shade700
-                //         : Theme.of(context).colorScheme.primary,
-                //   }),
-                // ),
+                backgroundColor: (reminder.status == reminderStatus.TRIGGERED)
+                    ? Colors.yellow.shade700
+                    : Theme.of(context).colorScheme.primary,
                 onPressed: widget.onTap,
                 label: Row(
                   spacing: 8,
