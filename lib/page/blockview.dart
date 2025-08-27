@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/settingsmodel.dart';
@@ -94,6 +96,35 @@ class _ICBlockView extends State<ICBlockView> {
     });
 
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: (Platform.isAndroid || Platform.isMacOS)
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              spacing: 16,
+              children: [
+                FloatingActionButton(
+                  onPressed: (!canRevert)
+                      ? null
+                      : () {
+                          _loadBlockContent();
+                          appState.setContentEditedState(false);
+                          setState(() {});
+                        },
+                  elevation: 4,
+                  child: Icon(Icons.restore),
+                ),
+                FloatingActionButton(
+                  onPressed: () {
+                    _onSave(context);
+                    appState.setContentEditedState(false);
+                    setState(() {});
+                  },
+                  elevation: 4,
+                  child: Icon(Icons.save),
+                ),
+              ],
+            )
+          : null,
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
@@ -101,51 +132,8 @@ class _ICBlockView extends State<ICBlockView> {
             color: Theme.of(context).colorScheme.surfaceContainerLow,
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    MenuItemButton(
-                      onPressed: (!canRevert)
-                          ? null
-                          : () {
-                              _loadBlockContent();
-                              appState.setContentEditedState(false);
-                              setState(() {});
-                            },
-                      requestFocusOnHover: false,
-                      child: Text(" Revert"),
-                    ),
-                    MenuItemButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Dialog(
-                              child: ICImportDocumentView(
-                                quillController: _controller,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      requestFocusOnHover: false,
-                      child: Text(" Import "),
-                    ),
-                    MenuItemButton(
-                      onPressed: () {
-                        _onSave(context);
-                        appState.setContentEditedState(false);
-                        setState(() {});
-                      },
-                      requestFocusOnHover: false,
-                      child: (appState.isContentEdited)
-                          ? Text(" Not Saved! ")
-                          : Text(" Save "),
-                    ),
-
-                    // Text(widget.blockid),
-                  ],
-                ),
+                if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
+                  _desktopActionBar(appState, pref),
                 QuillSimpleToolbar(
                   controller: _controller,
                   config: QuillSimpleToolbarConfig(
@@ -324,6 +312,54 @@ class _ICBlockView extends State<ICBlockView> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _desktopActionBar(ICAppState appState, ICUserPreferences pref) {
+    return Flex(
+      direction: Axis.horizontal,
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        MenuItemButton(
+          onPressed: (!canRevert)
+              ? null
+              : () {
+                  _loadBlockContent();
+                  appState.setContentEditedState(false);
+                  setState(() {});
+                },
+          requestFocusOnHover: false,
+          child: Text(" Revert"),
+        ),
+        MenuItemButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  child: ICImportDocumentView(quillController: _controller),
+                );
+              },
+            );
+          },
+          requestFocusOnHover: false,
+          child: Text(" Import "),
+        ),
+        MenuItemButton(
+          onPressed: () {
+            _onSave(context);
+            appState.setContentEditedState(false);
+            setState(() {});
+          },
+          requestFocusOnHover: false,
+          child: (appState.isContentEdited)
+              ? Text(" Not Saved! ")
+              : Text(" Save "),
+        ),
+
+        // Text(widget.blockid),
+      ],
     );
   }
 }

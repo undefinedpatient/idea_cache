@@ -10,6 +10,7 @@ class ICNavigationBarButton extends StatefulWidget {
   final Function() onTap;
   final bool enableEdit;
   final bool selected;
+  final double height;
   final bool collapsed;
   const ICNavigationBarButton({
     super.key,
@@ -19,6 +20,7 @@ class ICNavigationBarButton extends StatefulWidget {
     required this.onTap,
     required this.enableEdit,
     required this.selected,
+    this.height = 48,
     required this.collapsed,
   });
 
@@ -124,7 +126,7 @@ class _ICNavigationBarButtonState extends State<ICNavigationBarButton> {
         child: InkWell(
           onTap: widget.onTap,
           child: Container(
-            height: 48,
+            height: widget.height,
             color: (widget.selected)
                 ? Theme.of(context).colorScheme.onPrimaryContainer
                 : Colors.transparent,
@@ -154,7 +156,7 @@ class _ICNavigationBarButtonState extends State<ICNavigationBarButton> {
             color: (widget.selected)
                 ? Theme.of(context).colorScheme.onPrimaryContainer
                 : Colors.transparent,
-            height: 48,
+            height: widget.height,
             child: SizedBox.expand(
               child: Row(
                 mainAxisSize: MainAxisSize.max,

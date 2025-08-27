@@ -96,6 +96,7 @@ class _ICMainView extends State<ICMainView> {
   int _initialBlockPageIndex = -1;
   int _selectedIndex = 0;
   bool collapse = false;
+  Widget? pageWidget;
   @override
   void initState() {
     super.initState();
@@ -132,7 +133,6 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    Widget? pageWidget;
     ICAppState appState = context.watch<ICAppState>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
     ICBlockModel blockModel = context.read<ICBlockModel>();
@@ -161,269 +161,456 @@ class _ICMainView extends State<ICMainView> {
     }
 
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      return Scaffold(
-        floatingActionButton: ICReminderButton(
-          onTap: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return ICReminderView(
-                  onTapBlock: (String cacheId, String blockId) {
-                    log(cacheId + blockId);
-                    setState(() {
-                      _selectedIndex = cacheModel.caches.indexWhere(
-                        (cache) => cache.id == cacheId,
-                      );
-                      _initialBlockPageIndex = blockModel
-                          .cacheBlocksMap[cacheId]!
-                          .indexWhere((block) => block.id == blockId);
-                    });
-                    Navigator.pop(context);
-                  },
-                  onTapCache: (String cacheId) {
-                    log(cacheId);
-                    setState(() {
-                      _selectedIndex = cacheModel.caches.indexWhere(
-                        (cache) => cache.id == cacheId,
-                      );
-                      _initialBlockPageIndex = -1;
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            );
-          },
-        ),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        appBar: AppBar(
-          toolbarHeight: 32,
-          title: Text(
-            "IdeaCache v1.4.2",
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-              color: Theme.of(context).colorScheme.inversePrimary,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.surfaceTint,
-        ),
-        body: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: (collapse) ? 48 : 160,
-              child: Consumer<ICCacheModel>(
-                builder: (consumerContext, model, child) {
-                  return (model.isLoading)
-                      ? LinearProgressIndicator()
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ICNavigationBarButton(
-                              icon: (collapse)
-                                  ? Icons.arrow_right
-                                  : Icons.arrow_left,
-                              title: "",
-                              collapsed: collapse,
-                              selected: _selectedIndex == -2,
-                              enableEdit: false,
-                              onTap: () {
-                                setState(() {
-                                  collapse = !collapse;
-                                });
-                              },
-                            ),
-                            ICNavigationBarButton(
-                              icon: (_selectedIndex == -1)
-                                  ? Icons.dashboard
-                                  : Icons.dashboard_outlined,
+      return _windowApp();
+    } else {
+      return _androidApp();
+    }
+  }
 
-                              title: "Overview",
-                              selected: _selectedIndex == -1,
-                              collapsed: collapse,
-                              enableEdit: false,
-                              onTap: () {
-                                if (appState.isContentEdited) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        "Warning: Content Not Saved",
-                                      ),
-                                      duration: Durations.extralong3,
-                                    ),
-                                  );
-                                  appState.setContentEditedState(false);
-                                  return;
+  Widget _windowApp() {
+    ICAppState appState = context.watch<ICAppState>();
+    ICCacheModel cacheModel = context.read<ICCacheModel>();
+    ICBlockModel blockModel = context.read<ICBlockModel>();
+    return Scaffold(
+      floatingActionButton: ICReminderButton(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return ICReminderView(
+                onTapBlock: (String cacheId, String blockId) {
+                  log(cacheId + blockId);
+                  setState(() {
+                    _selectedIndex = cacheModel.caches.indexWhere(
+                      (cache) => cache.id == cacheId,
+                    );
+                    _initialBlockPageIndex = blockModel.cacheBlocksMap[cacheId]!
+                        .indexWhere((block) => block.id == blockId);
+                  });
+                  Navigator.pop(context);
+                },
+                onTapCache: (String cacheId) {
+                  log(cacheId);
+                  setState(() {
+                    _selectedIndex = cacheModel.caches.indexWhere(
+                      (cache) => cache.id == cacheId,
+                    );
+                    _initialBlockPageIndex = -1;
+                  });
+                  Navigator.pop(context);
+                },
+              );
+            },
+          );
+        },
+      ),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      appBar: AppBar(
+        toolbarHeight: 32,
+        title: Text(
+          "IdeaCache v1.4.2",
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+            color: Theme.of(context).colorScheme.inversePrimary,
+          ),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.surfaceTint,
+      ),
+      body: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: (collapse) ? 48 : 160,
+            child: Consumer<ICCacheModel>(
+              builder: (consumerContext, model, child) {
+                return (model.isLoading)
+                    ? LinearProgressIndicator()
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ICNavigationBarButton(
+                            icon: (collapse)
+                                ? Icons.arrow_right
+                                : Icons.arrow_left,
+                            title: "",
+                            collapsed: collapse,
+                            selected: _selectedIndex == -2,
+                            enableEdit: false,
+                            onTap: () {
+                              setState(() {
+                                collapse = !collapse;
+                              });
+                            },
+                          ),
+                          ICNavigationBarButton(
+                            icon: (_selectedIndex == -1)
+                                ? Icons.dashboard
+                                : Icons.dashboard_outlined,
+
+                            title: "Overview",
+                            selected: _selectedIndex == -1,
+                            collapsed: collapse,
+                            enableEdit: false,
+                            onTap: () {
+                              if (appState.isContentEdited) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Warning: Content Not Saved"),
+                                    duration: Durations.extralong3,
+                                  ),
+                                );
+                                appState.setContentEditedState(false);
+                                return;
+                              }
+                              setState(() {
+                                _selectedIndex = -1;
+                                pageWidget = ICOverview(
+                                  onSetPage: (int index) {
+                                    setState(() {
+                                      _selectedIndex = index;
+                                    });
+                                  },
+                                );
+                              });
+                            },
+                          ),
+                          Expanded(
+                            child: ReorderableListView(
+                              shrinkWrap: true,
+                              buildDefaultDragHandles: false,
+                              onReorder: (int oldIndex, int newIndex) async {
+                                Cache fromCache = model.caches[oldIndex];
+                                Cache toCache =
+                                    model.caches[(oldIndex < newIndex)
+                                        ? newIndex - 1
+                                        : newIndex];
+                                await model.reorderCachesByIds(
+                                  fromCache.id,
+                                  toCache.id,
+                                );
+                                if (_selectedIndex > -1 &&
+                                    _selectedIndex < model.caches.length) {
+                                  setState(() {
+                                    _selectedIndex = (oldIndex < newIndex)
+                                        ? newIndex - 1
+                                        : newIndex;
+                                  });
                                 }
-                                setState(() {
-                                  _selectedIndex = -1;
-                                  pageWidget = ICOverview(
-                                    onSetPage: (int index) {
+                              },
+
+                              children: model.caches.asMap().entries.map((
+                                entry,
+                              ) {
+                                final int index = entry.key;
+                                final String title = entry.value.name;
+                                final String id = entry.value.id;
+                                return ReorderableDelayedDragStartListener(
+                                  key: ValueKey(id),
+                                  index: index,
+                                  child: ICNavigationBarButton(
+                                    key: ValueKey(id),
+                                    title: title,
+                                    icon: (_selectedIndex == index)
+                                        ? Icons.pages
+                                        : Icons.pages_outlined,
+                                    cache: entry.value,
+                                    collapsed: collapse,
+                                    enableEdit: true,
+                                    onTap: () {
+                                      if (appState.isContentEdited) {
+                                        ScaffoldMessenger.of(
+                                          consumerContext,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Warning: Content Not Saved",
+                                            ),
+                                            duration: Durations.extralong3,
+                                          ),
+                                        );
+                                        appState.setContentEditedState(false);
+                                        return;
+                                      }
                                       setState(() {
+                                        _initialBlockPageIndex = -1;
                                         _selectedIndex = index;
                                       });
                                     },
-                                  );
-                                });
-                              },
-                            ),
-                            Expanded(
-                              child: ReorderableListView(
-                                shrinkWrap: true,
-                                buildDefaultDragHandles: false,
-                                onReorder: (int oldIndex, int newIndex) async {
-                                  Cache fromCache = model.caches[oldIndex];
-                                  Cache toCache =
-                                      model.caches[(oldIndex < newIndex)
-                                          ? newIndex - 1
-                                          : newIndex];
-                                  await model.reorderCachesByIds(
-                                    fromCache.id,
-                                    toCache.id,
-                                  );
-                                  if (_selectedIndex > -1 &&
-                                      _selectedIndex < model.caches.length) {
-                                    setState(() {
-                                      _selectedIndex = (oldIndex < newIndex)
-                                          ? newIndex - 1
-                                          : newIndex;
-                                    });
-                                  }
-                                },
-
-                                children: model.caches.asMap().entries.map((
-                                  entry,
-                                ) {
-                                  final int index = entry.key;
-                                  final String title = entry.value.name;
-                                  final String id = entry.value.id;
-                                  return ReorderableDelayedDragStartListener(
-                                    key: ValueKey(id),
-                                    index: index,
-                                    child: ICNavigationBarButton(
-                                      key: ValueKey(id),
-                                      title: title,
-                                      icon: (_selectedIndex == index)
-                                          ? Icons.pages
-                                          : Icons.pages_outlined,
-                                      cache: entry.value,
-                                      collapsed: collapse,
-                                      enableEdit: true,
-                                      onTap: () {
-                                        if (appState.isContentEdited) {
-                                          ScaffoldMessenger.of(
-                                            consumerContext,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                "Warning: Content Not Saved",
-                                              ),
-                                              duration: Durations.extralong3,
-                                            ),
-                                          );
-                                          appState.setContentEditedState(false);
-                                          return;
-                                        }
-                                        setState(() {
-                                          _initialBlockPageIndex = -1;
-                                          _selectedIndex = index;
-                                        });
-                                      },
-                                      selected: _selectedIndex == index,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            Consumer<ICBlockModel>(
-                              builder: (context, blockModel, child) {
-                                return ICNavigationBarButton(
-                                  enableEdit: false,
-                                  icon: Icons.add,
-                                  title: 'Add Cache',
-                                  collapsed: collapse,
-                                  selected: false,
-                                  onTap: () async {
-                                    Cache cache = await model.createCache();
-                                    blockModel.updateLocalBlockMapByCacheId(
-                                      cache.id,
-                                    );
-                                  },
+                                    selected: _selectedIndex == index,
+                                  ),
                                 );
-                              },
+                              }).toList(),
                             ),
-                            ICNavigationBarButton(
-                              enableEdit: false,
-                              icon: _selectedIndex == model.caches.length
-                                  ? Icons.settings
-                                  : Icons.settings_outlined,
-
-                              title: "Settings",
-                              collapsed: collapse,
-                              selected: _selectedIndex == model.caches.length,
-                              onTap: () {
-                                if (appState.isContentEdited) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Warning: Content Not Saved",
-                                      ),
-                                      duration: Durations.extralong3,
-                                    ),
+                          ),
+                          Consumer<ICBlockModel>(
+                            builder: (context, blockModel, child) {
+                              return ICNavigationBarButton(
+                                enableEdit: false,
+                                icon: Icons.add,
+                                title: 'Add Cache',
+                                collapsed: collapse,
+                                selected: false,
+                                onTap: () async {
+                                  Cache cache = await model.createCache();
+                                  blockModel.updateLocalBlockMapByCacheId(
+                                    cache.id,
                                   );
-                                  // set the edited state such that user can ignore the warning
-                                  appState.setContentEditedState(false);
-                                  return;
-                                }
-                                setState(() {
-                                  _selectedIndex = model.caches.length;
-                                  pageWidget = ICSettingPage();
-                                });
-                              },
-                            ),
-                          ],
-                        );
-                },
-              ),
-            ),
-            const VerticalDivider(thickness: 2, width: 2),
-            Expanded(child: pageWidget!),
-          ],
-        ),
-      );
-    } else {
-      return Scaffold(
-        floatingActionButton: ICReminderButton(
-          onTap: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return ICReminderView(
-                  onTapBlock: (String cacheId, String blockId) {},
-                  onTapCache: (String cacheId) {},
-                );
+                                },
+                              );
+                            },
+                          ),
+                          ICNavigationBarButton(
+                            enableEdit: false,
+                            icon: _selectedIndex == model.caches.length
+                                ? Icons.settings
+                                : Icons.settings_outlined,
+
+                            title: "Settings",
+                            collapsed: collapse,
+                            selected: _selectedIndex == model.caches.length,
+                            onTap: () {
+                              if (appState.isContentEdited) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Warning: Content Not Saved"),
+                                    duration: Durations.extralong3,
+                                  ),
+                                );
+                                // set the edited state such that user can ignore the warning
+                                appState.setContentEditedState(false);
+                                return;
+                              }
+                              setState(() {
+                                _selectedIndex = model.caches.length;
+                                pageWidget = ICSettingPage();
+                              });
+                            },
+                          ),
+                        ],
+                      );
               },
-            );
-          },
-        ),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        appBar: AppBar(
-          title: RichText(
-            text: TextSpan(
-              text: "IdeaCache ",
-              style: Theme.of(context).textTheme.headlineMedium,
-              children: <TextSpan>[
-                TextSpan(
-                  text: " v1.4.2",
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ],
             ),
           ),
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          const VerticalDivider(thickness: 2, width: 2),
+          Expanded(child: pageWidget!),
+        ],
+      ),
+    );
+  }
+
+  Widget _androidApp() {
+    ICAppState appState = context.watch<ICAppState>();
+    ICCacheModel cacheModel = context.read<ICCacheModel>();
+    ICBlockModel blockModel = context.read<ICBlockModel>();
+    return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: ICReminderButton(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return ICReminderView(
+                onTapBlock: (String cacheId, String blockId) {
+                  setState(() {
+                    _selectedIndex = cacheModel.caches.indexWhere(
+                      (cache) => cache.id == cacheId,
+                    );
+                    _initialBlockPageIndex = blockModel.cacheBlocksMap[cacheId]!
+                        .indexWhere((block) => block.id == blockId);
+                  });
+                  Navigator.pop(context);
+                },
+                onTapCache: (String cacheId) {
+                  log(cacheId);
+                  setState(() {
+                    _selectedIndex = cacheModel.caches.indexWhere(
+                      (cache) => cache.id == cacheId,
+                    );
+                    _initialBlockPageIndex = -1;
+                  });
+                  Navigator.pop(context);
+                },
+              );
+            },
+          );
+        },
+      ),
+      drawerEdgeDragWidth: 96,
+      drawer: Drawer(
+        child: Consumer<ICCacheModel>(
+          builder: (consumerContext, model, child) {
+            return (model.isLoading)
+                ? LinearProgressIndicator()
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      DrawerHeader(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                        ),
+                        child: Text("IdeaCache v1.4.2"),
+                      ),
+                      ICNavigationBarButton(
+                        icon: (_selectedIndex == -1)
+                            ? Icons.dashboard
+                            : Icons.dashboard_outlined,
+
+                        title: "Overview",
+                        selected: _selectedIndex == -1,
+                        collapsed: false,
+                        enableEdit: false,
+                        height: 64,
+                        onTap: () {
+                          if (appState.isContentEdited) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Warning: Content Not Saved"),
+                                duration: Durations.extralong3,
+                              ),
+                            );
+                            appState.setContentEditedState(false);
+                            return;
+                          }
+                          setState(() {
+                            _selectedIndex = -1;
+                            pageWidget = ICOverview(
+                              onSetPage: (int index) {
+                                setState(() {
+                                  _selectedIndex = index;
+                                });
+                              },
+                            );
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: ReorderableListView(
+                          shrinkWrap: true,
+                          buildDefaultDragHandles: false,
+                          onReorder: (int oldIndex, int newIndex) async {
+                            Cache fromCache = model.caches[oldIndex];
+                            Cache toCache =
+                                model.caches[(oldIndex < newIndex)
+                                    ? newIndex - 1
+                                    : newIndex];
+                            await model.reorderCachesByIds(
+                              fromCache.id,
+                              toCache.id,
+                            );
+                            if (_selectedIndex > -1 &&
+                                _selectedIndex < model.caches.length) {
+                              setState(() {
+                                _selectedIndex = (oldIndex < newIndex)
+                                    ? newIndex - 1
+                                    : newIndex;
+                              });
+                            }
+                          },
+
+                          children: model.caches.asMap().entries.map((entry) {
+                            final int index = entry.key;
+                            final String title = entry.value.name;
+                            final String id = entry.value.id;
+                            return ReorderableDelayedDragStartListener(
+                              key: ValueKey(id),
+                              index: index,
+                              child: ICNavigationBarButton(
+                                key: ValueKey(id),
+                                title: title,
+                                icon: (_selectedIndex == index)
+                                    ? Icons.pages
+                                    : Icons.pages_outlined,
+                                cache: entry.value,
+                                collapsed: false,
+                                enableEdit: true,
+                                height: 64,
+                                onTap: () {
+                                  if (appState.isContentEdited) {
+                                    ScaffoldMessenger.of(
+                                      consumerContext,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Warning: Content Not Saved",
+                                        ),
+                                        duration: Durations.extralong3,
+                                      ),
+                                    );
+                                    appState.setContentEditedState(false);
+                                    return;
+                                  }
+                                  setState(() {
+                                    _initialBlockPageIndex = -1;
+                                    _selectedIndex = index;
+                                  });
+                                },
+                                selected: _selectedIndex == index,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      Consumer<ICBlockModel>(
+                        builder: (context, blockModel, child) {
+                          return ICNavigationBarButton(
+                            enableEdit: false,
+                            icon: Icons.add,
+                            title: 'Add Cache',
+                            collapsed: false,
+                            selected: false,
+                            height: 64,
+                            onTap: () async {
+                              Cache cache = await model.createCache();
+                              blockModel.updateLocalBlockMapByCacheId(cache.id);
+                            },
+                          );
+                        },
+                      ),
+                      ICNavigationBarButton(
+                        enableEdit: false,
+                        icon: _selectedIndex == model.caches.length
+                            ? Icons.settings
+                            : Icons.settings_outlined,
+
+                        title: "Settings",
+                        collapsed: false,
+                        selected: _selectedIndex == model.caches.length,
+                        height: 64,
+                        onTap: () {
+                          if (appState.isContentEdited) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Warning: Content Not Saved"),
+                                duration: Durations.extralong3,
+                              ),
+                            );
+                            // set the edited state such that user can ignore the warning
+                            appState.setContentEditedState(false);
+                            return;
+                          }
+                          setState(() {
+                            _selectedIndex = model.caches.length;
+                            pageWidget = ICSettingPage();
+                          });
+                        },
+                      ),
+                    ],
+                  );
+          },
         ),
-        drawer: SafeArea(child: Drawer()),
-        body: pageWidget,
-      );
-    }
+      ),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      appBar: AppBar(
+        toolbarHeight: 42,
+        title: Text(
+          "IdeaCache v1.4.2",
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+            color: Theme.of(context).colorScheme.inversePrimary,
+          ),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.surfaceTint,
+      ),
+      body: pageWidget!,
+    );
   }
 }

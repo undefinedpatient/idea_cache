@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/optioncard.dart';
@@ -88,25 +89,27 @@ class _ICSettingPageState extends State<ICSettingPage> {
                 Flexible(flex: 16, fit: FlexFit.tight, child: Divider()),
               ],
             ),
-            ICOptionCard<bool>(
-              title: "ToolTips",
-              description: "",
-              initialValue: _pref.toolTips,
-              options: {},
-              onChanged: (value) {
-                _pref.toggleToolTips();
-              },
-            ),
+            if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+              ICOptionCard<bool>(
+                title: "ToolTips",
+                description: "",
+                initialValue: _pref.toolTips,
+                options: {},
+                onChanged: (value) {
+                  _pref.toggleToolTips();
+                },
+              ),
 
-            ICOptionCard<bool>(
-              title: "Pin Window",
-              description: "",
-              initialValue: _pref.windowPinValue,
-              options: {},
-              onChanged: (value) {
-                _pref.toggleWindowPin();
-              },
-            ),
+            if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+              ICOptionCard<bool>(
+                title: "Pin Window",
+                description: "",
+                initialValue: _pref.windowPinValue,
+                options: {},
+                onChanged: (value) {
+                  _pref.toggleWindowPin();
+                },
+              ),
           ],
         ),
       ),
