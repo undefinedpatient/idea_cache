@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -60,10 +61,10 @@ class _ICNotificationState extends State<ICReminderView> {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
         // padding: EdgeInsets.all(16),
         appBar: AppBar(
-          toolbarHeight: 42,
+          toolbarHeight: (Platform.isAndroid) ? 64 : 42,
           backgroundColor: Theme.of(context).colorScheme.surfaceTint,
           leading: IconButton(
-            iconSize: 24,
+            iconSize: (Platform.isAndroid) ? 32 : 24,
             color: Theme.of(context).colorScheme.inversePrimary,
             onPressed: () {
               if (isCreationView) {
@@ -89,7 +90,7 @@ class _ICNotificationState extends State<ICReminderView> {
           actionsPadding: EdgeInsets.fromLTRB(8, 0, 8, 0),
           actions: [
             IconButton(
-              iconSize: 24,
+              iconSize: (Platform.isAndroid) ? 32 : 24,
               color: Theme.of(context).colorScheme.inversePrimary,
               onPressed: () {
                 setState(() {

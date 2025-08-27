@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:idea_cache/app.dart';
 import 'package:idea_cache/notificationhandler.dart';
 import 'package:idea_cache/userpreferences.dart';
@@ -15,6 +16,11 @@ void main() async {
     await windowManager.ensureInitialized();
     await windowManager.setMinimumSize(const Size(420, 420));
     windowManager.setAlwaysOnTop(ICUserPreferences().windowPinValue);
+  } else {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   runApp(const ICApp());

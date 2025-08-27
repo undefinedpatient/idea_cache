@@ -86,27 +86,24 @@ class _ICReminderButtonState extends State<ICReminderButton> {
         .split('.')[0];
     return Consumer<ICNotificationHandler>(
       builder: (context, handler, child) {
-        return IconButton.filled(
-          style: ButtonStyle(
-            backgroundColor: WidgetStateColor.fromMap({
-              WidgetState.any: (reminder?.status == reminderStatus.TRIGGERED)
-                  ? Colors.yellow.shade700
-                  : Theme.of(context).colorScheme.primary,
-            }),
-          ),
-          onPressed: widget.onTap,
-
-          icon: (reminder != null)
-              ? Row(
+        return (reminder == null)
+            ? FloatingActionButton(
+                onPressed: widget.onTap,
+                child: const Icon(Icons.notifications),
+              )
+            : FloatingActionButton.extended(
+                // style: ButtonStyle(
+                //   backgroundColor: WidgetStateColor.fromMap({
+                //     WidgetState.any: (reminder?.status == reminderStatus.TRIGGERED)
+                //         ? Colors.yellow.shade700
+                //         : Theme.of(context).colorScheme.primary,
+                //   }),
+                // ),
+                onPressed: widget.onTap,
+                label: Row(
                   spacing: 8,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      (reminder.status == reminderStatus.TRIGGERED)
-                          ? Icons.notifications_active
-                          : Icons.notifications,
-                      size: 32,
-                    ),
                     Text(
                       reminder.name,
                       style: TextStyle(
@@ -121,9 +118,14 @@ class _ICReminderButtonState extends State<ICReminderButton> {
                       ),
                     ),
                   ],
-                )
-              : const Icon(Icons.notifications, size: 32),
-        );
+                ),
+                icon: Icon(
+                  (reminder.status == reminderStatus.TRIGGERED)
+                      ? Icons.notifications_active
+                      : Icons.notifications,
+                  size: 32,
+                ),
+              );
       },
     );
   }
