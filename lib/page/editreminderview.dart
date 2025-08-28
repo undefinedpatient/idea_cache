@@ -192,8 +192,8 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                       ],
                     ),
                     Divider(),
-                    Flex(
-                      direction: (constraints.maxWidth < 360)
+                    Wrap(
+                      direction: (constraints.maxWidth < 420)
                           ? Axis.vertical
                           : Axis.horizontal,
                       spacing: 16,

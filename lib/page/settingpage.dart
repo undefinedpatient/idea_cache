@@ -89,16 +89,15 @@ class _ICSettingPageState extends State<ICSettingPage> {
                 Flexible(flex: 16, fit: FlexFit.tight, child: Divider()),
               ],
             ),
-            if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
-              ICOptionCard<bool>(
-                title: "ToolTips",
-                description: "",
-                initialValue: _pref.toolTips,
-                options: {},
-                onChanged: (value) {
-                  _pref.toggleToolTips();
-                },
-              ),
+            ICOptionCard<bool>(
+              title: "ToolTips",
+              description: "",
+              initialValue: _pref.toolTips,
+              options: {},
+              onChanged: (value) {
+                _pref.toggleToolTips();
+              },
+            ),
 
             if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
               ICOptionCard<bool>(

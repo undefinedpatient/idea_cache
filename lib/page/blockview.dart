@@ -86,41 +86,246 @@ class _ICBlockView extends State<ICBlockView> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _mobileEditor() {
     ICAppState appState = context.watch<ICAppState>();
     ICUserPreferences pref = context.read<ICUserPreferences>();
-
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: (Platform.isAndroid || Platform.isMacOS)
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              spacing: 16,
-              children: [
-                FloatingActionButton(
-                  onPressed: (!canRevert)
-                      ? null
-                      : () {
-                          _loadBlockContent();
-                          appState.setContentEditedState(false);
-                          setState(() {});
-                        },
-                  elevation: 4,
-                  child: Icon(Icons.restore),
-                ),
-                FloatingActionButton(
-                  onPressed: () {
-                    _onSave(context);
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        spacing: 16,
+        children: [
+          FloatingActionButton(
+            onPressed: (!canRevert)
+                ? null
+                : () {
+                    _loadBlockContent();
                     appState.setContentEditedState(false);
                     setState(() {});
                   },
-                  elevation: 4,
-                  child: Icon(Icons.save),
+            elevation: 4,
+            child: Icon(Icons.restore),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              _onSave(context);
+              appState.setContentEditedState(false);
+              setState(() {});
+            },
+            elevation: 4,
+            child: Icon(Icons.save),
+          ),
+        ],
+      ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: TapRegion(
+        onTapOutside: (event) {
+          FocusScope.of(context).unfocus();
+        },
+        onTapInside: (event) {
+          _focusNode.requestFocus();
+          setState(() {});
+        },
+        child: Column(
+          children: [
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: Column(
+                children: [
+                  if (Platform.isWindows ||
+                      Platform.isMacOS ||
+                      Platform.isLinux)
+                    _desktopActionBar(appState, pref),
+                  QuillSimpleToolbar(
+                    controller: _controller,
+                    config: QuillSimpleToolbarConfig(
+                      multiRowsDisplay: false,
+                      buttonOptions: QuillSimpleToolbarButtonOptions(
+                        fontFamily: QuillToolbarFontFamilyButtonOptions(
+                          tooltip: (pref.toolTips) ? "Font Family" : "",
+                          items: _fontFamilies,
+                        ),
+                        selectAlignmentButtons:
+                            QuillToolbarSelectAlignmentButtonOptions(
+                              tooltips: QuillSelectAlignmentValues(
+                                leftAlignment: "",
+                                centerAlignment: "",
+                                rightAlignment: "",
+                                justifyAlignment: "",
+                              ),
+                            ),
+                        redoHistory: QuillToolbarHistoryButtonOptions(
+                          tooltip: (pref.toolTips) ? "Redo" : "",
+                        ),
+                        undoHistory: QuillToolbarHistoryButtonOptions(
+                          tooltip: (pref.toolTips) ? "Undo" : "",
+                        ),
+                        bold: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Bold" : "",
+                        ),
+                        italic: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Italic" : "",
+                        ),
+                        underLine: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Underline" : "",
+                        ),
+                        clearFormat: QuillToolbarClearFormatButtonOptions(
+                          tooltip: (pref.toolTips) ? "Clear Format" : "",
+                        ),
+                        listNumbers: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Numbered List" : "",
+                        ),
+                        listBullets: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Bulleted List" : "",
+                        ),
+                        toggleCheckList:
+                            QuillToolbarToggleCheckListButtonOptions(
+                              tooltip: (pref.toolTips)
+                                  ? "Toggle Check List"
+                                  : "",
+                            ),
+                        quote: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Quote" : "",
+                        ),
+                        search: QuillToolbarSearchButtonOptions(
+                          tooltip: (pref.toolTips) ? "Search" : "",
+                        ),
+                        fontSize: QuillToolbarFontSizeButtonOptions(
+                          tooltip: (pref.toolTips) ? "Font Size" : "",
+                          items: Map.from({
+                            '16': '16',
+                            '18': '18',
+                            '24': '24',
+                            '32': '32',
+                            'Clear': '0',
+                          }),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      sectionDividerColor: Theme.of(
+                        context,
+                      ).colorScheme.onSurface,
+                      showStrikeThrough: false,
+                      showAlignmentButtons: true,
+                      showInlineCode: false,
+                      showSubscript: false,
+                      showSuperscript: false,
+                      showColorButton: false,
+                      showHeaderStyle: false,
+                      showCodeBlock: false,
+                      showBackgroundColorButton: false,
+                      showIndent: false,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: ColorFiltered(
+                colorFilter: (_focusNode.hasPrimaryFocus)
+                    ? ColorFilter.srgbToLinearGamma()
+                    : ColorFilter.matrix(<double>[
+                        1, 0.0, 0.0, 0.0, 0.0,
+                        //
+                        0.0, 1, 0.0, 0.0, 0.0,
+                        //
+                        0.0, 0.0, 1, 0.0, 0.0,
+                        //
+                        0.0, 0.0, 0.0, 0.3, 0.0,
+                        //
+                      ]),
+                child: CallbackShortcuts(
+                  bindings: <ShortcutActivator, VoidCallback>{
+                    LogicalKeySet(
+                      LogicalKeyboardKey.controlLeft,
+                      LogicalKeyboardKey.keyS,
+                    ): () async {
+                      appState.setContentEditedState(false);
+                      await _onSave(context);
+                      setState(() {}); // Trigger Rebuild
+                    },
+                  },
+                  child: QuillEditor(
+                    controller: _controller,
+                    config: QuillEditorConfig(
+                      customStyles: DefaultStyles(
+                        quote: DefaultTextBlockStyle(
+                          TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 16,
+                            letterSpacing: 1,
+                          ),
+                          HorizontalSpacing.zero,
+                          VerticalSpacing.zero,
+                          VerticalSpacing.zero,
+                          BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withAlpha(20),
+                            border: BoxBorder.fromLTRB(
+                              left: BorderSide(
+                                width: 4,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        ),
+                        lists: DefaultListBlockStyle(
+                          TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 16,
+                            letterSpacing: 1,
+                          ),
+                          HorizontalSpacing.zero,
+                          VerticalSpacing.zero,
+                          VerticalSpacing.zero,
+                          null,
+                          null,
+                        ),
+                        sizeSmall: TextStyle(fontSize: 16),
+                        sizeLarge: TextStyle(fontSize: 20),
+                        sizeHuge: TextStyle(fontSize: 24),
+
+                        color: Colors.amber,
+                        paragraph: DefaultTextBlockStyle(
+                          TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontFamily: 'Roboto Thin',
+                            fontSize: 18,
+                            letterSpacing: 1,
+                          ),
+                          HorizontalSpacing.zero,
+                          VerticalSpacing.zero,
+                          VerticalSpacing.zero,
+                          null,
+                        ),
+                      ),
+                      padding: EdgeInsets.all(18),
+                      placeholder: "Write Something",
+                      expands: true,
+                    ),
+
+                    focusNode: _focusNode,
+                    scrollController: _scrollController,
+                  ),
                 ),
-              ],
-            )
-          : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _desktopEditor() {
+    ICAppState appState = context.watch<ICAppState>();
+    ICUserPreferences pref = context.read<ICUserPreferences>();
+    return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: TapRegion(
         onTapOutside: (event) {
@@ -323,6 +528,15 @@ class _ICBlockView extends State<ICBlockView> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      return _desktopEditor();
+    } else {
+      return _mobileEditor();
+    }
   }
 
   Widget _desktopActionBar(ICAppState appState, ICUserPreferences pref) {
