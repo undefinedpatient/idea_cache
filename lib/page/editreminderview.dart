@@ -193,14 +193,14 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                     ),
                     Divider(),
                     Flex(
-                      direction: (constraints.maxWidth < 480)
+                      direction: (constraints.maxWidth < 360)
                           ? Axis.vertical
                           : Axis.horizontal,
                       spacing: 16,
                       children: [
                         Text("CountDown: ", textScaler: TextScaler.linear(1.2)),
                         SizedBox(
-                          width: 96,
+                          width: 72,
                           child: TextFormField(
                             onChanged: (value) {
                               if (value.isEmpty) {
@@ -222,7 +222,7 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                           ),
                         ),
                         SizedBox(
-                          width: 96,
+                          width: 72,
                           child: TextFormField(
                             onChanged: (value) {
                               if (value.isEmpty) {
@@ -244,7 +244,7 @@ class _ICEditNotificationViewState extends State<ICEditNotificationView> {
                           ),
                         ),
                         SizedBox(
-                          width: 96,
+                          width: 72,
                           child: TextFormField(
                             onChanged: (value) {
                               if (value.isEmpty) {
