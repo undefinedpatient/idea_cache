@@ -253,7 +253,9 @@ class _ICCacheView extends State<ICCacheView> {
                         ? Icons.description
                         : Icons.description_outlined,
                   ),
-                  child: SizedBox(width: 90, child: Text("Overview")),
+                  child: (MediaQuery.of(context).size.width < 480)
+                      ? null
+                      : SizedBox(width: 80, child: Text("Overview")),
                 ),
                 Consumer<ICBlockModel>(
                   builder: (context, model, child) {
