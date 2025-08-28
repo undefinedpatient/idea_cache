@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:developer' as dev;
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_timezone/flutter_timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:idea_cache/model/filehandler.dart';
 import 'package:idea_cache/model/reminder.dart';
-import 'package:timezone/data/latest_all.dart';
-import 'package:timezone/timezone.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-// local Notification : in app
-// Notification : pop up on screen, like message notification
 class ICNotificationHandler extends ChangeNotifier {
+  static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   static AndroidNotificationChannel channel = const AndroidNotificationChannel(
     'Channel_id',
     'Channel_title',
@@ -28,9 +28,7 @@ class ICNotificationHandler extends ChangeNotifier {
       );
   static const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  // This is for InApp popupdialog notification
   static final List<ICReminder> _popupDialogList = [];
   static Map<reminderStatus, List<ICReminder>> reminderMap = {
     reminderStatus.DISMISSED: [],
@@ -40,6 +38,7 @@ class ICNotificationHandler extends ChangeNotifier {
   };
 
   static Timer? timer;
+  static Timer? timer2;
   List<ICReminder> get popupDialogList => _popupDialogList;
   static ICReminder? get oldestTriggeredReminder {
     return reminderMap[reminderStatus.TRIGGERED]!.lastOrNull;
@@ -49,20 +48,8 @@ class ICNotificationHandler extends ChangeNotifier {
     return reminderMap[reminderStatus.SCHEDULED]!.firstOrNull;
   }
 
-  void clearQueue() {
-    reminderMap.clear();
-    notifyListeners();
-  }
-
-  void wipeTimer(Timer timer) {
-    timer.cancel();
-  }
-
-  void alarmCallBack(ICReminder reminder) {
-    _popupDialogList.clear();
-  }
-
-  static Future<void> initReminders() async {
+  // Load all the reminders data as local data, and assign them with different role
+  static Future<void> loadRemindersFromFile() async {
     List<ICReminder> reminders = await FileHandler.readReminders();
     for (int i = 0; i < reminders.length; i++) {
       // If the reminders should be in Triggered Status
@@ -92,30 +79,176 @@ class ICNotificationHandler extends ChangeNotifier {
         continue;
       }
     }
+    /*
+      It is required to sort the reminders if they are not appended in order
+      doing so can ensure the check() check the correct reminder
+    */
+    _sortReminders();
   }
 
-  void initLoop() {
-    timer = Timer.periodic(Duration(milliseconds: 1000), check);
+  // Execute the checking per second, use checkInAppNotification as callback
+  void initInAppCheckLoop() {
+    timer = Timer.periodic(
+      Duration(milliseconds: 1000),
+      checkInAppNotification,
+    );
   }
 
-  void updateReminder(ICReminder reminder) {
-    reminderMap.forEach((status, reminders) {
-      reminders.removeWhere((item) => reminder.scheduleId == item.scheduleId);
-    });
-    reminderMap[reminder.status]!.add(reminder);
-    reminderMap = _sort();
+  // It is executed per second throughout the lifetime, only compute the latest upcoming reminder
+  void checkInAppNotification(Timer timer) async {
+    // _printInfo();
+    ICReminder? checkedReminder = upcomingReminder;
+    if (checkedReminder == null) {
+      return;
+    }
+    if (checkedReminder.time.compareTo(DateTime.now()) <= 0 ||
+        checkedReminder.time.isAtSameMomentAs(DateTime.now())) {
+      reminderMap[reminderStatus.SCHEDULED]!.removeWhere(
+        (item) => item.scheduleId == checkedReminder.scheduleId,
+      );
+      checkedReminder.status = reminderStatus.TRIGGERED;
+      await FileHandler.updateReminder(checkedReminder);
+
+      reminderMap.forEach((status, reminders) {
+        reminders.removeWhere(
+          (item) => checkedReminder.scheduleId == item.scheduleId,
+        );
+      });
+      reminderMap[checkedReminder.status]!.add(checkedReminder);
+
+      reminderMap = _sortReminders();
+      _popupDialogList.add(checkedReminder);
+      reminderMap = _sortReminders();
+      notifyListeners();
+      return;
+    }
+  }
+
+  static Future<void> initNotification() async {
+    // Initialize notification plugin
+    const InitializationSettings initSettings = InitializationSettings(
+      // android: androidSettings,
+      windows: initializationSettingsWindows,
+      android: initializationSettingsAndroid,
+    );
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
+    await flutterLocalNotificationsPlugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (payload) {},
+    );
+    // Set the local location such that the notification pop up at the right timezone
+    String timezoneLocation = await FlutterTimezone.getLocalTimezone();
+    tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation(timezoneLocation));
+  }
+
+  static Future<void> loadAllScheduleNotifications() async {
+    await flutterLocalNotificationsPlugin.cancelAll();
+    NotificationDetails details = NotificationDetails(
+      windows: WindowsNotificationDetails(),
+      android: AndroidNotificationDetails(
+        channel.id,
+        channel.name,
+        channelDescription: channel.description,
+        importance: Importance.high,
+        color: Colors.blue,
+        playSound: true,
+        icon: '@mipmap/ic_launcher',
+      ),
+    );
+    for (int i = 0; i < reminderMap[reminderStatus.SCHEDULED]!.length; i++) {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        reminderMap[reminderStatus.SCHEDULED]![i].scheduleId,
+        "ICReminder",
+        reminderMap[reminderStatus.SCHEDULED]![i].name,
+        tz.TZDateTime.from(
+          reminderMap[reminderStatus.SCHEDULED]![i].time,
+          tz.local,
+        ),
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    }
+  }
+
+  static Future<void> _scheduleNotification(ICReminder reminder) async {
+    NotificationDetails details = NotificationDetails(
+      windows: WindowsNotificationDetails(),
+      android: AndroidNotificationDetails(
+        channel.id,
+        channel.name,
+        channelDescription: channel.description,
+        importance: Importance.low,
+        color: Colors.blue,
+        playSound: true,
+        icon: '@mipmap/ic_launcher',
+      ),
+    );
+    tz.TZDateTime tzDateTime;
+    tzDateTime = tz.TZDateTime.from(reminder.time, tz.local);
+    dev.log(tzDateTime.toString());
+    // }
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      reminder.scheduleId,
+      "ICReminder",
+      reminder.name,
+      tzDateTime,
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  static Future<void> _removeNotification(ICReminder reminder) async {
+    await flutterLocalNotificationsPlugin.cancel(reminder.scheduleId);
+  }
+
+  void clearQueue() {
+    reminderMap.clear();
     notifyListeners();
   }
 
-  void removeReminder(ICReminder reminder) {
+  void alarmCallBack(ICReminder reminder) {
+    _popupDialogList.clear();
+  }
+
+  // Update/Add new formed Reminder
+  Future<void> updateReminder(ICReminder reminder) async {
+    dev.log("Reminder ${reminder.name} updated");
+    reminderMap.forEach((status, reminders) {
+      reminders.removeWhere((item) => reminder.scheduleId == item.scheduleId);
+    });
+    // There is one case when the reminder is already passed, changing from mute to schedule should not be possible
+    if (reminder.time.isBefore(DateTime.now())) {
+      reminder.status = reminderStatus.DISMISSED;
+    }
+    reminderMap[reminder.status]!.add(reminder);
+    reminderMap = _sortReminders();
+    //Attempt to remove existing regardless whether it is in the list
+    await _removeNotification(reminder);
+    if (reminder.status == reminderStatus.SCHEDULED) {
+      await _scheduleNotification(reminder);
+    }
+
+    notifyListeners();
+  }
+
+  // Remove the target reminder
+  Future<void> removeReminder(ICReminder reminder) async {
+    dev.log("Reminder ${reminder.name} removed");
     reminderMap.forEach((status, reminders) {
       reminders.removeWhere((item) => reminder.scheduleId == item.scheduleId);
     });
     _popupDialogList.removeWhere((item) => item.id == reminder.id);
+    await _removeNotification(reminder);
     notifyListeners();
   }
 
-  void printInfo() {
+  // Debug Function
+  void _printInfo() async {
     String timerInfo = timer?.tick.toString() ?? "Timer unavailable";
     String notActiveInfo = "";
     for (ICReminder value in reminderMap[reminderStatus.NOTACTIVE]!) {
@@ -143,35 +276,21 @@ class ICNotificationHandler extends ChangeNotifier {
     dev.log(
       "$timerInfo\n NOT ACTIVE:$notActiveInfo\n SCHEDULED: $scheduleInfo\n TRIGGERED: $triggeredInfo\n DISMISSED:$dismissedInfo\n Upcoming:$upcomingMessage\n AlarmsInfo:$alarmsInfo",
     );
+    String notificationInfo = "";
+    List<PendingNotificationRequest> notifications =
+        await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    for (PendingNotificationRequest request in notifications) {
+      notificationInfo += "{${request.id} ${request.body}}";
+    }
+
+    dev.log(notificationInfo);
   }
 
-  // Only compute the latest upcoming reminder
-  void check(Timer timer) async {
-    ICReminder? checkedReminder = upcomingReminder;
-    if (checkedReminder == null) {
-      return;
-    }
-    if (checkedReminder.time.compareTo(DateTime.now()) <= 0 ||
-        checkedReminder.time.isAtSameMomentAs(DateTime.now())) {
-      reminderMap[reminderStatus.SCHEDULED]!.removeWhere(
-        (item) => item.scheduleId == checkedReminder.scheduleId,
-      );
-      checkedReminder.status = reminderStatus.TRIGGERED;
-      FileHandler.updateReminder(checkedReminder);
-      updateReminder(checkedReminder);
-      _popupDialogList.add(checkedReminder);
-      reminderMap = _sort();
-      sendNotification(checkedReminder);
-      notifyListeners();
-      return;
-    }
-  }
-
-  static Map<reminderStatus, List<ICReminder>> _sort() {
+  static Map<reminderStatus, List<ICReminder>> _sortReminders() {
     Map<reminderStatus, List<ICReminder>> temp = reminderMap;
     temp.forEach((status, reminders) {
       for (int i = 0; i < reminders.length; i++) {
-        for (int j = i; j < reminders.length - i; j++) {
+        for (int j = i + 1; j < reminders.length; j++) {
           if (reminders[i].time.isAfter(reminders[j].time)) {
             ICReminder temp = reminders[i];
             reminders[i] = reminders[j];
@@ -182,101 +301,4 @@ class ICNotificationHandler extends ChangeNotifier {
     });
     return temp;
   }
-
-  static Future<void> initNotification() async {
-    // Initialize notification plugin
-    const InitializationSettings initSettings = InitializationSettings(
-      // android: androidSettings,
-      windows: initializationSettingsWindows,
-      android: initializationSettingsAndroid,
-    );
-
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
-
-    await flutterLocalNotificationsPlugin.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (payload) {},
-    );
-    String timezoneLocation = await tz.FlutterTimezone.getLocalTimezone();
-    initializeTimeZones();
-    setLocalLocation(getLocation(timezoneLocation));
-  }
-
-  // // Debug/Developement Purpose
-  static Future<void> sendNotification(ICReminder reminder) async {
-    WindowsNotificationDetails windowsNotificationDetails =
-        WindowsNotificationDetails();
-    NotificationDetails details = NotificationDetails(
-      windows: windowsNotificationDetails,
-      android: AndroidNotificationDetails(
-        channel.id,
-        channel.name,
-        channelDescription: channel.description,
-        importance: Importance.high,
-        color: Colors.blue,
-        playSound: true,
-        icon: '@mipmap/ic_launcher',
-      ),
-    );
-    ICNotificationHandler.flutterLocalNotificationsPlugin.show(
-      0,
-      reminder.name,
-      "",
-      details,
-    );
-  }
-
-  // static Future<void> scheduleLocalNotification(
-  //   ICReminder notification, {
-  //   required Function() callBack,
-  // }) async {
-  //   Duration secondCountDown = notification.dateTime.difference(DateTime.now());
-  //   Timer(secondCountDown, () async {
-  //     ICReminder? instantNotification = await FileHandler.findNotificationById(
-  //       notification.id,
-  //     );
-  //     // If the notification scheduled is deleted
-  //     if (instantNotification == null) {
-  //       return;
-  //     }
-  //     // If the notification time was updated
-  //     if (instantNotification.dateTime.compareTo(notification.dateTime) != 0) {
-  //       return;
-  //     }
-  //     callBack();
-  //   });
-  // }
-
-  // static Future<void> cancelNotification(ICReminder notification) async {
-  //   await flutterLocalNotificationsPlugin.cancel(notification.scheduleId);
-  // }
-
-  // static Future<void> scheduleNotification(ICReminder notification) async {
-  //   AndroidScheduleMode androidScheduleMode = AndroidScheduleMode.exact;
-  //   DateTime time = notification.dateTime;
-  //   WindowsNotificationDetails windowsNotificationDetails =
-  //       WindowsNotificationDetails();
-  //   NotificationDetails notificationDetails = NotificationDetails(
-  //     windows: windowsNotificationDetails,
-  //   );
-
-  //   flutterLocalNotificationsPlugin.zonedSchedule(
-  //     notification.scheduleId,
-  //     notification.name,
-  //     notification.description,
-  //     tz.TZDateTime.utc(
-  //       time.year,
-  //       time.month,
-  //       time.day,
-  //       time.hour,
-  //       time.minute,
-  //     ),
-  //     notificationDetails,
-  //     androidScheduleMode: androidScheduleMode,
-  //   );
-  // }
 }

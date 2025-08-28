@@ -17,7 +17,7 @@ class ICSettingPage extends StatefulWidget {
 }
 
 class _ICSettingPageState extends State<ICSettingPage> {
-  ICUserPreferences _pref = ICUserPreferences();
+  final ICUserPreferences _pref = ICUserPreferences();
   @override
   void initState() {
     super.initState();

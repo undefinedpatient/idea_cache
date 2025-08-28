@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:uuid/uuid.dart';
 
 enum reminderStatus { NOTACTIVE, SCHEDULED, TRIGGERED, DISMISSED }
@@ -12,7 +10,6 @@ class ICReminder {
   reminderStatus status;
   String name;
   DateTime time;
-
   ICReminder({
     this.cacheId = "",
     this.blockId = "",
@@ -20,7 +17,7 @@ class ICReminder {
     this.name = "Untitled",
     required this.time,
   }) : _id = Uuid().v4(),
-       scheduleId = DateTime.now().millisecondsSinceEpoch;
+       scheduleId = DateTime.now().millisecondsSinceEpoch % 2147483648;
 
   String get id => _id;
   int get hours {

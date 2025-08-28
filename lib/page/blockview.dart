@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:idea_cache/app.dart';
 import 'package:idea_cache/model/fileHandler.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/settingsmodel.dart';

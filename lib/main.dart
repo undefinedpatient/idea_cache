@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,8 +10,9 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ICNotificationHandler.initReminders();
+  await ICNotificationHandler.loadRemindersFromFile();
   await ICNotificationHandler.initNotification();
+  await ICNotificationHandler.loadAllScheduleNotifications();
   await ICUserPreferences().loadPreferences();
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     await windowManager.ensureInitialized();
@@ -22,6 +24,5 @@ void main() async {
       DeviceOrientation.portraitDown,
     ]);
   }
-
   runApp(const ICApp());
 }

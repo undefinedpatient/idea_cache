@@ -19,7 +19,7 @@ class ICReminderCard extends StatefulWidget {
   final void Function() onTapReminder;
   final void Function(String) onTapCache;
   final void Function(String, String) onTapBlock;
-  ICReminderCard({
+  const ICReminderCard({
     super.key,
     required this.index,
     required this.reminder,

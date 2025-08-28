@@ -94,7 +94,7 @@ class ICMainView extends StatefulWidget {
 
 class _ICMainView extends State<ICMainView> {
   int _initialBlockPageIndex = -1;
-  int _selectedIndex = 0;
+  int _selectedIndex = -1;
   bool collapse = false;
   Widget? pageWidget;
   @override
@@ -116,7 +116,10 @@ class _ICMainView extends State<ICMainView> {
     );
     Future.microtask(
       () => {
-        Provider.of<ICNotificationHandler>(context, listen: false).initLoop(),
+        Provider.of<ICNotificationHandler>(
+          context,
+          listen: false,
+        ).initInAppCheckLoop(),
       },
     );
   }
@@ -208,7 +211,7 @@ class _ICMainView extends State<ICMainView> {
       appBar: AppBar(
         toolbarHeight: 32,
         title: Text(
-          "IdeaCache v1.4.2",
+          "IdeaCache v1.4.3",
           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
             color: Theme.of(context).colorScheme.inversePrimary,
           ),
@@ -406,7 +409,12 @@ class _ICMainView extends State<ICMainView> {
       floatingActionButton: ICReminderButton(
         onTap: () {
           showModalBottomSheet(
+            isScrollControlled: true,
             context: context,
+            constraints: BoxConstraints(
+              // minHeight: MediaQuery.heightOf(context) * 0.8,
+              maxHeight: MediaQuery.heightOf(context) * 0.8,
+            ),
             builder: (context) {
               return ICReminderView(
                 onTapBlock: (String cacheId, String blockId) {
@@ -448,7 +456,7 @@ class _ICMainView extends State<ICMainView> {
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primaryContainer,
                         ),
-                        child: Text("IdeaCache v1.4.2"),
+                        child: Text("IdeaCache v1.4.3"),
                       ),
                       ICNavigationBarButton(
                         icon: (_selectedIndex == -1)
@@ -603,7 +611,7 @@ class _ICMainView extends State<ICMainView> {
       appBar: AppBar(
         toolbarHeight: 42,
         title: Text(
-          "IdeaCache v1.4.2",
+          "IdeaCache v1.4.3",
           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
             color: Theme.of(context).colorScheme.inversePrimary,
           ),
