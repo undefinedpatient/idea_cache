@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -25,7 +27,6 @@ class _ICBlockView extends State<ICBlockView> {
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
-
   final Map<String, String> _fontFamilies = {
     'Abel': "Abel",
     'Annie': 'Annie Use Your Telescope',
@@ -61,6 +62,13 @@ class _ICBlockView extends State<ICBlockView> {
   void initState() {
     super.initState();
     _loadBlockContent();
+    _controller.document.changes.listen((event) {
+      if (!mounted) return;
+      context.read<ICAppState>().setContentEditedState(true);
+      setState(() {
+        canRevert = true;
+      });
+    });
   }
 
   @override
@@ -74,6 +82,7 @@ class _ICBlockView extends State<ICBlockView> {
     _scrollController.dispose();
     _focusNode.dispose();
     _controller.dispose();
+
     super.dispose();
   }
 
@@ -81,17 +90,6 @@ class _ICBlockView extends State<ICBlockView> {
   Widget build(BuildContext context) {
     ICAppState appState = context.watch<ICAppState>();
     ICUserPreferences pref = context.read<ICUserPreferences>();
-    _controller.document.changes.listen((event) {
-      appState.setContentEditedState(true);
-
-      setState(() {
-        canRevert = true;
-      }); //Trigger Rebuild
-    });
-    // Rebuild the widget when the focus change, used to indicate whether the editor is being edited
-    _focusNode.addListener(() {
-      setState(() {});
-    });
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -124,191 +122,205 @@ class _ICBlockView extends State<ICBlockView> {
             )
           : null,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Column(
-        children: [
-          Material(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            child: Column(
-              children: [
-                if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
-                  _desktopActionBar(appState, pref),
-                QuillSimpleToolbar(
-                  controller: _controller,
-                  config: QuillSimpleToolbarConfig(
-                    buttonOptions: QuillSimpleToolbarButtonOptions(
-                      fontFamily: QuillToolbarFontFamilyButtonOptions(
-                        tooltip: (pref.toolTips) ? "Font Family" : "",
-                        items: _fontFamilies,
-                      ),
-                      selectAlignmentButtons:
-                          QuillToolbarSelectAlignmentButtonOptions(
-                            tooltips: QuillSelectAlignmentValues(
-                              leftAlignment: "",
-                              centerAlignment: "",
-                              rightAlignment: "",
-                              justifyAlignment: "",
+      body: TapRegion(
+        onTapOutside: (event) {
+          FocusScope.of(context).unfocus();
+        },
+        onTapInside: (event) {
+          _focusNode.requestFocus();
+          setState(() {});
+        },
+        child: Column(
+          children: [
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: Column(
+                children: [
+                  if (Platform.isWindows ||
+                      Platform.isMacOS ||
+                      Platform.isLinux)
+                    _desktopActionBar(appState, pref),
+                  QuillSimpleToolbar(
+                    controller: _controller,
+                    config: QuillSimpleToolbarConfig(
+                      buttonOptions: QuillSimpleToolbarButtonOptions(
+                        fontFamily: QuillToolbarFontFamilyButtonOptions(
+                          tooltip: (pref.toolTips) ? "Font Family" : "",
+                          items: _fontFamilies,
+                        ),
+                        selectAlignmentButtons:
+                            QuillToolbarSelectAlignmentButtonOptions(
+                              tooltips: QuillSelectAlignmentValues(
+                                leftAlignment: "",
+                                centerAlignment: "",
+                                rightAlignment: "",
+                                justifyAlignment: "",
+                              ),
                             ),
+                        redoHistory: QuillToolbarHistoryButtonOptions(
+                          tooltip: (pref.toolTips) ? "Redo" : "",
+                        ),
+                        undoHistory: QuillToolbarHistoryButtonOptions(
+                          tooltip: (pref.toolTips) ? "Undo" : "",
+                        ),
+                        bold: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Bold" : "",
+                        ),
+                        italic: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Italic" : "",
+                        ),
+                        underLine: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Underline" : "",
+                        ),
+                        clearFormat: QuillToolbarClearFormatButtonOptions(
+                          tooltip: (pref.toolTips) ? "Clear Format" : "",
+                        ),
+                        listNumbers: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Numbered List" : "",
+                        ),
+                        listBullets: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Bulleted List" : "",
+                        ),
+                        toggleCheckList:
+                            QuillToolbarToggleCheckListButtonOptions(
+                              tooltip: (pref.toolTips)
+                                  ? "Toggle Check List"
+                                  : "",
+                            ),
+                        quote: QuillToolbarToggleStyleButtonOptions(
+                          tooltip: (pref.toolTips) ? "Quote" : "",
+                        ),
+                        search: QuillToolbarSearchButtonOptions(
+                          tooltip: (pref.toolTips) ? "Search" : "",
+                        ),
+                        fontSize: QuillToolbarFontSizeButtonOptions(
+                          tooltip: (pref.toolTips) ? "Font Size" : "",
+                          items: Map.from({
+                            '16': '16',
+                            '18': '18',
+                            '24': '24',
+                            '32': '32',
+                            'Clear': '0',
+                          }),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                      redoHistory: QuillToolbarHistoryButtonOptions(
-                        tooltip: (pref.toolTips) ? "Redo" : "",
-                      ),
-                      undoHistory: QuillToolbarHistoryButtonOptions(
-                        tooltip: (pref.toolTips) ? "Undo" : "",
-                      ),
-                      bold: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (pref.toolTips) ? "Bold" : "",
-                      ),
-                      italic: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (pref.toolTips) ? "Italic" : "",
-                      ),
-                      underLine: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (pref.toolTips) ? "Underline" : "",
-                      ),
-                      clearFormat: QuillToolbarClearFormatButtonOptions(
-                        tooltip: (pref.toolTips) ? "Clear Format" : "",
-                      ),
-                      listNumbers: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (pref.toolTips) ? "Numbered List" : "",
-                      ),
-                      listBullets: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (pref.toolTips) ? "Bulleted List" : "",
-                      ),
-                      toggleCheckList: QuillToolbarToggleCheckListButtonOptions(
-                        tooltip: (pref.toolTips) ? "Toggle Check List" : "",
-                      ),
-                      quote: QuillToolbarToggleStyleButtonOptions(
-                        tooltip: (pref.toolTips) ? "Quote" : "",
-                      ),
-                      search: QuillToolbarSearchButtonOptions(
-                        tooltip: (pref.toolTips) ? "Search" : "",
-                      ),
-                      fontSize: QuillToolbarFontSizeButtonOptions(
-                        tooltip: (pref.toolTips) ? "Font Size" : "",
-                        items: Map.from({
-                          '16': '16',
-                          '18': '18',
-                          '24': '24',
-                          '32': '32',
-                          'Clear': '0',
-                        }),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                    ),
 
-                    color: Theme.of(context).colorScheme.onSurface,
-                    sectionDividerColor: Theme.of(
-                      context,
-                    ).colorScheme.onSurface,
-                    showStrikeThrough: false,
-                    showAlignmentButtons: true,
-                    showInlineCode: false,
-                    showSubscript: false,
-                    showSuperscript: false,
-                    showColorButton: false,
-                    showHeaderStyle: false,
-                    showCodeBlock: false,
-                    showBackgroundColorButton: false,
-                    showIndent: false,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      sectionDividerColor: Theme.of(
+                        context,
+                      ).colorScheme.onSurface,
+                      showStrikeThrough: false,
+                      showAlignmentButtons: true,
+                      showInlineCode: false,
+                      showSubscript: false,
+                      showSuperscript: false,
+                      showColorButton: false,
+                      showHeaderStyle: false,
+                      showCodeBlock: false,
+                      showBackgroundColorButton: false,
+                      showIndent: false,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          Expanded(
-            child: ColorFiltered(
-              colorFilter: (_focusNode.hasPrimaryFocus)
-                  ? ColorFilter.srgbToLinearGamma()
-                  : ColorFilter.matrix(<double>[
-                      1, 0.0, 0.0, 0.0, 0.0,
-                      //
-                      0.0, 1, 0.0, 0.0, 0.0,
-                      //
-                      0.0, 0.0, 1, 0.0, 0.0,
-                      //
-                      0.0, 0.0, 0.0, 0.3, 0.0,
-                      //
-                    ]),
-              child: CallbackShortcuts(
-                bindings: <ShortcutActivator, VoidCallback>{
-                  LogicalKeySet(
-                    LogicalKeyboardKey.controlLeft,
-                    LogicalKeyboardKey.keyS,
-                  ): () async {
-                    appState.setContentEditedState(false);
-                    await _onSave(context);
-                    setState(() {}); // Trigger Rebuild
+            Expanded(
+              child: ColorFiltered(
+                colorFilter: (_focusNode.hasPrimaryFocus)
+                    ? ColorFilter.srgbToLinearGamma()
+                    : ColorFilter.matrix(<double>[
+                        1, 0.0, 0.0, 0.0, 0.0,
+                        //
+                        0.0, 1, 0.0, 0.0, 0.0,
+                        //
+                        0.0, 0.0, 1, 0.0, 0.0,
+                        //
+                        0.0, 0.0, 0.0, 0.3, 0.0,
+                        //
+                      ]),
+                child: CallbackShortcuts(
+                  bindings: <ShortcutActivator, VoidCallback>{
+                    LogicalKeySet(
+                      LogicalKeyboardKey.controlLeft,
+                      LogicalKeyboardKey.keyS,
+                    ): () async {
+                      appState.setContentEditedState(false);
+                      await _onSave(context);
+                      setState(() {}); // Trigger Rebuild
+                    },
                   },
-                },
-                child: QuillEditor(
-                  controller: _controller,
-                  config: QuillEditorConfig(
-                    customStyles: DefaultStyles(
-                      quote: DefaultTextBlockStyle(
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 16,
-                          letterSpacing: 1,
-                        ),
-                        HorizontalSpacing.zero,
-                        VerticalSpacing.zero,
-                        VerticalSpacing.zero,
-                        BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withAlpha(20),
-                          border: BoxBorder.fromLTRB(
-                            left: BorderSide(
-                              width: 4,
-                              color: Theme.of(context).colorScheme.onSurface,
+                  child: QuillEditor(
+                    controller: _controller,
+                    config: QuillEditorConfig(
+                      customStyles: DefaultStyles(
+                        quote: DefaultTextBlockStyle(
+                          TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 16,
+                            letterSpacing: 1,
+                          ),
+                          HorizontalSpacing.zero,
+                          VerticalSpacing.zero,
+                          VerticalSpacing.zero,
+                          BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withAlpha(20),
+                            border: BoxBorder.fromLTRB(
+                              left: BorderSide(
+                                width: 4,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      lists: DefaultListBlockStyle(
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 16,
-                          letterSpacing: 1,
+                        lists: DefaultListBlockStyle(
+                          TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 16,
+                            letterSpacing: 1,
+                          ),
+                          HorizontalSpacing.zero,
+                          VerticalSpacing.zero,
+                          VerticalSpacing.zero,
+                          null,
+                          null,
                         ),
-                        HorizontalSpacing.zero,
-                        VerticalSpacing.zero,
-                        VerticalSpacing.zero,
-                        null,
-                        null,
-                      ),
-                      sizeSmall: TextStyle(fontSize: 16),
-                      sizeLarge: TextStyle(fontSize: 20),
-                      sizeHuge: TextStyle(fontSize: 24),
+                        sizeSmall: TextStyle(fontSize: 16),
+                        sizeLarge: TextStyle(fontSize: 20),
+                        sizeHuge: TextStyle(fontSize: 24),
 
-                      color: Colors.amber,
-                      paragraph: DefaultTextBlockStyle(
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontFamily: 'Roboto Thin',
-                          fontSize: 18,
-                          letterSpacing: 1,
+                        color: Colors.amber,
+                        paragraph: DefaultTextBlockStyle(
+                          TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontFamily: 'Roboto Thin',
+                            fontSize: 18,
+                            letterSpacing: 1,
+                          ),
+                          HorizontalSpacing.zero,
+                          VerticalSpacing.zero,
+                          VerticalSpacing.zero,
+                          null,
                         ),
-                        HorizontalSpacing.zero,
-                        VerticalSpacing.zero,
-                        VerticalSpacing.zero,
-                        null,
                       ),
+                      padding: EdgeInsets.all(18),
+                      placeholder: "Write Something",
+                      expands: true,
                     ),
-                    padding: EdgeInsets.all(18),
-                    placeholder: "Write Something",
-                    expands: true,
-                  ),
 
-                  focusNode: _focusNode,
-                  scrollController: _scrollController,
+                    focusNode: _focusNode,
+                    scrollController: _scrollController,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

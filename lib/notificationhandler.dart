@@ -14,9 +14,9 @@ class ICNotificationHandler extends ChangeNotifier {
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   static AndroidNotificationChannel channel = const AndroidNotificationChannel(
-    'Channel_id',
-    'Channel_title',
-    description: 'This channel is used for important notifications.',
+    'idea_cache',
+    'idea_cache_reminder',
+    description: 'This channel is used for Reminder notifications.',
     importance: Importance.high,
     playSound: true,
   );
@@ -125,6 +125,7 @@ class ICNotificationHandler extends ChangeNotifier {
   }
 
   static Future<void> initNotification() async {
+    
     // Initialize notification plugin
     const InitializationSettings initSettings = InitializationSettings(
       // android: androidSettings,
@@ -155,7 +156,7 @@ class ICNotificationHandler extends ChangeNotifier {
         channel.name,
         channelDescription: channel.description,
         importance: Importance.high,
-        color: Colors.blue,
+        color: const Color.fromARGB(255, 255, 255, 0),
         playSound: true,
         icon: '@mipmap/ic_launcher',
       ),
@@ -182,8 +183,8 @@ class ICNotificationHandler extends ChangeNotifier {
         channel.id,
         channel.name,
         channelDescription: channel.description,
-        importance: Importance.low,
-        color: Colors.blue,
+        importance: Importance.high,
+        color: const Color.fromARGB(255, 255, 255, 0),
         playSound: true,
         icon: '@mipmap/ic_launcher',
       ),
