@@ -8,21 +8,22 @@
 - **Local Storage**: Notes are securely saved on your device for offline access.
 - **Simple Organization**: Easily manage and categorize your notes.
 
-![image](./demo/demo.jpg)
-
+![image](./demo/desktopDemo.jpg)
+![image](./demo/mobileDemo.jpg)
 ## Supported Platforms
-Currently available for **Windows only**. Support for macOS, Linux, and mobile platforms is not under development yet.
+Available for **Windows** and **Android**
 
 ### System Requirements
 - Windows 10 or later
+- Android Version API 33+
 
 ## Installation
 1. Visit the [Releases page](https://github.com/undefinedpatient/idea_cache/releases) on GitHub.
-2. Download the latest `.exe` installer generated using Inno Setup Compiler.
+2. Download the latest `.exe` or `.apk` installer generated using Inno Setup Compiler.
 3. Run the installer and follow the on-screen instructions to install IdeaCache like any other Windows application.
 
 ## Where Notes Are Stored
-IdeaCache saves your documents locally in the following directory: %HOME%/Documents
+For Windows, IdeaCache saves your documents and data locally in the following directory: %HOME%/Documents
 
 ## License
 [MIT License](https://choosealicense.com/licenses/mit/)

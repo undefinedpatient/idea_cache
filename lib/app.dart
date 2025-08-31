@@ -211,7 +211,7 @@ class _ICMainView extends State<ICMainView> {
       appBar: AppBar(
         toolbarHeight: 32,
         title: Text(
-          "IdeaCache v1.4.3",
+          "IdeaCache v1.5.0",
           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
             color: Theme.of(context).colorScheme.inversePrimary,
           ),
@@ -460,7 +460,7 @@ class _ICMainView extends State<ICMainView> {
                               context,
                             ).colorScheme.primaryContainer,
                           ),
-                          child: Text("IdeaCache v1.4.3"),
+                          child: Text("IdeaCache v1.5.0"),
                         ),
                         ICNavigationBarButton(
                           icon: (_selectedIndex == -1)
@@ -493,6 +493,7 @@ class _ICMainView extends State<ICMainView> {
                                 },
                               );
                             });
+                            Navigator.pop(context);
                           },
                         ),
                         Expanded(
@@ -555,6 +556,7 @@ class _ICMainView extends State<ICMainView> {
                                       _initialBlockPageIndex = -1;
                                       _selectedIndex = index;
                                     });
+                                    Navigator.pop(context);
                                   },
                                   selected: _selectedIndex == index,
                                 ),
@@ -600,12 +602,14 @@ class _ICMainView extends State<ICMainView> {
                               );
                               // set the edited state such that user can ignore the warning
                               appState.setContentEditedState(false);
+
                               return;
                             }
                             setState(() {
                               _selectedIndex = model.caches.length;
                               pageWidget = ICSettingPage();
                             });
+                            Navigator.pop(context);
                           },
                         ),
                       ],
@@ -617,7 +621,7 @@ class _ICMainView extends State<ICMainView> {
         appBar: AppBar(
           toolbarHeight: 42,
           title: Text(
-            "IdeaCache v1.4.3",
+            "IdeaCache v1.5.0",
             style: Theme.of(context).textTheme.bodyLarge!.copyWith(
               color: Theme.of(context).colorScheme.inversePrimary,
             ),

@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <application
-        android:label="idea_cache"
+        android:label="Idea Cache"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
