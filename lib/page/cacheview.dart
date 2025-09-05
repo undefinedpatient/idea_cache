@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blocklisttile.dart';
+import 'package:idea_cache/component/renamecachedialog.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/blockmodel.dart';
 import 'package:idea_cache/model/cache.dart';
@@ -100,7 +101,17 @@ class _ICCacheView extends State<ICCacheView> {
             localCache = model.caches.firstWhere(
               (item) => item.id == widget.cacheid,
             );
-            return Text(localCache.name);
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return ICRenameCacheDialog(targetCache: localCache);
+                  },
+                );
+              },
+              child: Text(localCache.name),
+            );
           },
         ),
         actionsPadding: EdgeInsets.fromLTRB(0, 0, 16, 0),
