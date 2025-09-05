@@ -97,6 +97,19 @@ class _ICMainView extends State<ICMainView> {
   int _selectedIndex = -1;
   bool collapse = false;
   Widget? pageWidget;
+  String _getWeekdayString(int index) {
+    List<String> weekdayStrings = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+    return weekdayStrings[index - 1];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -136,9 +149,7 @@ class _ICMainView extends State<ICMainView> {
 
   @override
   Widget build(BuildContext buildContext) {
-    ICAppState appState = context.watch<ICAppState>();
     ICCacheModel cacheModel = context.read<ICCacheModel>();
-    ICBlockModel blockModel = context.read<ICBlockModel>();
 
     if (_selectedIndex == -1) {
       pageWidget = ICOverview(
@@ -211,7 +222,7 @@ class _ICMainView extends State<ICMainView> {
       appBar: AppBar(
         toolbarHeight: 32,
         title: Text(
-          "IdeaCache v1.5.0",
+          "IdeaCache v1.5.1",
           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
             color: Theme.of(context).colorScheme.inversePrimary,
           ),
@@ -460,7 +471,23 @@ class _ICMainView extends State<ICMainView> {
                               context,
                             ).colorScheme.primaryContainer,
                           ),
-                          child: Text("IdeaCache v1.5.0"),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("IdeaCache v1.5.1"),
+                              Text(
+                                _getWeekdayString(DateTime.now().weekday),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondaryFixedDim,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         ICNavigationBarButton(
                           icon: (_selectedIndex == -1)
@@ -621,7 +648,7 @@ class _ICMainView extends State<ICMainView> {
         appBar: AppBar(
           toolbarHeight: 42,
           title: Text(
-            "IdeaCache v1.5.0",
+            "IdeaCache v1.5.1",
             style: Theme.of(context).textTheme.bodyLarge!.copyWith(
               color: Theme.of(context).colorScheme.inversePrimary,
             ),

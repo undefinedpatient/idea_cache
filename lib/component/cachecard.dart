@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:idea_cache/component/renamecachedialog.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,9 @@ class _ICCacheCardState extends State<ICCacheCard> {
   Widget build(BuildContext context) {
     return Consumer<ICCacheModel>(
       builder: (context, model, child) {
+        /**
+         * Local Cache is required for updating the cache directly via cache model
+         */
         Cache localCache = model.caches.firstWhere(
           (cache) => cache.id == widget.cacheId,
         );
@@ -81,46 +85,8 @@ class _ICCacheCardState extends State<ICCacheCard> {
                                       showDialog(
                                         context: context,
                                         builder: (BuildContext context) {
-                                          // _textEditingController.text = userCache!.name;
-                                          return Dialog(
-                                            child: Container(
-                                              width: 240,
-                                              padding: EdgeInsets.all(16),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                spacing: 8,
-                                                children: [
-                                                  TextField(
-                                                    controller:
-                                                        _textEditingController,
-                                                    decoration: InputDecoration(
-                                                      labelText:
-                                                          "Edit Cache Name",
-                                                    ),
-                                                    onSubmitted: (value) async {
-                                                      localCache.name = value;
-                                                      model.updateCache(
-                                                        localCache,
-                                                      );
-
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () async {
-                                                      localCache.name =
-                                                          _textEditingController
-                                                              .text;
-                                                      model.updateCache(
-                                                        localCache,
-                                                      );
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: Text("Save"),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                          return ICRenameCacheDialog(
+                                            targetCache: localCache,
                                           );
                                         },
                                       );
@@ -308,39 +274,8 @@ class _ICCacheCardState extends State<ICCacheCard> {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  // _textEditingController.text = userCache!.name;
-                                  return Dialog(
-                                    child: Container(
-                                      width: 240,
-                                      padding: EdgeInsets.all(16),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        spacing: 8,
-                                        children: [
-                                          TextField(
-                                            controller: _textEditingController,
-                                            decoration: InputDecoration(
-                                              labelText: "Edit Cache Name",
-                                            ),
-                                            onSubmitted: (value) async {
-                                              localCache.name = value;
-                                              model.updateCache(localCache);
-
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          TextButton(
-                                            onPressed: () async {
-                                              localCache.name =
-                                                  _textEditingController.text;
-                                              model.updateCache(localCache);
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text("Save"),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  return ICRenameCacheDialog(
+                                    targetCache: localCache,
                                   );
                                 },
                               );

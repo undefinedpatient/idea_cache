@@ -25,7 +25,6 @@ class _ICManageStatus extends State<ICManageStatusPage> {
     text: "",
   );
   OverlayEntry? colorPickerOverlay;
-
   @override
   void initState() {
     super.initState();
@@ -57,12 +56,18 @@ class _ICManageStatus extends State<ICManageStatusPage> {
     return Consumer3<ICStatusModel, ICBlockModel, ICCacheModel>(
       builder: (context, statusModel, blockModel, cacheModel, child) {
         return SizedBox(
-          height: 500,
+          height: 480,
           width: 480,
           child: Scaffold(
             backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
             appBar: AppBar(
-              title: Text("Statuses Manager"),
+              automaticallyImplyLeading: false,
+              title: Text(
+                "Statuses Manager",
+                style: TextStyle(
+                  fontSize: (Platform.isAndroid || Platform.isIOS) ? 16 : 24,
+                ),
+              ),
               backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
               actions: [
                 Tooltip(
@@ -87,8 +92,10 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                     buildDefaultDragHandles: false,
                     children: statusModel.statuses.asMap().entries.map((entry) {
                       return ListTile(
+                        horizontalTitleGap: 0,
                         onTap: () {
                           _textEditingController.text = entry.value.statusName;
+                          userSelectedCacheId = entry.value.cacheId;
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -117,60 +124,57 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                             },
                                           ),
                                           SizedBox(height: 8),
-                                          if (Platform.isAndroid ||
-                                              Platform.isIOS)
-                                            Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text("Visibility: "),
-                                                Tooltip(
-                                                  message: (pref.toolTips)
-                                                      ? "Change the Visibility of this Status"
-                                                      : "",
-                                                  // It is saved on confirm, different from desktop
-                                                  child: DropdownButton(
-                                                    isDense: true,
-                                                    autofocus: false,
-                                                    value: userSelectedCacheId,
-                                                    items: cacheModel.caches
-                                                        .map(
-                                                          (cache) =>
-                                                              DropdownMenuItem(
-                                                                value: cache.id,
-                                                                child: Text(
-                                                                  cache.name,
-                                                                ),
+                                          Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text("Visibility: "),
+                                              Tooltip(
+                                                message: (pref.toolTips)
+                                                    ? "Change the Visibility of this Status"
+                                                    : "",
+                                                child: DropdownButton(
+                                                  isDense: true,
+                                                  autofocus: false,
+                                                  value: userSelectedCacheId,
+                                                  items: cacheModel.caches
+                                                      .map(
+                                                        (cache) =>
+                                                            DropdownMenuItem(
+                                                              value: cache.id,
+                                                              child: Text(
+                                                                cache.name,
                                                               ),
-                                                        )
-                                                        .followedBy([
-                                                          DropdownMenuItem(
-                                                            value: "",
-                                                            child: Text(
-                                                              "Global Status",
                                                             ),
+                                                      )
+                                                      .followedBy([
+                                                        DropdownMenuItem(
+                                                          value: "",
+                                                          child: Text(
+                                                            "Global Status",
                                                           ),
-                                                        ])
-                                                        .toList(),
-                                                    onChanged: (value) async {
-                                                      setDialogState(() {
-                                                        userSelectedCacheId =
-                                                            value ?? "";
-                                                      });
-
-                                                      ICStatus status =
-                                                          entry.value;
-                                                      status.cacheId =
+                                                        ),
+                                                      ])
+                                                      .toList(),
+                                                  onChanged: (value) async {
+                                                    setDialogState(() {
+                                                      userSelectedCacheId =
                                                           value ?? "";
-                                                      statusModel.updateStatus(
-                                                        status,
-                                                      );
-                                                    },
-                                                  ),
+                                                    });
+
+                                                    ICStatus status =
+                                                        entry.value;
+                                                    status.cacheId =
+                                                        value ?? "";
+                                                    statusModel.updateStatus(
+                                                      status,
+                                                    );
+                                                  },
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
+                                          ),
                                           TextButton(
                                             onPressed: () async {
                                               ICStatus status = entry.value;
@@ -210,6 +214,7 @@ class _ICManageStatus extends State<ICManageStatusPage> {
                                   ? "Change Status Color"
                                   : "",
                               child: PopupMenuButton(
+                                padding: EdgeInsetsGeometry.all(0),
                                 onOpened: () {},
                                 icon: Icon(
                                   Icons.circle,
