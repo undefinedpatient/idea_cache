@@ -455,8 +455,9 @@ class _ICMainView extends State<ICMainView> {
             );
           },
         ),
-        drawerEdgeDragWidth: 96,
+        drawerEdgeDragWidth: 120,
         drawer: Drawer(
+          width: 240,
           child: Consumer<ICCacheModel>(
             builder: (consumerContext, model, child) {
               return (model.isLoading)

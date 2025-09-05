@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/blockmodel.dart';
@@ -69,7 +68,7 @@ class _ICBlockListTile extends State<ICBlockListTile> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 200,
+      width: 180,
       child: MenuItemButton(
         style: MenuItemButton.styleFrom(
           backgroundColor: (widget.isSelected)

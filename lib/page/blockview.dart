@@ -305,7 +305,7 @@ class _ICBlockView extends State<ICBlockView> {
                           null,
                         ),
                       ),
-                      padding: EdgeInsets.all(18),
+                      padding: EdgeInsets.fromLTRB(24, 24, 64, 128),
                       placeholder: "Write Something",
                       expands: true,
                     ),

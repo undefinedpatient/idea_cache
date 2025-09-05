@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:idea_cache/component/preview.dart';
 import 'package:idea_cache/model/block.dart';
@@ -95,6 +94,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
     return Builder(
       builder: (ctx) {
         return PopupMenuButton(
+          padding: EdgeInsetsGeometry.all(0),
           menuPadding: EdgeInsets.all(0),
           tooltip: "",
           itemBuilder: (context) => [
@@ -240,6 +240,7 @@ class _ICBlockCardState extends State<ICBlockCard> {
               ),
             ),
           ].toList(),
+          child: const Icon(Icons.more_vert),
         );
       },
     );
