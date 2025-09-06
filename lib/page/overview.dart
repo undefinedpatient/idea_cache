@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:idea_cache/component/cachecard.dart';
 import 'package:idea_cache/model/cache.dart';
 import 'package:idea_cache/model/cachemodel.dart';
+import 'package:idea_cache/userpreferences.dart';
 import 'package:provider/provider.dart';
 
 class ICOverview extends StatefulWidget {
@@ -16,7 +17,6 @@ class ICOverview extends StatefulWidget {
 }
 
 class _ICOverview extends State<ICOverview> {
-  bool isScrollVertical = false;
   final TextEditingController _textEditingController = TextEditingController(
     text: "",
   );
@@ -56,6 +56,7 @@ class _ICOverview extends State<ICOverview> {
 
   @override
   Widget build(BuildContext context) {
+    ICUserPreferences pref = context.watch<ICUserPreferences>();
     return Consumer<ICCacheModel>(
       builder: (context, model, child) {
         if (model.isLoading) {
@@ -67,22 +68,15 @@ class _ICOverview extends State<ICOverview> {
             title: Text("Overview"),
             backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
             actions: [
-              DropdownButton(
-                padding: EdgeInsets.all(4),
-                value: isScrollVertical,
-                items: [
-                  DropdownMenuItem(value: false, child: Text("Horizontal")),
-                  DropdownMenuItem(value: true, child: Text("Vertical")),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    if (value == null) {
-                      isScrollVertical = false;
-                    } else {
-                      isScrollVertical = value;
-                    }
-                  });
+              IconButton(
+                onPressed: () {
+                  pref.toggleViewAxis();
                 },
+                icon: Icon(
+                  (pref.viewAxis == Axis.vertical)
+                      ? Icons.horizontal_distribute
+                      : Icons.vertical_distribute,
+                ),
               ),
             ],
           ),
@@ -145,7 +139,7 @@ class _ICOverview extends State<ICOverview> {
                 Divider(),
                 Text("Pinned", textScaler: TextScaler.linear(1.5)),
                 SizedBox(
-                  height: (isScrollVertical) ? null : 180,
+                  height: (pref.viewAxis == Axis.vertical) ? null : 180,
                   child: ReorderableListView(
                     proxyDecorator: proxyDecorator,
                     padding: EdgeInsets.all(0),
@@ -159,9 +153,7 @@ class _ICOverview extends State<ICOverview> {
                     },
                     shrinkWrap: true,
                     buildDefaultDragHandles: false,
-                    scrollDirection: (isScrollVertical == true)
-                        ? Axis.vertical
-                        : Axis.horizontal,
+                    scrollDirection: pref.viewAxis,
                     children: model.caches
                         // Only take whose not pinned
                         .where((Cache cache) => cache.group == "pinned")
@@ -175,9 +167,7 @@ class _ICOverview extends State<ICOverview> {
                         .entries
                         .map((entry) {
                           return ICCacheCard(
-                            scrollDirection: (isScrollVertical)
-                                ? Axis.vertical
-                                : Axis.horizontal,
+                            scrollDirection: pref.viewAxis,
                             key: ValueKey(entry.value.id),
                             index: entry.key,
                             cacheId: entry.value.id,
@@ -194,7 +184,7 @@ class _ICOverview extends State<ICOverview> {
                 ),
                 Divider(),
                 SizedBox(
-                  height: (isScrollVertical) ? null : 180,
+                  height: (pref.viewAxis == Axis.vertical) ? null : 180,
                   child: ReorderableListView(
                     proxyDecorator: proxyDecorator,
                     padding: EdgeInsets.all(0),
@@ -211,9 +201,7 @@ class _ICOverview extends State<ICOverview> {
                     },
                     shrinkWrap: true,
                     buildDefaultDragHandles: false,
-                    scrollDirection: (isScrollVertical == true)
-                        ? Axis.vertical
-                        : Axis.horizontal,
+                    scrollDirection: pref.viewAxis,
                     children: model.caches
                         // Only take whose not pinned
                         .where((Cache cache) => cache.group == "")
@@ -227,9 +215,7 @@ class _ICOverview extends State<ICOverview> {
                         .entries
                         .map((entry) {
                           return ICCacheCard(
-                            scrollDirection: (isScrollVertical)
-                                ? Axis.vertical
-                                : Axis.horizontal,
+                            scrollDirection: pref.viewAxis,
                             key: ValueKey(entry.value.id),
                             index: entry.key,
                             cacheId: entry.value.id,

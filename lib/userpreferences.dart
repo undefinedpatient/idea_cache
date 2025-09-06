@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,6 +26,7 @@ class ICUserPreferences extends ChangeNotifier {
     _tint = (preferences[_tintString] ?? Colors.amber.toARGB32()) as int;
     _fontFamily = (preferences[_fontFamilyString] ?? "Abel") as String;
     _toolTips = (preferences[_toolTipsString] ?? true) as bool;
+    _viewAxis = Axis.values[(preferences[_viewAxisString] ?? 0) as int];
   }
 
   /* 
@@ -124,6 +126,22 @@ class ICUserPreferences extends ChangeNotifier {
   void toggleToolTips() {
     _toolTips = !_toolTips;
     _pref.setBool(_toolTipsString, _toolTips);
+    notifyListeners();
+  }
+
+  /*
+
+  */
+  Axis _viewAxis = Axis.horizontal;
+  Axis get viewAxis => _viewAxis;
+  final String _viewAxisString = "viewAxis";
+  void toggleViewAxis() {
+    if (_viewAxis == Axis.horizontal) {
+      _viewAxis = Axis.vertical;
+    } else {
+      _viewAxis = Axis.horizontal;
+    }
+    _pref.setInt(_viewAxisString, _viewAxis.index);
     notifyListeners();
   }
 }

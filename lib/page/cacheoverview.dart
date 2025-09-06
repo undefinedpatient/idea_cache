@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:idea_cache/component/blockcard.dart';
 import 'package:idea_cache/model/block.dart';
 import 'package:idea_cache/model/blockmodel.dart';
+import 'package:idea_cache/userpreferences.dart';
 import 'package:provider/provider.dart';
 
 class ICCacheOverview extends StatefulWidget {
@@ -52,28 +53,22 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
 
   @override
   Widget build(BuildContext context) {
+    ICUserPreferences userPreferences = context.watch<ICUserPreferences>();
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: AppBar(
         title: Text("Overview"),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
-          DropdownButton(
-            padding: EdgeInsets.all(4),
-            value: isScrollVertical,
-            items: [
-              DropdownMenuItem(value: false, child: Text("Horizontal")),
-              DropdownMenuItem(value: true, child: Text("Vertical")),
-            ],
-            onChanged: (value) {
-              setState(() {
-                if (value == null) {
-                  isScrollVertical = false;
-                } else {
-                  isScrollVertical = value;
-                }
-              });
+          IconButton(
+            onPressed: () {
+              userPreferences.toggleViewAxis();
             },
+            icon: Icon(
+              (userPreferences.viewAxis == Axis.vertical)
+                  ? Icons.horizontal_distribute
+                  : Icons.vertical_distribute,
+            ),
           ),
         ],
       ),
@@ -135,9 +130,7 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                       );
                     },
                     buildDefaultDragHandles: false,
-                    scrollDirection: (isScrollVertical == true)
-                        ? Axis.vertical
-                        : Axis.horizontal,
+                    scrollDirection: userPreferences.viewAxis,
                     children: localBlocks
                         .asMap()
                         .entries
@@ -154,9 +147,9 @@ class _ICCacheOverviewState extends State<ICCacheOverview> {
                             onTap: () {
                               widget.setPage(entry.key, entry.value);
                             },
-                            axis: (isScrollVertical == true)
-                                ? Axis.horizontal
-                                : Axis.vertical,
+                            axis: (userPreferences.viewAxis == Axis.horizontal)
+                                ? Axis.vertical
+                                : Axis.horizontal,
                           );
                         })
                         .toList(),
